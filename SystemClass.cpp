@@ -315,6 +315,7 @@ void SystemClass::OnMainMenu(){
 	if (fadingOut&&m_Clock->TimeLeft(fadeTimerID) == 1){
 		gameMode = nextGameMode;
 	}
+	//if not fading out of main menu
 	else if (!fadingOut){
 		//if Started button is pressed
 		if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(gameStartButton.buttonRect, lClickPos) &&
@@ -663,6 +664,9 @@ void SystemClass::OnVersusMode(){
 									
 									versusMatch.laser[versusMatch.numLasers].particle[i]
 								}
+								// !!!
+								// purposefully left a syntax error here so that
+								// I know where to come back to
 							}
 							if (versusMatch.tempSpeed){
 								delete versusMatch.tempSpeed;
