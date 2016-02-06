@@ -58,7 +58,8 @@ bool SystemClass::Initialize(){
 	gameStartButton.buttonRect.right = m_screenWidth / 2 + 150;
 	gameStartButton.buttonRect.top = m_screenHeight / 2 - 50;
 	gameStartButton.buttonRect.bottom = m_screenHeight / 2 + 50;
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/gameStartButton.tga", gameStartButton.buttonRect, m_screenWidth, m_screenHeight, gameStartButton.bitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/gameStartButton.tga", gameStartButton.buttonRect,
+		m_screenWidth, m_screenHeight, gameStartButton.bitmapID);
 	if (!result){
 		return false;
 	}
@@ -307,12 +308,19 @@ void SystemClass::SetFadingEffects(){
 
 //main menu mode
 void SystemClass::OnMainMenu(){
+	//render Start button
 	m_Graphics->RenderBitmap(gameStartButton.bitmapID);
-	if (fadingOut&&m_Clock->TimeLeft(fadeTimerID) == 1){ //fading into other mode
+	
+	//if fading out of main menu into another game mode
+	if (fadingOut&&m_Clock->TimeLeft(fadeTimerID) == 1){
 		gameMode = nextGameMode;
 	}
 	else if (!fadingOut){
-		if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(gameStartButton.buttonRect, lClickPos) && Contains(gameStartButton.buttonRect, mousePt)){
+		//if Started button is pressed
+		if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(gameStartButton.buttonRect, lClickPos) &&
+			Contains(gameStartButton.buttonRect, mousePt)){
+			
+			//fade into character select screen
 			fadingOut = true;
 			fadingIn = false;
 			nextGameMode = CHARACTER_SELECT_MODE;
@@ -320,31 +328,42 @@ void SystemClass::OnMainMenu(){
 	}
 }
 
+//character select mode
 bool SystemClass::OnCharacterSelectMode(){
+	
+	//initialize character select mode if not already done so
 	if (!isCharSelectInit){
 		if (!InitializeCharSelect()){
 			return false;
 		}
 	}
+
+	//reset selected characters to unselected upon starting char. sel. mode
 	if (!isCharSelectStarted){
 		versusMatch.player[0].character = UNSELECTED;
 		versusMatch.player[1].character = UNSELECTED;
 		isCharSelectStarted = true;
 	}
 
+	//if esc key is pressed, the mode changes to main menu
 	if (m_Input->IsKeyJustPressed(VK_ESCAPE)){
 		fadingOut = true;
 		fadingIn = false;
 		nextGameMode = MAIN_MENU;
 	}
+
+	//if timer for char.sel. mode fading into next mode reaches one, change current
+	//mode to next one
 	if (fadingOut && m_Clock->TimeLeft(fadeTimerID) == 1){
 		isCharSelectStarted = false;
 		gameMode = nextGameMode;
 	}
 
+	//render background bitmap
 	m_Graphics->RenderBitmap(charSelectModeBackgroundID);
 
 	RECT rc = { 0, 0, m_screenWidth, m_screenHeight };
+	//if right-clicked the mouse, currently selected character will be cancelled
 	if (m_Input->IsKeyJustReleased(VK_RBUTTON) && Contains(rc, rClickPos)){
 		if (versusMatch.player[1].character != UNSELECTED){
 			versusMatch.player[1].character = UNSELECTED;
