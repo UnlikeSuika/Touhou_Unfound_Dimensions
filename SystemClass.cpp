@@ -53,6 +53,7 @@ bool SystemClass::Initialize(){
 
 	//Initialize the game with main menu screen.
 	gameMode = MAIN_MENU;
+	
 	//Initialize game start button
 	gameStartButton.buttonRect.left = m_screenWidth / 2 - 150;
 	gameStartButton.buttonRect.right = m_screenWidth / 2 + 150;
@@ -89,6 +90,7 @@ bool SystemClass::Initialize(){
 
 //Shuts down SystemClass variables
 void SystemClass::Shutdown(){
+
 	//Shut down GraphicsClass object if present
 	if (m_Graphics){
 		m_Graphics->Shutdown();
@@ -149,6 +151,7 @@ bool SystemClass::Frame(){
 	m_Input->GetMouseLocation(mouseX, mouseY);
 	mousePt.x = mouseX;
 	mousePt.y = mouseY;
+
 	//Set the left and right mouse click positions where applicable
 	SetInitialClickPositions();
 
@@ -205,6 +208,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight){
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = m_applicationName;
 	wc.cbSize = sizeof(WNDCLASSEX);
+
 	//Register window
 	RegisterClassEx(&wc);
 
@@ -234,6 +238,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight){
 
 //Shuts down the application window
 void SystemClass::ShutdownWindows(){
+
 	//Display default cursor (just in case it was set not to be displayed)
 	ShowCursor(true);
 
@@ -269,17 +274,21 @@ void SystemClass::SetInitialClickPositions(){
 
 //Set the effect for screen fading into or out of game mode
 void SystemClass::SetFadingEffects(){
+
 	//if fading out of current mode
 	if (fadingOut && (!fadingIn)){
+	
 		//if timer for fading out is already running
 		if (m_Clock->IsTimerRunning(fadeTimerID)){
 			m_Graphics->SetFadingEffect(1.0f*(1 - (float)m_Clock->TimeLeft(fadeTimerID) / 30));
+	
 			//if the timer has reached zero
 			if (m_Clock->TimeLeft(fadeTimerID) == 0){
 				fadingOut = false;
 				fadingIn = true;
 			}
 		}
+	
 		//if timer for fading out has not yet started
 		else{
 			m_Graphics->StartFadingEffect();
@@ -289,9 +298,11 @@ void SystemClass::SetFadingEffects(){
 
 	// if fading into the next game mode
 	else if ((!fadingOut) && fadingIn){
+	
 		//if the timer for fading in is running
 		if (m_Clock->IsTimerRunning(fadeTimerID)){
 			m_Graphics->SetFadingEffect(1.0f*(float)m_Clock->TimeLeft(fadeTimerID) / 30);
+	
 			//if the timer has reached zero
 			if (m_Clock->TimeLeft(fadeTimerID) == 0){
 				fadingIn = false;
@@ -299,6 +310,7 @@ void SystemClass::SetFadingEffects(){
 				m_Clock->DeleteTimer(fadeTimerID);
 			}
 		}
+	
 		//if timer for fading in has not yet started
 		else{
 			m_Clock->SetTimer(fadeTimerID, 30);
@@ -308,6 +320,7 @@ void SystemClass::SetFadingEffects(){
 
 //main menu mode
 void SystemClass::OnMainMenu(){
+
 	//render Start button
 	m_Graphics->RenderBitmap(gameStartButton.bitmapID);
 	
@@ -315,8 +328,10 @@ void SystemClass::OnMainMenu(){
 	if (fadingOut&&m_Clock->TimeLeft(fadeTimerID) == 1){
 		gameMode = nextGameMode;
 	}
+
 	//if not fading out of main menu
 	else if (!fadingOut){
+	
 		//if Started button is pressed
 		if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(gameStartButton.buttonRect, lClickPos) &&
 			Contains(gameStartButton.buttonRect, mousePt)){
@@ -364,6 +379,7 @@ bool SystemClass::OnCharacterSelectMode(){
 	m_Graphics->RenderBitmap(charSelectModeBackgroundID);
 
 	RECT rc = { 0, 0, m_screenWidth, m_screenHeight };
+
 	//if right-clicked the mouse, currently selected character will be cancelled
 	if (m_Input->IsKeyJustReleased(VK_RBUTTON) && Contains(rc, rClickPos)){
 		if (versusMatch.player[1].character != UNSELECTED){
@@ -376,12 +392,23 @@ bool SystemClass::OnCharacterSelectMode(){
 		}
 	}
 
+	//for each of the char. sel. buttons
 	for (int i = 0; i < MAX_CHAR_SELECT_BUTTONS; i++){
-		m_Graphics->RenderBitmap(charSelect[i].bitmapID);
-		if (Contains(charSelect[i].buttonRect, mousePt)){
-			m_Graphics->UpdateBitmap(selectedCharButtonID, charSelect[i].buttonRect);
+	
+		//render character select button sprites
+		m_Graphics->RenderBitmap(charSelectButton[i].bitmapID);
+
+		//if the cursor is hovering on one of the char. sel. buttons
+		if (Contains(charSelectButton[i].buttonRect, mousePt)){
+			
+			//highlight the button
+			m_Graphics->UpdateBitmap(selectedCharButtonID, charSelectButton[i].buttonRect);
 			m_Graphics->RenderBitmap(selectedCharButtonID);
+
+			//if the user is currently selecting a character for player 1
 			if (versusMatch.player[0].character == UNSELECTED){
+	
+				//display the character avatars on the left side of the versus matchup
 				if (i == 0){
 					m_Graphics->UpdateBitmap(reimuAvatarID, 200, 250);
 					m_Graphics->RenderBitmap(reimuAvatarID);
@@ -390,7 +417,10 @@ bool SystemClass::OnCharacterSelectMode(){
 					m_Graphics->UpdateBitmap(marisaAvatarID, 200, 250);
 					m_Graphics->RenderBitmap(marisaAvatarID);
 				}
-				if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(charSelect[i].buttonRect, lClickPos)){
+
+				//if user clicked and released the left mouse button on the character select button,
+				//the character indicated by the char. sel. button will be selected
+				if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(charSelectButton[i].buttonRect, lClickPos)){
 					if (i == 0){
 						versusMatch.player[0].character = REIMU;
 						versusMatch.player[0].pCharacterAvatarID = &reimuAvatarID;
@@ -399,11 +429,17 @@ bool SystemClass::OnCharacterSelectMode(){
 						versusMatch.player[0].character = MARISA;
 						versusMatch.player[0].pCharacterAvatarID = &marisaAvatarID;
 					}
+
+					//start the timer for flashing the character avatar upon selecting
 					m_Clock->AddTimer(versusMatch.player[0].flashTimerID, 15);
 				}
 			}
+
+			//if the user is currently selecting a character for player 2
 			else if (versusMatch.player[1].character == UNSELECTED){
-				if (i == 0){
+	
+				//display a horizontally flipped avatar on the right side of the versus matchup
+				if (i == 0){ 
 					m_Graphics->UpdateBitmap(reimuAvatarID, 600, 250);
 					m_Graphics->EnableBitmapXFlip(reimuAvatarID);
 					m_Graphics->RenderBitmap(reimuAvatarID);
@@ -415,7 +451,10 @@ bool SystemClass::OnCharacterSelectMode(){
 					m_Graphics->RenderBitmap(marisaAvatarID);
 					m_Graphics->DisableBitmapXFlip(marisaAvatarID);
 				}
-				if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(charSelect[i].buttonRect, lClickPos)){
+
+				//if user clicked and released the left mouse button on the character select button,
+				//the character indicated by the char. sel. button will be selected
+				if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(charSelectButton[i].buttonRect, lClickPos)){
 					if (i == 0){
 						versusMatch.player[1].character = REIMU;
 						versusMatch.player[1].pCharacterAvatarID = &reimuAvatarID;
@@ -424,15 +463,26 @@ bool SystemClass::OnCharacterSelectMode(){
 						versusMatch.player[1].character = MARISA;
 						versusMatch.player[1].pCharacterAvatarID = &marisaAvatarID;
 					}
+
+					//start the timer for flashing the character avatar upon selecting
 					m_Clock->AddTimer(versusMatch.player[1].flashTimerID, 15);
 				}
 			}
 		}
 	}
+
+	//!!!
+	//This program will later be expanded to allow more than two players.
+	//Currently, there is only 1 vs 1 match available.
 	versusMatch.numPlayers = 2;
+
+	//the body of this "for" loop will render the avatars of selected characters
 	for (int i = 0; i < versusMatch.numPlayers; i++){
 		if (versusMatch.player[i].character != UNSELECTED){
 			XMFLOAT4 flashHue;
+			 
+			//if the flash timer is still running, the degree to which the avatar shines white
+			//depends on how much time is left for the timer to reach zero
 			if (m_Clock->IsTimerRunning(versusMatch.player[i].flashTimerID)){
 				flashHue = SOLID_WHITE;
 				flashHue.w = (float)m_Clock->TimeLeft(versusMatch.player[i].flashTimerID) / 15.0f;
@@ -440,6 +490,9 @@ bool SystemClass::OnCharacterSelectMode(){
 			else{
 				flashHue = NULL_COLOR;
 			}
+
+			//update avatar positions and white hue, and horizontally flip the 
+			//character avatar for player 2
 			if (i == 0){
 				m_Graphics->DisableBitmapXFlip(*versusMatch.player[i].pCharacterAvatarID);
 				m_Graphics->UpdateBitmap(*versusMatch.player[i].pCharacterAvatarID, 200, 250, 0.0f, 1.0f, flashHue);
@@ -448,11 +501,14 @@ bool SystemClass::OnCharacterSelectMode(){
 				m_Graphics->EnableBitmapXFlip(*versusMatch.player[i].pCharacterAvatarID);
 				m_Graphics->UpdateBitmap(*versusMatch.player[i].pCharacterAvatarID, 600, 250, 0.0f, 1.0f, flashHue);
 			}
+
+			//render the avatar
 			m_Graphics->RenderBitmap(*versusMatch.player[i].pCharacterAvatarID);
 			m_Graphics->DisableBitmapXFlip(*versusMatch.player[i].pCharacterAvatarID);
 		}
 	}
 
+	//if both characters are selected, move onto versus mode
 	if (versusMatch.player[0].character != UNSELECTED && versusMatch.player[1].character != UNSELECTED){
 		fadingOut = true;
 		fadingIn = false;
@@ -462,11 +518,20 @@ bool SystemClass::OnCharacterSelectMode(){
 	return true;
 }
 
+//versus mode
 void SystemClass::OnVersusMode(){
+	
+	//initialize versus mode upon first running
 	if (!isVersusModeInit){
-		if(!InitializeVersusMode()){ //Initialize versus mode, and if not initialized successfully,
+		if(!InitializeVersusMode()){
+	
+			//error message
 			MessageBox(m_hwnd, L"Could not load the versus mode.", L"Error", MB_OK);
+			
+			//shut down versus mode
 			ShutdownVersusMode();
+			
+			//move on to main menu
 			fadingOut = true;
 			fadingIn = false;
 			nextGameMode = MAIN_MENU;
@@ -475,18 +540,22 @@ void SystemClass::OnVersusMode(){
 	}
 
 #ifdef _DEBUG
-	if (m_Input->IsKeyJustPressed(0x52)){  //R key resets/reloads versus mode
+
+	//in debug mode, R key resets and reloads the versus mode
+	if (m_Input->IsKeyJustPressed(0x52)){ 
 		ShutdownVersusMode();
 		InitializeVersusMode();
 		return;
 	}
 #endif
 
+	//if timer for versus mode fading into next mode reaches one, change current
+	//mode to the next mode
 	if (fadingOut && m_Clock->TimeLeft(fadeTimerID) == 1){
 		gameMode = nextGameMode;
 	}
 
-	//render map background
+	//render background map
 	m_Graphics->UpdateBitmap(versusMatch.map.mapBitmapID, 400, 300);
 	m_Graphics->RenderBitmap(versusMatch.map.mapBitmapID);
 
@@ -497,31 +566,43 @@ void SystemClass::OnVersusMode(){
 		m_Graphics->UpdateBitmap(versusMatch.player[i].inGameSpriteID, round(renderBitmapPosX), round(renderBitmapPosY));
 		m_Graphics->RenderBitmap(versusMatch.player[i].inGameSpriteID);
 	}
+
+	//render bullet sprites
 	for (int i = 0; i < versusMatch.numBullets; i++){
 		m_Graphics->UpdateBitmap(*versusMatch.bullet[i].pBitmapID, versusMatch.bullet[i].position.x, versusMatch.bullet[i].position.y, versusMatch.bullet[i].moveAngle);
 		m_Graphics->RenderBitmap(*versusMatch.bullet[i].pBitmapID);
 	}
 
-
+	//if it is currently Move Phase and player hasn't made a choice
 	if (versusMatch.movePhase && versusMatch.choice==PENDING_CHOICE){
+	
+		//update and render Move choice button
 		versusMatch.moveButton.buttonRect = { 0, 550, 150, 600 };
 		m_Graphics->UpdateBitmap(versusMatch.moveButton.bitmapID, versusMatch.moveButton.buttonRect);
 		m_Graphics->RenderBitmap(versusMatch.moveButton.bitmapID);
 
+		//update and render Pass choice button
 		versusMatch.passButton.buttonRect = { 150, 550, 300, 600 };
 		m_Graphics->UpdateBitmap(versusMatch.passButton.bitmapID, versusMatch.passButton.buttonRect);
 		m_Graphics->RenderBitmap(versusMatch.passButton.bitmapID);
+
+		//if left mouse button is clicked and just released
 		if (m_Input->IsKeyJustReleased(VK_LBUTTON)){
+		
+			//if the user left-clicked the Move choice button
 			if (Contains(versusMatch.moveButton.buttonRect,mousePt) && Contains(versusMatch.moveButton.buttonRect, lClickPos)){
 				versusMatch.choice = MOVE;
 			}
+
+			//if the user left-clicked the Pass choice button
 			else if (Contains(versusMatch.passButton.buttonRect,mousePt) && Contains(versusMatch.passButton.buttonRect, lClickPos)){
-				
 				versusMatch.choice = PASS;
 			}
 		}
 
 #ifdef _DEBUG
+	
+		//in debug mode, M key is shortkey for Move choice and P key is shortkey for Pass choice
 		else if (m_Input->IsKeyJustPressed(0x4D)){
 			versusMatch.choice = MOVE;
 		}
@@ -530,149 +611,345 @@ void SystemClass::OnVersusMode(){
 		}
 #endif
 	}
+
+	//if it is currently Act Phase and player hasn't made a choice
 	else if (versusMatch.actionPhase && versusMatch.choice == PENDING_CHOICE){
+	
+		//update and render Shoot choice button
 		versusMatch.shootButton.buttonRect = { 0, 550, 150, 600 };
 		m_Graphics->UpdateBitmap(versusMatch.shootButton.bitmapID, versusMatch.shootButton.buttonRect);
 		m_Graphics->RenderBitmap(versusMatch.shootButton.bitmapID);
 
+		//update and render Spell choice button
 		versusMatch.spellButton.buttonRect = { 150, 550, 300, 600 };
 		m_Graphics->UpdateBitmap(versusMatch.spellButton.bitmapID, versusMatch.spellButton.buttonRect);
 		m_Graphics->RenderBitmap(versusMatch.spellButton.bitmapID);
 
+		//update and render Pass choice button
 		versusMatch.passButton.buttonRect = { 300, 550, 450, 600 };
 		m_Graphics->UpdateBitmap(versusMatch.passButton.bitmapID, versusMatch.passButton.buttonRect);
 		m_Graphics->RenderBitmap(versusMatch.passButton.bitmapID);
 
+		//if left mouse button is clicked and just released
 		if (m_Input->IsKeyJustReleased(VK_LBUTTON)){
+			
+			//if the user left-clicked the Shoot choice button
 			if (Contains(versusMatch.shootButton.buttonRect, mousePt) && Contains(versusMatch.shootButton.buttonRect, lClickPos)){
 				versusMatch.choice = SHOOT;
 			}
+
+			//if the user left-clicked the Pass choice button
 			else if (Contains(versusMatch.passButton.buttonRect, mousePt) && Contains(versusMatch.passButton.buttonRect, lClickPos)){
 				versusMatch.choice = PASS;
 			}
+
+			//if the user left-clicked the Spell choice button
 			else if (Contains(versusMatch.spellButton.buttonRect, mousePt) && Contains(versusMatch.spellButton.buttonRect, lClickPos)){
 				versusMatch.choice = SPELL;
 			}
 		}
 	}
 
-	if (versusMatch.movePhase && versusMatch.choice != PENDING_CHOICE){  //if the user makes a choice in move phase
-		XMFLOAT2& pos = versusMatch.player[versusMatch.playerTurn].position;  //x,y position of character
-		XMFLOAT2& speedVec = versusMatch.player[versusMatch.playerTurn].moveSpeed;  //x,y component of character's velocity
-		float& angle = versusMatch.player[versusMatch.playerTurn].moveAngle;  //angle of character's velocity
+	//if it is currently Move Phase and player has made a choice
+	if (versusMatch.movePhase && versusMatch.choice != PENDING_CHOICE){  
+	
+		XMFLOAT2& pos = versusMatch.player[versusMatch.playerTurn].position;
+		XMFLOAT2& speedVec = versusMatch.player[versusMatch.playerTurn].moveSpeed;
+		float& angle = versusMatch.player[versusMatch.playerTurn].moveAngle;  
+		
+		//Move Phase choice handling
 		switch (versusMatch.choice){
+		
+		//Move choice
 		case MOVE:
+
+			//the user will move the character
 			versusMatch.shooting = true;
+
+			//if the player hasn't moved the character yet
 			if (versusMatch.shooting && speedVec.x == 0 && speedVec.y == 0){
 				Shoot(pos, speedVec, angle);
 			}
+
+			//if the player has moved the character and character is still moving
 			else if (versusMatch.shooting){
-				Moving(pos, speedVec, angle,versusMatch.player[versusMatch.playerTurn].hitboxRadius);
+				
+				//move the character in the initial speed/direction of the mouse
+				//until it gradually slows down to zero speed or it collides into a wall
+				//after which shooting = false
+				Moving(pos, speedVec, angle, versusMatch.player[versusMatch.playerTurn].hitboxRadius);
+
+				//if the character has stopped moving
 				if (!versusMatch.shooting){
+
+					//change the current phase to Act Phase
 					versusMatch.movePhase = false;
 					versusMatch.actionPhase = true;
+					
+					//announce Act Phase
 					m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
+
+					//reset the player's choice to PENDING_CHOICE
 					versusMatch.choice = PENDING_CHOICE;
 				}
 			}
 			break;
+
+		//Pass choice
 		case PASS:
+			
+			//change the current phase to Act Phase
 			versusMatch.movePhase = false;
 			versusMatch.actionPhase = true;
+
+			//announce Act Phase
 			m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
+
+			//reset the player's choice to PENDING_CHOICE
 			versusMatch.choice = PENDING_CHOICE;
+
 			break;
 		}
 	}
+
+	//if it is currently Act Phase and player has made a choice
 	else if (versusMatch.actionPhase && versusMatch.choice != PENDING_CHOICE){
+		
+		//Act Phase choice handling
 		switch (versusMatch.choice){
+		
+		//Shoot choice
 		case SHOOT:
+
+			//different shooting properties for each character
 			switch (versusMatch.player[versusMatch.playerTurn].character){
+			
+			//Reimu will shoot a single 2-damage amulet
 			case REIMU:
+				
+				//if temporary position, velocity, and angle variables are not yet initialized
 				if (!versusMatch.shooting){
-					InitializeTempPosSpeedAngle(versusMatch.player[versusMatch.playerTurn].position.x, versusMatch.player[versusMatch.playerTurn].position.y);
+
+					//initialize the temporary variables
+					InitializeTempPosSpeedAngle(versusMatch.player[versusMatch.playerTurn].position.x,
+						versusMatch.player[versusMatch.playerTurn].position.y);
+
+					//the player will shoot the bullet
 					versusMatch.shooting = true;
 				}
+
+				//if the player is shooting the bullet or the bullet is in motion
 				if (versusMatch.shooting){
+
+					//temporary variables are used so that the bullet can be created and rendered
+					//after position, speed, and angle are recorded 
 					if (versusMatch.tempPos || versusMatch.tempSpeed || versusMatch.tempAngle){
+						
+						//if the speed, position, and angle have not yet been recorded
 						if (versusMatch.tempSpeed->x == 0.0f && versusMatch.tempSpeed->y == 0.0f){
 							Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle);
 						}
+
+						//if the speed, position, and angle have been recorded
 						else{
+
+							//bullet gives 2 damage upon contact with the opponent character
 							versusMatch.bullet[versusMatch.numBullets].damage = 2;
+
+							//set the bullet sprite
 							versusMatch.bullet[versusMatch.numBullets].pBitmapID = &versusMatch.type01color01bulletID;
+
+							//the new bullet will have the position as recorded in temporary variable
 							if (versusMatch.tempPos){
 								versusMatch.bullet[versusMatch.numBullets].position = *versusMatch.tempPos;
 								delete versusMatch.tempPos;
 								versusMatch.tempPos = 0;
 							}
+
+							//the new bullet will have the velocity as recorded in temporary variable
 							if (versusMatch.tempSpeed){
 								versusMatch.bullet[versusMatch.numBullets].moveSpeed = *versusMatch.tempSpeed;
 								delete versusMatch.tempSpeed;
 								versusMatch.tempSpeed = 0;
 							}
+
+							//the new bullet will have the angle as recorded in temporary variable
 							if (versusMatch.tempAngle){
 								versusMatch.bullet[versusMatch.numBullets].moveAngle = *versusMatch.tempAngle;
 								delete versusMatch.tempAngle;
 								versusMatch.tempAngle = 0;
 							}
+
+							//increase the bullet count by one
 							versusMatch.numBullets++;
 						}
 					}
+
+					//if the position, velocity, and angle has been transferred from temporary
+					//variables to the new bullet
 					if(!versusMatch.tempPos && !versusMatch.tempSpeed && !versusMatch.tempAngle){
+						
 						XMFLOAT2& bulletPos = versusMatch.bullet[versusMatch.numBullets - 1].position;
 						XMFLOAT2& bulletSpeed = versusMatch.bullet[versusMatch.numBullets - 1].moveSpeed;
 						float& bulletAngle = versusMatch.bullet[versusMatch.numBullets - 1].moveAngle;
+						
+						//the bullet is being shot
 						Moving(bulletPos, bulletSpeed, bulletAngle, 6.0f);
+
+						//if the bullet stopped moving
 						if (!versusMatch.shooting){
+							
 							int collidedChar;
+
+							//detect whether bullet has collided with opponent character
 							if (CollisionWithCharacter(bulletPos, 6.0f, collidedChar)){
 								versusMatch.player[collidedChar].hp -= versusMatch.bullet[versusMatch.numBullets - 1].damage;
 							}
+
+							//bullet is erased
 							versusMatch.numBullets--;
-							versusMatch.movePhase = true;
-							versusMatch.actionPhase = false;
+
+
+							//move on to next player's turn
 							versusMatch.playerTurn++;
 							if (versusMatch.playerTurn >= versusMatch.numPlayers){
 								versusMatch.playerTurn = 0;
 							}
+
+							//move on to Move Phase
+							versusMatch.movePhase = true;
+							versusMatch.actionPhase = false;
+
+							//announce Move Phase
 							m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
+
+							//reset the player's choice to PENDING_CHOICE
 							versusMatch.choice = PENDING_CHOICE;
 						}
 					}
 				}
 				
 				break;
+
+			//Marisa will shoot a 3-damage laser
 			case MARISA:
+				
+				//if temporary position, velocity and angle variables are not yet initialized
 				if (!versusMatch.shooting){
-					InitializeTempPosSpeedAngle(versusMatch.player[versusMatch.playerTurn].position.x, versusMatch.player[versusMatch.playerTurn].position.y);
+
+					//Initialize the temporary variables
+					InitializeTempPosSpeedAngle(versusMatch.player[versusMatch.playerTurn].position.x,
+						versusMatch.player[versusMatch.playerTurn].position.y);
+
+					//the player will shoot the laser
 					versusMatch.shooting = true;
 				}
+
+				//if the player is shooting the laser or the laser is still activated
 				if (versusMatch.shooting){
+					
+					int collidedChar = -1;
+
+					//temporary variables are used so that the laser can be created and rendered
+					//after the position and angle are recorded
 					if (versusMatch.tempPos || versusMatch.tempSpeed || versusMatch.tempAngle){
+						
+						//if the speed, position, and angle have not yet been recorded
 						if (versusMatch.tempSpeed->x == 0 && versusMatch.tempSpeed->y == 0){
 							Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle);
 						}
+
+						//if the speed, position, and angle have been recorded
 						else{
-							if (versusMatch.tempAngle){
-								versusMatch.laser[versusMatch.numLasers].angle = *versusMatch.tempAngle;
-								delete versusMatch.tempAngle;
-								versusMatch.tempAngle = 0;
+
+							//laser gives 3 damage upon contact with the opponent character
+							versusMatch.laser[versusMatch.numLasers].damage = 3;
+
+							//allot heap for laser particles
+							versusMatch.laser[versusMatch.numLasers].particle = new LaserParticleType[9];
+
+							//setting laser particles to laserColor01 particles
+							for (int i = 0; i < 9; i++){
+								*versusMatch.laser[versusMatch.numLasers].particle[i].pParticleBitmapID
+									= versusMatch.laserColor01particleID[i];
 							}
-							if (versusMatch.tempPos){
-								for (int i = 0; i < 9; i++){
-									
-									versusMatch.laser[versusMatch.numLasers].particle[i]
+
+							XMFLOAT2 posCtrI = *versusMatch.tempPos;
+							float slope = versusMatch.tempSpeed->y / versusMatch.tempSpeed->x;
+							float yInt = versusMatch.tempPos->y - slope*versusMatch.tempPos->x;
+							
+							for (int i = 0; i < 9; i++){
+								XMFLOAT2& posI = versusMatch.laser[versusMatch.numLasers].particle[i].posI;
+								XMFLOAT2& posF = versusMatch.laser[versusMatch.numLasers].particle[i].posF;
+								XMFLOAT2& midPt = versusMatch.laser[versusMatch.numLasers].particle[i].midPt;
+								RECT& dim = versusMatch.laser[versusMatch.numLasers].particle[i].dimensions;
+								posI.x = (-4.0f + (float)i) / 4.0f*versusMatch.player[versusMatch.playerTurn].hitboxRadius *
+									cos(*versusMatch.tempAngle) + posCtrI.x;
+								posI.y = slope*posI.x + yInt;
+								posF = posI;
+								
+								while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+									posF.x += 1.0f;
+									posF.y += slope;
 								}
-								// !!!
-								// purposefully left a syntax error here so that
-								// I know where to come back to
+								midPt.x = (posI.x + posF.x) / 2.0f;
+								midPt.y = (posI.y + posF.y) / 2.0f;
+								dim.left = 0;
+								dim.top = 0;
+								dim.right = round(versusMatch.player[versusMatch.playerTurn].hitboxRadius / 9.0f);
+								dim.bottom = round(Distance(posI, posF));
 							}
-							if (versusMatch.tempSpeed){
-								delete versusMatch.tempSpeed;
-								versusMatch.tempSpeed = 0;
+							
+							// !!!
+							// purposefully left a syntax error here so that
+							// I know where to come back to
+
+							delete versusMatch.tempPos;
+							versusMatch.tempPos = 0;
+
+							//temporary speed variable is deleted
+							delete versusMatch.tempSpeed;
+							versusMatch.tempSpeed = 0;
+
+							//the laser will have the angle as recorded in temporary variable
+							versusMatch.laser[versusMatch.numLasers].angle = *versusMatch.tempAngle;
+							delete versusMatch.tempAngle;
+							versusMatch.tempAngle = 0;
+
+							m_Clock->AddTimer(versusMatch.laser[versusMatch.numLasers].timerID, 180);
+
+							//increase the laser count by one
+							versusMatch.numLasers++;
+						}
+					}
+					if (!versusMatch.tempPos && !versusMatch.tempSpeed && !versusMatch.tempAngle){
+						if (collidedChar != -1){
+							versusMatch.player[collidedChar].hp -= versusMatch.laser[versusMatch.numLasers - 1].damage;
+							collidedChar = -1;
+						}
+
+						if (m_Clock->IsTimerRunning(versusMatch.laser[versusMatch.numLasers - 1].timerID)){
+							for (int i = 0; i < 9; i++){
+								m_Graphics->UpdateBitmap(*versusMatch.laser[versusMatch.numLasers - 1].particle[i].pParticleBitmapID,
+									versusMatch.laser[versusMatch.numLasers - 1].particle[i].dimensions,
+									versusMatch.laser[versusMatch.numLasers - 1].angle);
+
+								m_Graphics->RenderBitmap(*versusMatch.laser[versusMatch.numLasers - 1].particle[i].pParticleBitmapID);
 							}
-							//set parameters for the laser
+						}
+						else{
+							m_Clock->DeleteTimer(versusMatch.laser[versusMatch.numLasers - 1].timerID);
+							delete versusMatch.laser[versusMatch.numLasers - 1].particle;
+							versusMatch.laser[versusMatch.numLasers - 1].particle = 0;
+							versusMatch.numBullets--;
+							versusMatch.playerTurn++;
+							if (versusMatch.playerTurn >= versusMatch.numPlayers){
+								versusMatch.playerTurn = 0;
+							}
+							versusMatch.movePhase = true;
+							versusMatch.actionPhase = false;
+							m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
+							versusMatch.choice = PENDING_CHOICE;
 						}
 					}
 				}
@@ -756,22 +1033,25 @@ bool SystemClass::InitializeCharSelect(){
 	versusMatch.numPlayers = 2;
 
 	for (int i = 0; i < MAX_CHAR_SELECT_BUTTONS; i++){
-		charSelect[i].buttonRect.top = 500;
-		charSelect[i].buttonRect.bottom = 600;
-		charSelect[i].buttonRect.left = 100 * i;
-		charSelect[i].buttonRect.right = 100 * i + 100;
+		charSelectButton[i].buttonRect.top = 500;
+		charSelectButton[i].buttonRect.bottom = 600;
+		charSelectButton[i].buttonRect.left = 100 * i;
+		charSelectButton[i].buttonRect.right = 100 * i + 100;
 	}
 
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_reimu.tga", charSelect[0].buttonRect, m_screenWidth, m_screenHeight, charSelect[0].bitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_reimu.tga", charSelectButton[0].buttonRect,
+		m_screenWidth, m_screenHeight, charSelectButton[0].bitmapID);
 	if (!result){
 		return false;
 	}
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_marisa.tga", charSelect[1].buttonRect, m_screenWidth, m_screenHeight, charSelect[1].bitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_marisa.tga", charSelectButton[1].buttonRect,
+		m_screenWidth, m_screenHeight, charSelectButton[1].bitmapID);
 	if (!result){
 		return false;
 	}
 	for (int i = 2; i < MAX_CHAR_SELECT_BUTTONS; i++){
-		result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_locked.tga", charSelect[i].buttonRect, m_screenWidth, m_screenHeight, charSelect[i].bitmapID);
+		result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_locked.tga", charSelectButton[i].buttonRect,
+			m_screenWidth, m_screenHeight, charSelectButton[i].bitmapID);
 		if (!result){
 			return false;
 		}
@@ -1090,26 +1370,55 @@ void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle){
 
 }
 
+//processes a currently moving object
 void SystemClass::Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius){
-	pos.x += speedVec.x;  //Update x position
-	pos.y += speedVec.y;  //update y position
-	int nullInt;
-	if (CollisionWithWall(pos, radius) || CollisionWithCharacter(pos,radius,nullInt)){
+	
+	//update x position
+	pos.x += speedVec.x; 
+
+	//update y position
+	pos.y += speedVec.y;
+
+	//a null integer variable for receiving information for collision with character
+	int nullInt = 0;
+
+	//if the object collided with a wall or a character
+	if (CollisionWithWall(pos, radius) || CollisionWithCharacter(pos, radius, nullInt)){
+		
+		//slope for calculation a linear line (y = mx + b)
+		//that represents the object's movement
 		float slope;
+
+		//object's position in the previous frame
 		XMFLOAT2 posI = { pos.x - speedVec.x, pos.y - speedVec.y };
+
+		//if the object is moving in a vertical line
 		if (speedVec.x == 0){
+
+			//if the object is heading downwards
 			if (speedVec.y > 0){
+
+				//test whether the object collides 0.1 pixel, 0.2 pixel, etc
+				//below the initial position
 				for (float y = 0.0f; posI.y + y <= pos.y; y += 0.1f){
 					XMFLOAT2 testPos = { posI.x, posI.y + y };
+
+					//if the object collides at testPos, set the object's position to testPos
 					if (CollisionWithWall(testPos, radius) || CollisionWithCharacter(pos, radius, nullInt)){
 						pos = testPos;
 						break;
 					}
 				}
 			}
+			//if the object is heading upwards
 			else if (speedVec.y < 0){
+
+				//test whether the object collides 0.1 pixel, 0.2 pixel, etc
+				//above the initial position
 				for (float y = 0.0f; posI.y + y >= pos.y; y -= 0.1f){
 					XMFLOAT2 testPos = { posI.x, posI.y + y };
+
+					//if the object collides at testPos, set the object's position to testPos
 					if (CollisionWithWall(testPos, radius) || CollisionWithCharacter(testPos, radius, nullInt)){
 						pos = testPos;
 						break;
@@ -1117,21 +1426,41 @@ void SystemClass::Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float 
 				}
 			}
 		}
+
+		//if the object is not moving in a vertical line
 		else{
+
+			//slope (m) in y = mx + b
 			slope = speedVec.y / speedVec.x;
+
+			//y-intercept (b) in y = mx + b
 			float b = pos.y - slope*pos.x;
+
+			//if the object is moving to the right
 			if (speedVec.x > 0){
+				
+				//test where the object collides by incrementing the x-position 
+				//by 0.1 pixels and updating y-position to mx + b
 				for (float x = 0.0f; posI.x + x <= pos.x; x += 0.1f){
 					XMFLOAT2 testPos = { posI.x + x, slope*(posI.x + x) + b };
+					
+					//if the object collides at testPos, set the object's position to testPos
 					if (CollisionWithWall(testPos, radius) || CollisionWithCharacter(testPos,radius,nullInt)){
 						pos = testPos;
 						break;
 					}
 				}
 			}
+
+			//if the object is moving to the left
 			else if (speedVec.x < 0){
+				
+				//test where the object collides by decrementing the x-position 
+				//by 0.1 pixels and updating y-position to mx + b
 				for (float x = 0.0f; posI.x + x >= pos.x; x -= 0.1f){
 					XMFLOAT2 testPos = { posI.x + x, slope*(posI.x + x) + b };
+					
+					//if the object collides at testPos, set the object's position to testPos
 					if (CollisionWithWall(testPos, radius) || CollisionWithCharacter(testPos,radius,nullInt)){
 						pos = testPos;
 						break;
@@ -1139,42 +1468,66 @@ void SystemClass::Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float 
 				}
 			}
 		}
+
+		//the object has stopped moving
 		speedVec.x = 0;
 		speedVec.y = 0;
 	}
+
+	//if the object is still moving without colliding with wall or character
 	else{
-		//Below portion is for slowing down the character's velocity
+
+		//if the object is moving to the right
 		if (speedVec.x > 0){
+
+			//slow down x-speed
 			speedVec.x -= FRICTION*cos(angle);
 			if (speedVec.x <= 0){
 				speedVec.x = 0;
 			}
 		}
+
+		//if the object is moving to the left
 		else if (speedVec.x < 0){
+
+			//slow down x-speed
 			speedVec.x -= FRICTION*cos(angle);
 			if (speedVec.x >= 0){
 				speedVec.x = 0;
 			}
 		}
 
+		//if the object is moving down
 		if (speedVec.y > 0){
+
+			//slow down y-speed
 			speedVec.y -= FRICTION*sin(angle);
 			if (speedVec.y <= 0){
 				speedVec.y = 0;
 			}
 		}
+
+		//if the object is moving up
 		else if (speedVec.y < 0){
+			
+			//slow down y-speed
 			speedVec.y -= FRICTION*sin(angle);
 			if (speedVec.y >= 0){
 				speedVec.y = 0;
 			}
 		}
 	}
+
+	//if the object is no longer moving
 	if (speedVec.x == 0 && speedVec.y == 0){
+		
+		//the object is no longer moving
 		versusMatch.shooting = false;
 	}
 }
 
+//initializes the temporary variables for recording
+//position, speed, and angle
 void SystemClass::InitializeTempPosSpeedAngle(float x, float y){
 	versusMatch.tempAngle = new float;
 	versusMatch.tempPos = new XMFLOAT2;

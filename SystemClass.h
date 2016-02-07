@@ -65,7 +65,10 @@ private:
 
 	//represents a single particle of an in-game laser
 	struct LaserParticleType{
+		XMFLOAT2 posI;         //the start position of laser particle
+		XMFLOAT2 posF;         //the end position of laser particle
 		XMFLOAT2 midPt;        //the midpoint of particle's start and end position
+		RECT dimensions;       //x and y dimensions by which the particle will be stretched
 		int* pParticleBitmapID;//pointer to particle's in-game sprite bitmap
 	};
 
@@ -74,6 +77,7 @@ private:
 		LaserParticleType* particle;//heap array of laser particles
 		float angle;                //direction(angle) of laser
 		int damage;                 //damage upon colliding on another object
+		int timerID;                  //duration for which laser is rendered
 	};
 
 	//represents a player
@@ -125,7 +129,7 @@ private:
 		int shootFrame;                          //the frame when the bullet/character was initially fired
 		int numBullets;                          //number of on-screen bullets
 		int numLasers;                           //number of on-screen lasers
-		bool shooting;                           //whether the player is currently shooting a bullet/character
+		bool shooting;                           //whether the player is currently shooting a bullet/moving a character
 		int aimCircleBitmapID;                   //ID of bitmap of aiming circle
 		int type01color01bulletID;               //ID of bitmap of Type01Color01 bullet
 		int laserColor01particleID[9];           //array of IDs of bitmaps of Color01 laser particles
@@ -186,11 +190,11 @@ private:
 	GraphicsClass* m_Graphics;        //GraphicsClass object
 	TimeClass* m_Clock;               //TimeClass object
 
-	GameMode gameMode;                             //current game mode
-	GameMode nextGameMode;                         //which game mode the system is transitioning into
-	ButtonType gameStartButton;                    //button for starting a game in main menu
-	ButtonType charSelect[MAX_CHAR_SELECT_BUTTONS];//array of character select choice buttons in character select screen
-	GameType versusMatch;                          //object of the versus match
+	GameMode gameMode;                                   //current game mode
+	GameMode nextGameMode;                               //which game mode the system is transitioning into
+	ButtonType gameStartButton;                          //button for starting a game in main menu
+	ButtonType charSelectButton[MAX_CHAR_SELECT_BUTTONS];//array of character select choice buttons in character select screen
+	GameType versusMatch;                                //object of the versus match
 	
 	POINT mousePt;           //current cursor position relative to client window
 	POINT lClickPos;         //cursor position upon left clicking
