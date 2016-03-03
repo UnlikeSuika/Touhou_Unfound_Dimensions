@@ -714,19 +714,19 @@ void SystemClass::OnVersusMode(){
 
 	//if it is currently Act Phase and player has made a choice
 	else if (versusMatch.actionPhase && versusMatch.choice != PENDING_CHOICE){
-		
+
 		//Act Phase choice handling
 		switch (versusMatch.choice){
-		
-		//Shoot choice
+
+			//Shoot choice
 		case SHOOT:
 
 			//different shooting properties for each character
 			switch (versusMatch.player[versusMatch.playerTurn].character){
-			
-			//Reimu will shoot a single 2-damage amulet
+
+				//Reimu will shoot a single 2-damage amulet
 			case REIMU:
-				
+
 				//if temporary position, velocity, and angle variables are not yet initialized
 				if (!versusMatch.shooting){
 
@@ -744,7 +744,7 @@ void SystemClass::OnVersusMode(){
 					//temporary variables are used so that the bullet can be created and rendered
 					//after position, speed, and angle are recorded 
 					if (versusMatch.tempPos || versusMatch.tempSpeed || versusMatch.tempAngle){
-						
+
 						//if the speed, position, and angle have not yet been recorded
 						if (versusMatch.tempSpeed->x == 0.0f && versusMatch.tempSpeed->y == 0.0f){
 							Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle);
@@ -787,18 +787,18 @@ void SystemClass::OnVersusMode(){
 
 					//if the position, velocity, and angle has been transferred from temporary
 					//variables to the new bullet
-					if(!versusMatch.tempPos && !versusMatch.tempSpeed && !versusMatch.tempAngle){
-						
+					if (!versusMatch.tempPos && !versusMatch.tempSpeed && !versusMatch.tempAngle){
+
 						XMFLOAT2& bulletPos = versusMatch.bullet[versusMatch.numBullets - 1].position;
 						XMFLOAT2& bulletSpeed = versusMatch.bullet[versusMatch.numBullets - 1].moveSpeed;
 						float& bulletAngle = versusMatch.bullet[versusMatch.numBullets - 1].moveAngle;
-						
+
 						//the bullet is being shot
 						Moving(bulletPos, bulletSpeed, bulletAngle, 6.0f);
 
 						//if the bullet stopped moving
 						if (!versusMatch.shooting){
-							
+
 							int collidedChar;
 
 							//detect whether bullet has collided with opponent character
@@ -828,12 +828,12 @@ void SystemClass::OnVersusMode(){
 						}
 					}
 				}
-				
+
 				break;
 
-			//Marisa will shoot a 3-damage laser
+				//Marisa will shoot a 3-damage laser
 			case MARISA:
-				
+
 				//if temporary position, velocity and angle variables are not yet initialized
 				if (!versusMatch.shooting){
 
@@ -847,13 +847,13 @@ void SystemClass::OnVersusMode(){
 
 				//if the player is shooting the laser or the laser is still activated
 				if (versusMatch.shooting){
-					
+
 					int collidedChar = -1;
 
 					//temporary variables are used so that the laser can be created and rendered
 					//after the position and angle are recorded
 					if (versusMatch.tempPos || versusMatch.tempSpeed || versusMatch.tempAngle){
-						
+
 						//if the speed, position, and angle have not yet been recorded
 						if (versusMatch.tempSpeed->x == 0 && versusMatch.tempSpeed->y == 0){
 							Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle);
@@ -870,14 +870,14 @@ void SystemClass::OnVersusMode(){
 
 							//setting laser particles to laserColor01 particles
 							for (int i = 0; i < 9; i++){
-								*versusMatch.laser[versusMatch.numLasers].particle[i].pParticleBitmapID
-									= versusMatch.laserColor01particleID[i];
+								versusMatch.laser[versusMatch.numLasers].particle[i].pParticleBitmapID
+									= &versusMatch.laserColor01particleID[i];
 							}
-
+							//!!!
 							XMFLOAT2 posCtrI = *versusMatch.tempPos;
 							float slope = versusMatch.tempSpeed->y / versusMatch.tempSpeed->x;
 							float yInt = versusMatch.tempPos->y - slope*versusMatch.tempPos->x;
-							
+
 							for (int i = 0; i < 9; i++){
 								XMFLOAT2& posI = versusMatch.laser[versusMatch.numLasers].particle[i].posI;
 								XMFLOAT2& posF = versusMatch.laser[versusMatch.numLasers].particle[i].posF;
@@ -887,7 +887,7 @@ void SystemClass::OnVersusMode(){
 									cos(*versusMatch.tempAngle) + posCtrI.x;
 								posI.y = slope*posI.x + yInt;
 								posF = posI;
-								
+
 								while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
 									posF.x += 1.0f;
 									posF.y += slope;
@@ -899,10 +899,6 @@ void SystemClass::OnVersusMode(){
 								dim.right = round(versusMatch.player[versusMatch.playerTurn].hitboxRadius / 9.0f);
 								dim.bottom = round(Distance(posI, posF));
 							}
-							
-							// !!!
-							// purposefully left a syntax error here so that
-							// I know where to come back to
 
 							delete versusMatch.tempPos;
 							versusMatch.tempPos = 0;
@@ -956,43 +952,86 @@ void SystemClass::OnVersusMode(){
 				break;
 			}
 			break;
+
+			//Pass choice
 		case PASS:
+
+			//move on to Move Phase
 			versusMatch.movePhase = true;
 			versusMatch.actionPhase = false;
+
+			//switch player turn
 			versusMatch.playerTurn++;
 			if (versusMatch.playerTurn >= versusMatch.numPlayers){
 				versusMatch.playerTurn = 0;
 			}
+
+			//announce Move Phase
 			m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
+
+			//reset the player choice to PENDING_CHOICE
 			versusMatch.choice = PENDING_CHOICE;
 			break;
+
+		//Spell choice
 		case SPELL:
 			break;
+
+		//error handling: anything else just skips the turn
+		default:
+
+			//change from Act Phase to Move Phase
+			versusMatch.movePhase = true;
+			versusMatch.actionPhase = false;
+
+			//switch player turn
+			versusMatch.playerTurn++;
+			if (versusMatch.playerTurn >= versusMatch.numPlayers){
+				versusMatch.playerTurn = 0;
+			}
+
+			//announce Move Phase
+			m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
+
+			//reset the player choice to PENDING_CHOICE
+			versusMatch.choice = PENDING_CHOICE;
 		}
 	}
 	
-	//character status bar
+	//display the character's status window if player hasn't made a choice yet
 	if (versusMatch.choice == PENDING_CHOICE){
 		for (int i = 0; i < versusMatch.numPlayers; i++){
+			
+			//set rectangle containing character sprite
 			RECT rc;
 			rc.left = (long)round(versusMatch.player[i].position.x - versusMatch.player[i].inGameSpriteWidth / 2.0f);
 			rc.right = (long)round(versusMatch.player[i].position.x + versusMatch.player[i].inGameSpriteWidth / 2.0f);
 			rc.top = (long)round(versusMatch.player[i].position.y - versusMatch.player[i].inGameSpriteHeight / 2.0f);
 			rc.bottom = (long)round(versusMatch.player[i].position.y + versusMatch.player[i].inGameSpriteHeight / 2.0f);
+
+			//if the mouse cursor is hovering over the rectangle
 			if (Contains(rc, mousePt)){
+
+				//update and render status window over the mouse position
 				m_Graphics->UpdateBitmap(versusMatch.statsWindowBitmapID, mousePt.x + 35, mousePt.y - 40);
 				m_Graphics->RenderBitmap(versusMatch.statsWindowBitmapID);
 				
+				//assemble string that displays current HP
 				string hpStr = "HP: ";
 				hpStr = hpStr + to_string(versusMatch.player[i].hp) + " / " + to_string(versusMatch.player[i].maxHp);
 				char hpDisp[MAX_CHARACTER_COUNT];
 				strcpy(hpDisp, hpStr.c_str());
+
+				//update and render current HP
 				m_Graphics->UpdateSentence(versusMatch.hpDispSentID, hpDisp, mousePt.x, mousePt.y - 65, SOLID_BLACK);
 				m_Graphics->RenderSentence(versusMatch.hpDispSentID);
 
+				//assemble string that displays current MP
 				string mpStr = "MP: " + to_string(versusMatch.player[i].mp);
 				char mpDisp[MAX_CHARACTER_COUNT];
 				strcpy(mpDisp, mpStr.c_str());
+
+				//update and render current MP
 				m_Graphics->UpdateSentence(versusMatch.mpDispSentID, mpDisp, mousePt.x, mousePt.y-30, SOLID_BLACK);
 				m_Graphics->RenderSentence(versusMatch.mpDispSentID);
 
@@ -1014,24 +1053,42 @@ void SystemClass::OnVersusMode(){
 		long timeLeft = m_Clock->TimeLeft(versusMatch.phaseAnnounceTimerID);
 		int posX = m_Graphics->GetBitmapWidth(*versusMatch.pPhaseAnnounceBitmapID) / 2;
 		int posY = m_Graphics->GetBitmapHeight(*versusMatch.pPhaseAnnounceBitmapID) / 2;
+
+		//more than 3.5 seconds left
 		if (timeLeft>=210){
+			
+			//the announcement bitmap fades in
 			m_Graphics->UpdateBitmap(*versusMatch.pPhaseAnnounceBitmapID, posX, posY, 0.0f, 1.0f - ((float)timeLeft - 210.0f) / 30.0f, NULL_COLOR);
 		}
+
+		//3.5 to 1 seconds left
 		else if (timeLeft < 210 && timeLeft >= 60){
+
+			//the announcement bitmap stays
 			m_Graphics->UpdateBitmap(*versusMatch.pPhaseAnnounceBitmapID, posX, posY);
 		}
+
+		//less than 1 second left
 		else if (timeLeft < 60){
+
+			//the announcement bitmap fades out
 			m_Graphics->UpdateBitmap(*versusMatch.pPhaseAnnounceBitmapID, posX, posY, 0.0f, (float)timeLeft / 60.0f);
 		}
+
+		//render the announcement bitmap
 		m_Graphics->RenderBitmap(*versusMatch.pPhaseAnnounceBitmapID);
 	}
 }
 
+//initialize variables for character select mode
 bool SystemClass::InitializeCharSelect(){
 	bool result;
+	RECT rc;
 
+	//currently, the number of players is 2
 	versusMatch.numPlayers = 2;
 
+	//set the dimensions for character select buttons
 	for (int i = 0; i < MAX_CHAR_SELECT_BUTTONS; i++){
 		charSelectButton[i].buttonRect.top = 500;
 		charSelectButton[i].buttonRect.bottom = 600;
@@ -1039,16 +1096,21 @@ bool SystemClass::InitializeCharSelect(){
 		charSelectButton[i].buttonRect.right = 100 * i + 100;
 	}
 
+	//add bitmap for Reimu's character select button
 	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_reimu.tga", charSelectButton[0].buttonRect,
 		m_screenWidth, m_screenHeight, charSelectButton[0].bitmapID);
 	if (!result){
 		return false;
 	}
+
+	//add bitmap for Marisa's character select button
 	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_marisa.tga", charSelectButton[1].buttonRect,
 		m_screenWidth, m_screenHeight, charSelectButton[1].bitmapID);
 	if (!result){
 		return false;
 	}
+
+	//add bitmaps for rest of the char. sel. buttons (unselectable)
 	for (int i = 2; i < MAX_CHAR_SELECT_BUTTONS; i++){
 		result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_locked.tga", charSelectButton[i].buttonRect,
 			m_screenWidth, m_screenHeight, charSelectButton[i].bitmapID);
@@ -1057,98 +1119,158 @@ bool SystemClass::InitializeCharSelect(){
 		}
 	}
 
-	RECT rc;
-	rc.top = 0;
-	rc.bottom = 100;
-	rc.left = 0;
-	rc.right = 100;
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_selected.tga", rc, m_screenWidth, m_screenHeight, selectedCharButtonID);
+	//this bitmap will be rendered over the char. sel. button
+	//over which the mouse cursor is hovering. this bitmap is used to
+	//highlight such select button.
+	rc = { 0, 100, 0, 100 };
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_selected.tga", rc, m_screenWidth,
+		m_screenHeight, selectedCharButtonID);
 	if (!result){
 		return false;
 	}
 
+	//background bitmap for char. sel. mode
 	rc = { 0, 0, m_screenWidth, m_screenHeight };
-	m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_background.tga", rc, m_screenWidth, m_screenHeight, charSelectModeBackgroundID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_background.tga", rc, m_screenWidth,
+		m_screenHeight, charSelectModeBackgroundID);
+	if (!result){
+		return false;
+	}
 
 	rc = { 0, 0, 400, 500 };
-	m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_reimu_avatar.tga", rc, m_screenWidth, m_screenHeight, reimuAvatarID);
-	m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_marisa_avatar.tga", rc, m_screenWidth, m_screenHeight, marisaAvatarID);
 
+	//avatar bitmap for Reimu
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_reimu_avatar.tga", rc, m_screenWidth,
+		m_screenHeight, reimuAvatarID);
+	if (!result){
+		return false;
+	}
+
+	//avatar bitmap for Marisa
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_marisa_avatar.tga", rc, m_screenWidth,
+		m_screenHeight, marisaAvatarID);
+	if (!result){
+		return false;
+	}
+
+	//char. sel. mode is initialized
 	isCharSelectInit = true;
+
 	return true;
 }
 
+//initialize variables for versus mode
 bool SystemClass::InitializeVersusMode(){
 	bool result;
 
+	//reset player turn
 	versusMatch.playerTurn = 0;
+
+	//reset current phase
 	versusMatch.movePhase = true;
 	versusMatch.actionPhase = false;
+
+	//reset shooting state and shoot frame
 	versusMatch.shooting = false;
 	versusMatch.shootFrame = -1;
+
+	//reset player won
 	versusMatch.victoryPlayer = -1;
+
+	//reset player choice to PENDING_CHOICE
 	versusMatch.choice = PENDING_CHOICE;
+
+	//reset number of bullets to zero
 	versusMatch.numBullets = 0;
+
+	//set temporary heap variables to NULL
 	versusMatch.tempAngle = 0;
 	versusMatch.tempPos = 0;
 	versusMatch.tempSpeed = 0;
+
+	//add timer for announcement of current phase
 	m_Clock->AddTimer(versusMatch.phaseAnnounceTimerID, 240);
+
+	//add bitmap of the background map
 	RECT screenRect = { 0, 0, m_screenWidth, m_screenHeight };
 	result = m_Graphics->AddBitmap(m_hwnd, "/Data/test_map.tga", screenRect, m_screenWidth, m_screenHeight, versusMatch.map.mapBitmapID);
 	if (!result){
 		return false;
 	}
+
+	//add bitmaps for the phase announcement
 	RECT announceRect = { 0, 0, 398, 37 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_move_phase_announce.tga", announceRect, m_screenWidth, m_screenHeight, versusMatch.movePhaseAnnounceBitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_move_phase_announce.tga", announceRect,
+		m_screenWidth, m_screenHeight, versusMatch.movePhaseAnnounceBitmapID);
 	if (!result){
 		return false;
 	}
 	announceRect = { 0, 0, 338, 37 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_act_phase_announce.tga", announceRect, m_screenWidth, m_screenHeight, versusMatch.actPhaseAnnounceBitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_act_phase_announce.tga", announceRect,
+		m_screenWidth, m_screenHeight, versusMatch.actPhaseAnnounceBitmapID);
 	if (!result){
 		return false;
 	}
+
+	//add bitmaps for choice buttons
 	versusMatch.passButton.buttonRect = { 0, 0, 150, 50 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_pass_button.tga", versusMatch.passButton.buttonRect, m_screenWidth, m_screenHeight, versusMatch.passButton.bitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_pass_button.tga", versusMatch.passButton.buttonRect,
+		m_screenWidth, m_screenHeight, versusMatch.passButton.bitmapID);
 	if (!result){
 		return false;
 	}
 	versusMatch.moveButton.buttonRect = { 0, 0, 150, 50 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_move_button.tga", versusMatch.moveButton.buttonRect, m_screenWidth, m_screenHeight, versusMatch.moveButton.bitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_move_button.tga", versusMatch.moveButton.buttonRect,
+		m_screenWidth, m_screenHeight, versusMatch.moveButton.bitmapID);
 	if (!result){
 		return false;
 	}
 	versusMatch.shootButton.buttonRect = { 0, 0, 150, 50 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_shoot_button.tga", versusMatch.shootButton.buttonRect, m_screenWidth, m_screenHeight, versusMatch.shootButton.bitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_shoot_button.tga", versusMatch.shootButton.buttonRect,
+		m_screenWidth, m_screenHeight, versusMatch.shootButton.bitmapID);
 	if (!result){
 		return false;
 	}
 	versusMatch.spellButton.buttonRect = { 0, 0, 150, 50 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_spell_button.tga", versusMatch.spellButton.buttonRect, m_screenWidth, m_screenHeight, versusMatch.spellButton.bitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_spell_button.tga", versusMatch.spellButton.buttonRect,
+		m_screenWidth, m_screenHeight, versusMatch.spellButton.bitmapID);
 	if (!result){
 		return false;
 	}
+
+	//add bitmap of aiming circle
 	RECT aimCircleRect = { 0, 0, 100, 100 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_aim.tga", aimCircleRect, m_screenWidth, m_screenHeight, versusMatch.aimCircleBitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_aim.tga", aimCircleRect, m_screenWidth, m_screenHeight,
+		versusMatch.aimCircleBitmapID);
 	if (!result){
 		return false;
 	}
+
+	//add bitmaps for all types of bullets
 	RECT bulletRect = { 0, 0, 14, 12 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/bullet/type_01_color_01.tga", bulletRect, m_screenWidth, m_screenHeight, versusMatch.type01color01bulletID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/bullet/type_01_color_01.tga", bulletRect, m_screenWidth,
+		m_screenHeight, versusMatch.type01color01bulletID);
 	if (!result){
 		return false;
 	}
+
+	//add bitmap for the character status window
 	RECT statsRect = { 0, 0, 100, 80 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_stats_window.tga", statsRect, m_screenWidth, m_screenHeight, versusMatch.statsWindowBitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_stats_window.tga", statsRect, m_screenWidth,
+		m_screenHeight, versusMatch.statsWindowBitmapID);
 	if (!result){
 		return false;
 	}
 	
+	//reset laser particle heap arrays to NULL
 	for (int i = 0; i < MAX_ON_SCREEN_LASERS; i++){
 		versusMatch.laser[i].particle = 0;
 	}
+
+	//reset number of lasers to zero
 	versusMatch.numLasers = 0;
 
+	//add bitmaps for particles of all types of lasers
 	RECT particleRect = { 0, 0, 1, 1 };
 	for (int i = 0; i < 9; i++){
 		char path[MAX_CHARACTER_COUNT];
@@ -1160,15 +1282,19 @@ bool SystemClass::InitializeVersusMode(){
 		}
 	}
 
+	//add sentence object for showing current HP
 	result = m_Graphics->AddSentence(m_hwnd, " ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.hpDispSentID);
 	if (!result){
 		return false;
 	}
+
+	//add sentence object for showing current MP
 	result = m_Graphics->AddSentence(m_hwnd, " ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.mpDispSentID);
 	if (!result){
 		return false;
 	}
 
+	//set the map's wall collision detection
 	for (int y = 0; y < 600; y++){
 		for (int x = 0; x < 800; x++){
 			versusMatch.map.isWall[x][y] = false;
@@ -1192,9 +1318,15 @@ bool SystemClass::InitializeVersusMode(){
 	}
 
 	for (int i = 0; i < versusMatch.numPlayers; i++){
+		 
+		//set spell card lists to NULL
 		versusMatch.player[i].spellCard = 0;
+
 		RECT spriteRect;
+		
 		switch (versusMatch.player[i].character){
+		
+		//initialize the character stats corresponding to Reimu
 		case REIMU:
 			versusMatch.player[i].maxHp = 40;
 			versusMatch.player[i].numSpellCards = 2;
@@ -1202,7 +1334,8 @@ bool SystemClass::InitializeVersusMode(){
 			versusMatch.player[i].inGameSpriteHeight = 20;
 			versusMatch.player[i].hitboxRadius = 10.0f;
 			spriteRect = { 0, 0, versusMatch.player[i].inGameSpriteWidth, versusMatch.player[i].inGameSpriteHeight };
-			result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_reimu.tga", spriteRect, m_screenWidth, m_screenHeight, versusMatch.player[i].inGameSpriteID);
+			result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_reimu.tga", spriteRect, m_screenWidth, m_screenHeight,
+				versusMatch.player[i].inGameSpriteID);
 			if (!result){
 				return false;
 			}
@@ -1214,6 +1347,7 @@ bool SystemClass::InitializeVersusMode(){
 
 			break;
 
+			//initialize the character stats corresponding to Marisa
 		case MARISA:
 			versusMatch.player[i].maxHp = 43;
 			versusMatch.player[i].inGameSpriteWidth = 30;
@@ -1233,19 +1367,30 @@ bool SystemClass::InitializeVersusMode(){
 
 			break;
 		}
+
+		//set current HP to max HP
 		versusMatch.player[i].hp = versusMatch.player[i].maxHp;
+
+		//set current MP to zero
 		versusMatch.player[i].mp = 0;
+
+		//characters are stationary
 		versusMatch.player[i].moveSpeed = { 0.0f, 0.0f };
 
+		//first player starts at the left side of the map
 		if (i == 0){
 			versusMatch.player[i].position = { 100.0f, 300.0f };
 		}
+
+		//second player starts at the right side of the map
 		else if (i == 1){
 			versusMatch.player[i].position = { 700.0f, 300.0f };
 		}
 	}
 
+	//versus mode is initialized
 	isVersusModeInit = true;
+	
 	return true;
 }
 
@@ -1539,6 +1684,7 @@ void SystemClass::InitializeTempPosSpeedAngle(float x, float y){
 	*versusMatch.tempAngle = 0.0f;
 }
 
+//handles messages to the Windows application
 LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 	switch (uMsg){
 	case WM_KEYDOWN:
@@ -1566,6 +1712,8 @@ LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT uMsg, WPARAM wParam
 	}
 }
 
+//receives the translated messages, closes the application
+//if WM_DESTROY or WM_CLOSE, handle message otherwise
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 	switch (uMsg){
 	case WM_DESTROY:
