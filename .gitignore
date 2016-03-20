@@ -1,0 +1,4 @@
+*.user
+*.filters
+shader-error.txt
+*.vcxproj
