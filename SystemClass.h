@@ -63,30 +63,22 @@ private:
 		int* pBitmapID;    //pointer to bullet's in-game sprite bitmap
 	};
 
-/*****
-*	TODO
-*	will get back to this later
-*	//represents a single particle of an in-game laser
-*	struct LaserParticleType{
-*		XMFLOAT2 posI;         //the start position of laser particle
-*		XMFLOAT2 posF;         //the end position of laser particle
-*		XMFLOAT2 midPt;        //the midpoint of particle's start and end position
-*		RECT dimensions;       //x and y dimensions by which the particle will be stretched
-*		int* pParticleBitmapID;//pointer to particle's in-game sprite bitmap
-*	};
-*****/
+	//represents a single particle of an in-game laser
+	struct LaserParticleType{
+		XMFLOAT2 posI;         //the start position of laser particle
+		XMFLOAT2 posF;         //the end position of laser particle
+		XMFLOAT2 midPt;        //the midpoint of particle's start and end position
+		RECT dimensions;       //x and y dimensions by which the particle will be stretched
+		int* pBitmapID;//heap variable of particles' in-game sprite bitmap
+	};
 
 	//represents an in-game laser
 	struct LaserType{
-		float angle;                //direction(angle) of laser
-		int damage;                 //damage upon colliding on another object
-		int* pBitmapID;              //pointer to ID of bitmap for laser
-		XMFLOAT2 posI;
-		XMFLOAT2 posF;
-		XMFLOAT2 midPt;
-		RECT dimensions;
-		int timerID;                //duration for which laser is rendered
-
+		float angle;                 //direction(angle) of laser
+		int damage;                  //damage upon colliding on another object
+		LaserParticleType* particles;
+		int numParticles;
+		int timerID;                 //duration for which laser is rendered
 	};
 
 	//represents a player
@@ -141,7 +133,7 @@ private:
 		bool shooting;                           //whether the player is currently shooting a bullet/moving a character
 		int aimCircleBitmapID;                   //ID of bitmap of aiming circle
 		int type01color01bulletID;               //ID of bitmap of Type01Color01 bullet
-		int color01LaserID;                      //ID of Color1 laser
+		int color01laserParticleID[9];                   //array of IDs of Color1 laser bitmaps
 
 		bool movePhase;                          //whether it is currently Move Phase
 		bool actionPhase;                        //whether it is currently Act Phase
