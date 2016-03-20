@@ -573,6 +573,20 @@ void SystemClass::OnVersusMode(){
 		m_Graphics->RenderBitmap(*versusMatch.bullet[i].pBitmapID);
 	}
 
+	//render lasers
+	for (int i = 0; i < versusMatch.numLasers; i++){
+		LaserType& laser = versusMatch.laser[i];
+
+		//set laser sprite's dimensions
+		m_Graphics->UpdateBitmap(*laser.pBitmapID, laser.dimensions);
+
+		//set laser sprite's centre position
+		m_Graphics->UpdateBitmap(*laser.pBitmapID, laser.midPt.x, laser.midPt.y, laser.angle);
+
+		//render laser sprite
+		m_Graphics->RenderBitmap(*versusMatch.laser[i].pBitmapID);
+	}
+
 	//if it is currently Move Phase and player hasn't made a choice
 	if (versusMatch.movePhase && versusMatch.choice==PENDING_CHOICE){
 	
@@ -648,6 +662,18 @@ void SystemClass::OnVersusMode(){
 				versusMatch.choice = SPELL;
 			}
 		}
+#ifdef _DEBUG
+		//in debug mode, P key is shortkey for Pass choice, S key is for Shoot, L key is for Spell
+		else if (m_Input->IsKeyJustPressed(0x50)){
+			versusMatch.choice = PASS;
+		}
+		else if (m_Input->IsKeyJustPressed(0x53)){
+			versusMatch.choice = SHOOT;
+		}
+		else if (m_Input->IsKeyJustPressed(0x4C)){
+			versusMatch.choice = SPELL;
+		}
+#endif
 	}
 
 	//if it is currently Move Phase and player has made a choice
@@ -862,44 +888,62 @@ void SystemClass::OnVersusMode(){
 						//if the speed, position, and angle have been recorded
 						else{
 
-							//laser gives 3 damage upon contact with the opponent character
-							versusMatch.laser[versusMatch.numLasers].damage = 3;
 
-							//allot heap for laser particles
-							versusMatch.laser[versusMatch.numLasers].particle = new LaserParticleType[9];
+							//TODO
+							//laser particles
+
+							LaserType& laser = versusMatch.laser[versusMatch.numLasers];
+
+							//laser gives 3 damage upon contact with the opponent character
+							laser.damage = 3;
 
 							//setting laser particles to laserColor01 particles
-							for (int i = 0; i < 9; i++){
-								versusMatch.laser[versusMatch.numLasers].particle[i].pParticleBitmapID
-									= &versusMatch.laserColor01particleID[i];
-							}
-							//!!!
+							laser.pBitmapID = &versusMatch.color01LaserID;
+
 							XMFLOAT2 posCtrI = *versusMatch.tempPos;
 							float slope = versusMatch.tempSpeed->y / versusMatch.tempSpeed->x;
 							float yInt = versusMatch.tempPos->y - slope*versusMatch.tempPos->x;
 
-							for (int i = 0; i < 9; i++){
-								XMFLOAT2& posI = versusMatch.laser[versusMatch.numLasers].particle[i].posI;
-								XMFLOAT2& posF = versusMatch.laser[versusMatch.numLasers].particle[i].posF;
-								XMFLOAT2& midPt = versusMatch.laser[versusMatch.numLasers].particle[i].midPt;
-								RECT& dim = versusMatch.laser[versusMatch.numLasers].particle[i].dimensions;
-								posI.x = (-4.0f + (float)i) / 4.0f*versusMatch.player[versusMatch.playerTurn].hitboxRadius *
-									cos(*versusMatch.tempAngle) + posCtrI.x;
-								posI.y = slope*posI.x + yInt;
-								posF = posI;
 
+							XMFLOAT2& posI = laser.posI;
+							XMFLOAT2& posF = laser.posF;
+							XMFLOAT2& midPt = laser.midPt;
+							RECT& dim = laser.dimensions;
+							posI = posCtrI;
+							posF = posI;
+
+							if (versusMatch.tempSpeed->x > 0){
 								while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
 									posF.x += 1.0f;
 									posF.y += slope;
 								}
-								midPt.x = (posI.x + posF.x) / 2.0f;
-								midPt.y = (posI.y + posF.y) / 2.0f;
-								dim.left = 0;
-								dim.top = 0;
-								dim.right = round(versusMatch.player[versusMatch.playerTurn].hitboxRadius / 9.0f);
-								dim.bottom = round(Distance(posI, posF));
 							}
+							else if (versusMatch.tempSpeed->x < 0){
+								while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+									posF.x -= 1.0f;
+									posF.y -= slope;
+								}
+							}
+							else{
+								if (versusMatch.tempSpeed->y > 0){
+									while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+										posF.y += 1.0f;
+									}
+								}
+								else{
+									while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+										posF.y -= 1.0f;
+									}
+								}
+							}
+							midPt.x = (posI.x + posF.x) / 2.0f;
+							midPt.y = (posI.y + posF.y) / 2.0f;
+							dim.left = 0;
+							dim.top = 0;
+							dim.bottom = round(versusMatch.player[versusMatch.playerTurn].hitboxRadius);
+							dim.right = round(Distance(posI, posF));
 
+							//temporary position variable is deleted
 							delete versusMatch.tempPos;
 							versusMatch.tempPos = 0;
 
@@ -908,42 +952,35 @@ void SystemClass::OnVersusMode(){
 							versusMatch.tempSpeed = 0;
 
 							//the laser will have the angle as recorded in temporary variable
-							versusMatch.laser[versusMatch.numLasers].angle = *versusMatch.tempAngle;
+							laser.angle = *versusMatch.tempAngle;
 							delete versusMatch.tempAngle;
 							versusMatch.tempAngle = 0;
 
-							m_Clock->AddTimer(versusMatch.laser[versusMatch.numLasers].timerID, 180);
+							m_Clock->AddTimer(laser.timerID, 180);
 
 							//increase the laser count by one
 							versusMatch.numLasers++;
 						}
 					}
+					LaserType& laser = versusMatch.laser[versusMatch.numLasers - 1];
 					if (!versusMatch.tempPos && !versusMatch.tempSpeed && !versusMatch.tempAngle){
 						if (collidedChar != -1){
-							versusMatch.player[collidedChar].hp -= versusMatch.laser[versusMatch.numLasers - 1].damage;
+							versusMatch.player[collidedChar].hp -= laser.damage;
 							collidedChar = -1;
 						}
 
-						if (m_Clock->IsTimerRunning(versusMatch.laser[versusMatch.numLasers - 1].timerID)){
-							for (int i = 0; i < 9; i++){
-								m_Graphics->UpdateBitmap(*versusMatch.laser[versusMatch.numLasers - 1].particle[i].pParticleBitmapID,
-									versusMatch.laser[versusMatch.numLasers - 1].particle[i].dimensions,
-									versusMatch.laser[versusMatch.numLasers - 1].angle);
-
-								m_Graphics->RenderBitmap(*versusMatch.laser[versusMatch.numLasers - 1].particle[i].pParticleBitmapID);
-							}
-						}
-						else{
-							m_Clock->DeleteTimer(versusMatch.laser[versusMatch.numLasers - 1].timerID);
-							delete versusMatch.laser[versusMatch.numLasers - 1].particle;
-							versusMatch.laser[versusMatch.numLasers - 1].particle = 0;
-							versusMatch.numBullets--;
+						if (!m_Clock->IsTimerRunning(laser.timerID)){
+							m_Clock->DeleteTimer(laser.timerID);
+							versusMatch.numLasers--;
 							versusMatch.playerTurn++;
 							if (versusMatch.playerTurn >= versusMatch.numPlayers){
 								versusMatch.playerTurn = 0;
 							}
+							versusMatch.shooting = false;
+
 							versusMatch.movePhase = true;
 							versusMatch.actionPhase = false;
+
 							m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
 							versusMatch.choice = PENDING_CHOICE;
 						}
@@ -1261,25 +1298,18 @@ bool SystemClass::InitializeVersusMode(){
 	if (!result){
 		return false;
 	}
-	
-	//reset laser particle heap arrays to NULL
-	for (int i = 0; i < MAX_ON_SCREEN_LASERS; i++){
-		versusMatch.laser[i].particle = 0;
-	}
 
 	//reset number of lasers to zero
 	versusMatch.numLasers = 0;
 
-	//add bitmaps for particles of all types of lasers
+	//add bitmap for p
 	RECT particleRect = { 0, 0, 1, 1 };
-	for (int i = 0; i < 9; i++){
-		char path[MAX_CHARACTER_COUNT];
-		string pathStr = "/Data/bullet/laser_color_01_particle_0" + to_string(i + 1) + ".tga";
-		strcpy(path, pathStr.c_str());
-		result = m_Graphics->AddBitmap(m_hwnd, path, particleRect, m_screenWidth, m_screenHeight, versusMatch.laserColor01particleID[i]);
-		if (!result){
-			return false;
-		}
+	char path[MAX_CHARACTER_COUNT];
+	string pathStr = "/Data/bullet/laser_color_01_particle_03.tga";
+	strcpy(path, pathStr.c_str());
+	result = m_Graphics->AddBitmap(m_hwnd, path, particleRect, m_screenWidth, m_screenHeight, versusMatch.color01LaserID);
+	if (!result){
+		return false;
 	}
 
 	//add sentence object for showing current HP
@@ -1423,9 +1453,7 @@ void SystemClass::ShutdownVersusMode(){
 	m_Graphics->DeleteBitmap(versusMatch.spellButton.bitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.aimCircleBitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.statsWindowBitmapID);
-	for (int i = 0; i < 9; i++){
-		m_Graphics->DeleteBitmap(versusMatch.laserColor01particleID[i]);
-	}
+	m_Graphics->DeleteBitmap(versusMatch.color01LaserID);
 
 	m_Graphics->DeleteSentence(versusMatch.hpDispSentID);
 	m_Graphics->DeleteSentence(versusMatch.mpDispSentID);
@@ -1504,7 +1532,10 @@ void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle){
 	else if (versusMatch.shootFrame != -1 && (m_Input->IsKeyJustReleased(VK_LBUTTON) || Distance(mousePt, lClickPos) > 50.0f)){
 		speedVec.x = (float)(mousePt.x - lClickPos.x) / (float)(m_Clock->GetFrameCount() - versusMatch.shootFrame); //record x component
 		speedVec.y = (float)(mousePt.y - lClickPos.y) / (float)(m_Clock->GetFrameCount() - versusMatch.shootFrame); //record y component
-		angle = atan2(speedVec.y, speedVec.x);   //record angle
+		
+		//record angle
+		angle = atan2(speedVec.y, speedVec.x);
+
 		versusMatch.shootFrame = -1;
 	}
 
