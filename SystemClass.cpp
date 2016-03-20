@@ -912,9 +912,29 @@ void SystemClass::OnVersusMode(){
 							posI = posCtrI;
 							posF = posI;
 
-							while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
-								posF.x += 1.0f;
-								posF.y += slope;
+							if (versusMatch.tempSpeed->x > 0){
+								while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+									posF.x += 1.0f;
+									posF.y += slope;
+								}
+							}
+							else if (versusMatch.tempSpeed->x < 0){
+								while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+									posF.x -= 1.0f;
+									posF.y -= slope;
+								}
+							}
+							else{
+								if (versusMatch.tempSpeed->y > 0){
+									while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+										posF.y += 1.0f;
+									}
+								}
+								else{
+									while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+										posF.y -= 1.0f;
+									}
+								}
 							}
 							midPt.x = (posI.x + posF.x) / 2.0f;
 							midPt.y = (posI.y + posF.y) / 2.0f;
