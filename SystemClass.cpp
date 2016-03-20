@@ -576,15 +576,14 @@ void SystemClass::OnVersusMode(){
 	//render lasers
 	for (int i = 0; i < versusMatch.numLasers; i++){
 		LaserType& laser = versusMatch.laser[i];
-		int height = laser.dimensions.bottom - laser.dimensions.top;
-		int width = laser.dimensions.right - laser.dimensions.left;
-		RECT dim;
-		dim.top = laser.midPt.y - height / 2;
-		dim.bottom = laser.midPt.y + height / 2;
-		dim.left = laser.midPt.x - width / 2;
-		dim.right = laser.midPt.x + width / 2;
 
-		m_Graphics->UpdateBitmap(*versusMatch.laser[i].pBitmapID, dim);
+		//set laser sprite's dimensions
+		m_Graphics->UpdateBitmap(*laser.pBitmapID, laser.dimensions);
+
+		//set laser sprite's centre position
+		m_Graphics->UpdateBitmap(*laser.pBitmapID, laser.midPt.x, laser.midPt.y, laser.angle);
+
+		//render laser sprite
 		m_Graphics->RenderBitmap(*versusMatch.laser[i].pBitmapID);
 	}
 
@@ -663,6 +662,18 @@ void SystemClass::OnVersusMode(){
 				versusMatch.choice = SPELL;
 			}
 		}
+#ifdef _DEBUG
+		//in debug mode, P key is shortkey for Pass choice, S key is for Shoot, L key is for Spell
+		else if (m_Input->IsKeyJustPressed(0x50)){
+			versusMatch.choice = PASS;
+		}
+		else if (m_Input->IsKeyJustPressed(0x53)){
+			versusMatch.choice = SHOOT;
+		}
+		else if (m_Input->IsKeyJustPressed(0x4C)){
+			versusMatch.choice = SPELL;
+		}
+#endif
 	}
 
 	//if it is currently Move Phase and player has made a choice
@@ -879,7 +890,7 @@ void SystemClass::OnVersusMode(){
 
 
 							//TODO
-							//laser
+							//laser particles
 
 							LaserType& laser = versusMatch.laser[versusMatch.numLasers];
 
@@ -912,7 +923,7 @@ void SystemClass::OnVersusMode(){
 							dim.bottom = round(versusMatch.player[versusMatch.playerTurn].hitboxRadius);
 							dim.right = round(Distance(posI, posF));
 
-
+							//temporary position variable is deleted
 							delete versusMatch.tempPos;
 							versusMatch.tempPos = 0;
 
@@ -925,7 +936,7 @@ void SystemClass::OnVersusMode(){
 							delete versusMatch.tempAngle;
 							versusMatch.tempAngle = 0;
 
-							m_Clock->AddTimer(versusMatch.laser[versusMatch.numLasers].timerID, 180);
+							m_Clock->AddTimer(laser.timerID, 180);
 
 							//increase the laser count by one
 							versusMatch.numLasers++;
@@ -945,8 +956,11 @@ void SystemClass::OnVersusMode(){
 							if (versusMatch.playerTurn >= versusMatch.numPlayers){
 								versusMatch.playerTurn = 0;
 							}
+							versusMatch.shooting = false;
+
 							versusMatch.movePhase = true;
 							versusMatch.actionPhase = false;
+
 							m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
 							versusMatch.choice = PENDING_CHOICE;
 						}
@@ -1498,7 +1512,10 @@ void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle){
 	else if (versusMatch.shootFrame != -1 && (m_Input->IsKeyJustReleased(VK_LBUTTON) || Distance(mousePt, lClickPos) > 50.0f)){
 		speedVec.x = (float)(mousePt.x - lClickPos.x) / (float)(m_Clock->GetFrameCount() - versusMatch.shootFrame); //record x component
 		speedVec.y = (float)(mousePt.y - lClickPos.y) / (float)(m_Clock->GetFrameCount() - versusMatch.shootFrame); //record y component
-		angle = atan2(speedVec.y, speedVec.x);   //record angle
+		
+		//record angle
+		angle = atan2(speedVec.y, speedVec.x);
+
 		versusMatch.shootFrame = -1;
 	}
 
