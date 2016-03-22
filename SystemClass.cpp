@@ -922,7 +922,7 @@ void SystemClass::OnVersusMode(){
 								RECT& dim = laser.particles[i].dimensions;
 								
 								float maxXDisp = sqrt(pow((float)versusMatch.player[versusMatch.playerTurn].hitboxRadius, 2.0f) / (1.0f + pow(perpSlope, 2)));
-								posI.x = posCtrI.x + maxXDisp*(float)(i - 4);
+								posI.x = posCtrI.x + maxXDisp*(float)(i - 4) / 4.0f;
 								posI.y = posI.x*perpSlope + perpYInt;
 								
 								posF = posI;
@@ -985,7 +985,7 @@ void SystemClass::OnVersusMode(){
 								midPt.y = (posI.y + posF.y) / 2.0f;
 								dim.left = 0;
 								dim.top = 0;
-								dim.bottom = round(versusMatch.player[versusMatch.playerTurn].hitboxRadius/9.0f);
+								dim.bottom = round(2.0f*versusMatch.player[versusMatch.playerTurn].hitboxRadius / 9.0f+2.0f);
 								dim.right = round(Distance(posI, posF));
 							}
 
