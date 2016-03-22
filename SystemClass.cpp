@@ -902,10 +902,10 @@ void SystemClass::OnVersusMode(){
 							//laser gives 3 damage upon contact with the opponent character
 							laser.damage = 3;
 
-							//setting laser particles to laserColor01 particles
-							laser.particles = new LaserParticleType[9];
+							laser.numParticles = 18;
 
-							laser.numParticles = 9;
+							//setting laser particles to laserColor01 particles
+							laser.particles = new LaserParticleType[laser.numParticles];
 
 							XMFLOAT2 posCtrI = *versusMatch.tempPos;
 							float slope = versusMatch.tempSpeed->y / versusMatch.tempSpeed->x;  //divide by 0 ?!
@@ -913,7 +913,7 @@ void SystemClass::OnVersusMode(){
 							float perpSlope = -1.0f / slope;
 							float perpYInt = versusMatch.tempPos->y - perpSlope*versusMatch.tempPos->x;
 
-							for (int i = 0; i < 9; i++){
+							for (int i = 0; i < laser.numParticles; i++){
 								laser.particles[i].pBitmapID = &versusMatch.color01laserParticleID[i];
 
 								XMFLOAT2& posI = laser.particles[i].posI;
@@ -922,7 +922,7 @@ void SystemClass::OnVersusMode(){
 								RECT& dim = laser.particles[i].dimensions;
 								
 								float maxXDisp = sqrt(pow((float)versusMatch.player[versusMatch.playerTurn].hitboxRadius, 2.0f) / (1.0f + pow(perpSlope, 2)));
-								posI.x = posCtrI.x + maxXDisp*(float)(i - 4) / 4.0f;
+								posI.x = posCtrI.x + maxXDisp*(float)(i - laser.numParticles / 2.0f) / (laser.numParticles / 2.0f);
 								posI.y = posI.x*perpSlope + perpYInt;
 								
 								posF = posI;
@@ -985,7 +985,7 @@ void SystemClass::OnVersusMode(){
 								midPt.y = (posI.y + posF.y) / 2.0f;
 								dim.left = 0;
 								dim.top = 0;
-								dim.bottom = round(2.0f*versusMatch.player[versusMatch.playerTurn].hitboxRadius / 9.0f+2.0f);
+								dim.bottom = round(2.0f*versusMatch.player[versusMatch.playerTurn].hitboxRadius / (float)laser.numParticles + 2.0f);
 								dim.right = round(Distance(posI, posF));
 							}
 
@@ -1355,9 +1355,15 @@ bool SystemClass::InitializeVersusMode(){
 
 	//add bitmap for laser particles
 	RECT particleRect = { 0, 0, 1, 1 };
-	for (int i = 0; i < 9; i++){
+	for (int i = 0; i < 18; i++){
 		char path[MAX_CHARACTER_COUNT];
-		string pathStr = "/Data/bullet/laser_color_01_particle_0" + to_string(i + 1) + ".tga";
+		string pathStr;
+		if (i < 9){
+			pathStr = "/Data/bullet/laser_color_01_particle_0" + to_string(i + 1) + ".tga";
+		}
+		else{
+			pathStr = "/Data/bullet/laser_color_01_particle_" + to_string(i + 1) + ".tga";
+		}
 		strcpy(path, pathStr.c_str());
 		result = m_Graphics->AddBitmap(m_hwnd, path, particleRect, m_screenWidth, m_screenHeight, versusMatch.color01laserParticleID[i]);
 		if (!result){
@@ -1506,7 +1512,7 @@ void SystemClass::ShutdownVersusMode(){
 	m_Graphics->DeleteBitmap(versusMatch.spellButton.bitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.aimCircleBitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.statsWindowBitmapID);
-	for (int i = 0; i < 9; i++){
+	for (int i = 0; i < 18; i++){
 		m_Graphics->DeleteBitmap(versusMatch.color01laserParticleID[i]);
 	}
 

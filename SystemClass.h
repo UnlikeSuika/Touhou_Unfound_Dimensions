@@ -133,7 +133,7 @@ private:
 		bool shooting;                           //whether the player is currently shooting a bullet/moving a character
 		int aimCircleBitmapID;                   //ID of bitmap of aiming circle
 		int type01color01bulletID;               //ID of bitmap of Type01Color01 bullet
-		int color01laserParticleID[9];                   //array of IDs of Color1 laser bitmaps
+		int color01laserParticleID[18];                   //array of IDs of Color1 laser bitmaps
 
 		bool movePhase;                          //whether it is currently Move Phase
 		bool actionPhase;                        //whether it is currently Act Phase
