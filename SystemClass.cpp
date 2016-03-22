@@ -908,8 +908,10 @@ void SystemClass::OnVersusMode(){
 							laser.numParticles = 9;
 
 							XMFLOAT2 posCtrI = *versusMatch.tempPos;
-							float slope = versusMatch.tempSpeed->y / versusMatch.tempSpeed->x;
+							float slope = versusMatch.tempSpeed->y / versusMatch.tempSpeed->x;  //divide by 0 ?!
 							float yInt = versusMatch.tempPos->y - slope*versusMatch.tempPos->x;
+							float perpSlope = -1.0f / slope;
+							float perpYInt = versusMatch.tempPos->y - perpSlope*versusMatch.tempPos->x;
 
 							for (int i = 0; i < 9; i++){
 								laser.particles[i].pBitmapID = &versusMatch.color01laserParticleID[i];
@@ -919,30 +921,62 @@ void SystemClass::OnVersusMode(){
 								XMFLOAT2& midPt = laser.particles[i].midPt;
 								RECT& dim = laser.particles[i].dimensions;
 								
-								posI = posCtrI;
+								float maxXDisp = sqrt(pow((float)versusMatch.player[versusMatch.playerTurn].hitboxRadius, 2.0f) / (1.0f + pow(perpSlope, 2)));
+								posI.x = posCtrI.x + maxXDisp*(float)(i - 4);
+								posI.y = posI.x*perpSlope + perpYInt;
+								
 								posF = posI;
 
-								if (versusMatch.tempSpeed->x > 0){
-									while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
-										posF.x += 1.0f;
-										posF.y += slope;
-									}
-								}
-								else if (versusMatch.tempSpeed->x < 0){
-									while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
-										posF.x -= 1.0f;
-										posF.y -= slope;
-									}
-								}
-								else{
-									if (versusMatch.tempSpeed->y > 0){
+								if (collidedChar == -1){
+									if (versusMatch.tempSpeed->x > 0){
 										while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
-											posF.y += 1.0f;
+											posF.x += 1.0f;
+											posF.y += slope;
+										}
+									}
+									else if (versusMatch.tempSpeed->x < 0){
+										while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+											posF.x -= 1.0f;
+											posF.y -= slope;
 										}
 									}
 									else{
-										while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
-											posF.y -= 1.0f;
+										if (versusMatch.tempSpeed->y > 0){
+											while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+												posF.y += 1.0f;
+											}
+										}
+										else{
+											while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
+												posF.y -= 1.0f;
+											}
+										}
+									}
+								}
+								else{
+									int nullChar = -1;
+									if (versusMatch.tempSpeed->x > 0){
+										while (!(CollisionWithCharacter(posF, 1.0f, nullChar)) && !(CollisionWithWall(posF, 1.0f))){
+											posF.x += 1.0f;
+											posF.y += slope;
+										}
+									}
+									else if (versusMatch.tempSpeed->x < 0){
+										while (!(CollisionWithCharacter(posF, 1.0f, nullChar)) && !(CollisionWithWall(posF, 1.0f))){
+											posF.x -= 1.0f;
+											posF.y -= slope;
+										}
+									}
+									else{
+										if (versusMatch.tempSpeed->y > 0){
+											while (!(CollisionWithCharacter(posF, 1.0f, nullChar)) && !(CollisionWithWall(posF, 1.0f))){
+												posF.y += 1.0f;
+											}
+										}
+										else{
+											while (!(CollisionWithCharacter(posF, 1.0f, nullChar)) && !(CollisionWithWall(posF, 1.0f))){
+												posF.y -= 1.0f;
+											}
 										}
 									}
 								}
@@ -951,7 +985,7 @@ void SystemClass::OnVersusMode(){
 								midPt.y = (posI.y + posF.y) / 2.0f;
 								dim.left = 0;
 								dim.top = 0;
-								dim.bottom = round(versusMatch.player[versusMatch.playerTurn].hitboxRadius);
+								dim.bottom = round(versusMatch.player[versusMatch.playerTurn].hitboxRadius/9.0f);
 								dim.right = round(Distance(posI, posF));
 							}
 
