@@ -66,18 +66,18 @@ private:
 	//represents a single particle of an in-game laser
 	struct LaserParticleType{
 		XMFLOAT2 posI;         //the start position of laser particle
-		XMFLOAT2 posF;         //the end position of laser particle
+		XMFLOAT2 posF;         //the end position of laser particle (where laser lands)
 		XMFLOAT2 midPt;        //the midpoint of particle's start and end position
 		RECT dimensions;       //x and y dimensions by which the particle will be stretched
-		int* pBitmapID;//heap variable of particles' in-game sprite bitmap
+		int* pBitmapID;        //pointer to ID of sprite bitmap
 	};
 
 	//represents an in-game laser
 	struct LaserType{
 		float angle;                 //direction(angle) of laser
 		int damage;                  //damage upon colliding on another object
-		LaserParticleType* particles;
-		int numParticles;
+		LaserParticleType* particles;//heap array of laser entities
+		int numParticles;            //number of laser entities
 		int timerID;                 //duration for which laser is rendered
 	};
 
@@ -87,7 +87,8 @@ private:
 		PlayableCharacter character;//character chosen by the player
 		int *pCharacterAvatarID;    //pointer to ID of avatar bitmap displayed in char select screen
 		int flashTimerID;           //ID of a timer for flashing the character avatar upon selecting  
-		int inGameSpriteID;         //ID of in-game sprite bitmap
+		int *pInGameSpriteID;       //pointer to ID of in-game sprite bitmap
+		int spriteClockID;          //pointer to ID of in-game sprite motion clock
 		int inGameSpriteWidth;      //width of in-game sprite bitmap
 		int inGameSpriteHeight;     //height of in-game sprite bitmap
 
@@ -124,6 +125,8 @@ private:
 		int numPlayers;                          //number of player in the match
 		int playerTurn;                          //current player turn
 		int victoryPlayer;                       //which player won this match
+		int reimuStationaryBitmapID[4];          //array of IDs of Reimu's stationary bitmaps
+		int marisaStationaryBitmapID[4];         //array of IDs of Marisa's stationary bitmaps
 
 		BulletType bullet[MAX_ON_SCREEN_BULLETS];//array of on-screen bullets
 		LaserType laser[MAX_ON_SCREEN_LASERS];   //array of on-screen lasers
@@ -133,7 +136,7 @@ private:
 		bool shooting;                           //whether the player is currently shooting a bullet/moving a character
 		int aimCircleBitmapID;                   //ID of bitmap of aiming circle
 		int type01color01bulletID;               //ID of bitmap of Type01Color01 bullet
-		int color01laserParticleID[18];                   //array of IDs of Color1 laser bitmaps
+		int color01laserParticleID[18];          //array of IDs of Color1 laser bitmaps
 
 		bool movePhase;                          //whether it is currently Move Phase
 		bool actionPhase;                        //whether it is currently Act Phase

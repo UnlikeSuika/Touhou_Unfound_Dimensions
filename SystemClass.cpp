@@ -561,10 +561,51 @@ void SystemClass::OnVersusMode(){
 
 	//render character sprites
 	for (int i = 0; i < versusMatch.numPlayers; i++){
-		float renderBitmapPosX = versusMatch.player[i].position.x;
-		float renderBitmapPosY = versusMatch.player[i].position.y;
-		m_Graphics->UpdateBitmap(versusMatch.player[i].inGameSpriteID, round(renderBitmapPosX), round(renderBitmapPosY));
-		m_Graphics->RenderBitmap(versusMatch.player[i].inGameSpriteID);
+		PlayerType& player = versusMatch.player[i];
+
+		float renderBitmapPosX = player.position.x;
+		float renderBitmapPosY = player.position.y;
+
+		int time = m_Clock->CurrentClockTime(player.spriteClockID);
+
+		switch (player.character){
+		case REIMU:	
+			if (time % 120 <= 3){
+				player.pInGameSpriteID = &versusMatch.reimuStationaryBitmapID[2];				
+			}
+			else if (time % 12 < 3){
+				player.pInGameSpriteID = &versusMatch.reimuStationaryBitmapID[0];
+			}
+			else if (time % 12 > 3 && time % 12 <= 6){
+				player.pInGameSpriteID = &versusMatch.reimuStationaryBitmapID[1];
+			}
+			else {
+				player.pInGameSpriteID = &versusMatch.reimuStationaryBitmapID[3];
+			}
+
+			renderBitmapPosY = round(3.0f*sin((float)time / 30.0f) + renderBitmapPosY);
+			
+			break;
+
+		case MARISA:
+			if (time % 32 < 8){
+				player.pInGameSpriteID = &versusMatch.marisaStationaryBitmapID[0];
+			}
+			else if (time % 32 > 8 && time % 32 <= 16){
+				player.pInGameSpriteID = &versusMatch.marisaStationaryBitmapID[1];
+			}
+			else if (time % 32 > 16 && time % 32 <= 24){
+				player.pInGameSpriteID = &versusMatch.marisaStationaryBitmapID[2];
+			}
+			else{
+				player.pInGameSpriteID = &versusMatch.marisaStationaryBitmapID[3];
+			}
+
+			renderBitmapPosY = round(4.0f*sin((float)time / 15.0f) + renderBitmapPosY);
+		}
+
+		m_Graphics->UpdateBitmap(*player.pInGameSpriteID, round(renderBitmapPosX), round(renderBitmapPosY));
+		m_Graphics->RenderBitmap(*player.pInGameSpriteID);
 	}
 
 	//render bullet sprites
@@ -902,50 +943,87 @@ void SystemClass::OnVersusMode(){
 							//laser gives 3 damage upon contact with the opponent character
 							laser.damage = 3;
 
+							//set number of laser entities
 							laser.numParticles = 18;
 
 							//setting laser particles to laserColor01 particles
 							laser.particles = new LaserParticleType[laser.numParticles];
 
+							//centre position of the entire set of lasers
 							XMFLOAT2 posCtrI = *versusMatch.tempPos;
-							float slope = versusMatch.tempSpeed->y / versusMatch.tempSpeed->x;  //divide by 0 ?!
+
+							//slope, yInt represent m, b in y = mx + b, the linear line of the laser's trajectory
+							float slope = versusMatch.tempSpeed->y / versusMatch.tempSpeed->x;  //TODO: deal with division by 0
 							float yInt = versusMatch.tempPos->y - slope*versusMatch.tempPos->x;
+
+							//slope, yInt represent m, b in y = mx + b, the linear line perpendicular to above line
 							float perpSlope = -1.0f / slope;
 							float perpYInt = versusMatch.tempPos->y - perpSlope*versusMatch.tempPos->x;
 
+							//for each laser entity
 							for (int i = 0; i < laser.numParticles; i++){
+
+								//set pointer to bitmap ID
 								laser.particles[i].pBitmapID = &versusMatch.color01laserParticleID[i];
 
+								//entity's initial position
 								XMFLOAT2& posI = laser.particles[i].posI;
+
+								//entity's final position (where the laser lands)
 								XMFLOAT2& posF = laser.particles[i].posF;
+
+								//midpoint between entity's initial and final positions
 								XMFLOAT2& midPt = laser.particles[i].midPt;
+
+								//rectangular dimensions of entity sprite
 								RECT& dim = laser.particles[i].dimensions;
 								
+								//x-component of maximum displacement of entity's position from laser's center
 								float maxXDisp = sqrt(pow((float)versusMatch.player[versusMatch.playerTurn].hitboxRadius, 2.0f) / (1.0f + pow(perpSlope, 2)));
+
+								//set initial position
 								posI.x = posCtrI.x + maxXDisp*(float)(i - laser.numParticles / 2.0f) / (laser.numParticles / 2.0f);
 								posI.y = posI.x*perpSlope + perpYInt;
 								
+								//initialize final position to posI
 								posF = posI;
 
+								//if laser has not made a collision with opponent yet
 								if (collidedChar == -1){
+
+									//if player shot laser to the right
 									if (versusMatch.tempSpeed->x > 0){
+
+										//increment posF for checking wall/character collision
 										while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
 											posF.x += 1.0f;
 											posF.y += slope;
 										}
 									}
+
+									//if player shot laser to the left
 									else if (versusMatch.tempSpeed->x < 0){
+
+										//decrement posF for checking wall/chararcter collision
 										while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
 											posF.x -= 1.0f;
 											posF.y -= slope;
 										}
 									}
+
+									//if player shot vertically
 									else{
+
+										//if player shot the laser upwards
 										if (versusMatch.tempSpeed->y > 0){
+
+											//increment the y-position of 
 											while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
 												posF.y += 1.0f;
 											}
 										}
+
+										//if player shot the laser downwards
 										else{
 											while (!(CollisionWithCharacter(posF, 1.0f, collidedChar)) && !(CollisionWithWall(posF, 1.0f))){
 												posF.y -= 1.0f;
@@ -953,6 +1031,9 @@ void SystemClass::OnVersusMode(){
 										}
 									}
 								}
+
+								//if the lasr has made collision with another character, do not change the collidedChar
+								//TODO: when laser hits more than one character, an array of players hit will have to be recorded
 								else{
 									int nullChar = -1;
 									if (versusMatch.tempSpeed->x > 0){
@@ -1350,6 +1431,30 @@ bool SystemClass::InitializeVersusMode(){
 		return false;
 	}
 
+	//add bitmaps for Reimu's in-game sprites
+	for (int i = 0; i < 4; i++){
+		RECT charRect = { 0, 0, 40, 72 };
+		char path[MAX_CHARACTER_COUNT];
+		string pathStr = "/Data/in_game_reimu_stationary_0" + to_string(i + 1) + ".tga";
+		strcpy(path, pathStr.c_str());
+		result = m_Graphics->AddBitmap(m_hwnd, path, charRect, m_screenWidth, m_screenHeight, versusMatch.reimuStationaryBitmapID[i]);
+		if (!result){
+			return false;
+		}
+	}
+
+	//add bitmap for Marisa's in-game sprite
+	for (int i = 0; i < 4; i++){
+		RECT charRect = { 0, 0, 54, 63 };
+		char path[MAX_CHARACTER_COUNT];
+		string pathStr = "/Data/in_game_marisa_stationary_0" + to_string(i + 1) + ".tga";
+		strcpy(path, pathStr.c_str());
+		result = m_Graphics->AddBitmap(m_hwnd, path, charRect, m_screenWidth, m_screenHeight, versusMatch.marisaStationaryBitmapID[i]);
+		if (!result){
+			return false;
+		}
+	}
+
 	//reset number of lasers to zero
 	versusMatch.numLasers = 0;
 
@@ -1411,6 +1516,9 @@ bool SystemClass::InitializeVersusMode(){
 		//set spell card lists to NULL
 		versusMatch.player[i].spellCard = 0;
 
+		//add clock for character sprite motion
+		m_Clock->AddClock(versusMatch.player[i].spriteClockID);
+
 		RECT spriteRect;
 		
 		switch (versusMatch.player[i].character){
@@ -1419,15 +1527,10 @@ bool SystemClass::InitializeVersusMode(){
 		case REIMU:
 			versusMatch.player[i].maxHp = 40;
 			versusMatch.player[i].numSpellCards = 2;
-			versusMatch.player[i].inGameSpriteWidth = 20;
-			versusMatch.player[i].inGameSpriteHeight = 20;
+			versusMatch.player[i].inGameSpriteWidth = 40;
+			versusMatch.player[i].inGameSpriteHeight = 72;
 			versusMatch.player[i].hitboxRadius = 10.0f;
 			spriteRect = { 0, 0, versusMatch.player[i].inGameSpriteWidth, versusMatch.player[i].inGameSpriteHeight };
-			result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_reimu.tga", spriteRect, m_screenWidth, m_screenHeight,
-				versusMatch.player[i].inGameSpriteID);
-			if (!result){
-				return false;
-			}
 			versusMatch.player[i].spellCard = new SpellCardType[versusMatch.player[i].numSpellCards];
 			strcpy(versusMatch.player[i].spellCard[0].cardName, "Spirit Sign \"Fantasy Seal\"");
 			versusMatch.player[i].spellCard[0].mpCost = 6;
@@ -1439,14 +1542,9 @@ bool SystemClass::InitializeVersusMode(){
 			//initialize the character stats corresponding to Marisa
 		case MARISA:
 			versusMatch.player[i].maxHp = 43;
-			versusMatch.player[i].inGameSpriteWidth = 30;
-			versusMatch.player[i].inGameSpriteHeight = 30;
+			versusMatch.player[i].inGameSpriteWidth = 54;
+			versusMatch.player[i].inGameSpriteHeight = 63;
 			versusMatch.player[i].hitboxRadius = 15.0f;
-			spriteRect = { 0, 0, versusMatch.player[i].inGameSpriteWidth, versusMatch.player[i].inGameSpriteHeight };
-			result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_marisa.tga", spriteRect, m_screenWidth, m_screenHeight, versusMatch.player[i].inGameSpriteID);
-			if (!result){
-				return false;
-			}
 			versusMatch.player[i].numSpellCards = 2;
 			versusMatch.player[i].spellCard = new SpellCardType[versusMatch.player[i].numSpellCards];
 			strcpy(versusMatch.player[i].spellCard[0].cardName, "Magic Sign \"Stardust Reverie\"");
@@ -1485,11 +1583,11 @@ bool SystemClass::InitializeVersusMode(){
 
 void SystemClass::ShutdownVersusMode(){
 	for (int i = 0; i < versusMatch.numPlayers; i++){
-		m_Graphics->DeleteBitmap(versusMatch.player[i].inGameSpriteID);
 		if (versusMatch.player[i].spellCard){
 			delete[] versusMatch.player[i].spellCard;
 			versusMatch.player[i].spellCard = 0;
 		}
+		m_Clock->DeleteClock(versusMatch.player[i].spriteClockID);
 	}
 	if (versusMatch.tempAngle){
 		delete versusMatch.tempAngle;
@@ -1514,6 +1612,9 @@ void SystemClass::ShutdownVersusMode(){
 	m_Graphics->DeleteBitmap(versusMatch.statsWindowBitmapID);
 	for (int i = 0; i < 18; i++){
 		m_Graphics->DeleteBitmap(versusMatch.color01laserParticleID[i]);
+	}
+	for (int i = 0; i < 4; i++){
+		m_Graphics->DeleteBitmap(versusMatch.reimuStationaryBitmapID[i]);
 	}
 
 	m_Graphics->DeleteSentence(versusMatch.hpDispSentID);

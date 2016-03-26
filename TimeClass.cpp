@@ -7,6 +7,8 @@ TimeClass::TimeClass(){
 	}
 	timerIDCount = 1;
 	timerCount = 0;
+	clockIDCount = 1;
+	clockCount = 0;
 }
 
 TimeClass::TimeClass(const TimeClass& other){}
@@ -29,15 +31,25 @@ void TimeClass::FrameIncrement(){
 			timer[i].timeLeft--;
 		}
 	}
+
+	for (int i = 0; i < clockCount; i++){
+		clock[i].time++;
+	}
 }
 
-void TimeClass::AddTimer(int& timerID, int timeLimit){
-	timer[timerCount].timeLeft = timeLimit;
-	timer[timerCount].ID = timerIDCount;
-	timerID = timerIDCount;
+bool TimeClass::AddTimer(int& timerID, int timeLimit){
+	if (timerCount < MAX_TIMER_COUNT){
+		timer[timerCount].timeLeft = timeLimit;
+		timer[timerCount].ID = timerIDCount;
+		timerID = timerIDCount;
+		timerCount++;
+		timerIDCount++;
 
-	timerCount++;
-	timerIDCount++;
+		return true;
+	}
+	else{
+		return false;
+	}
 }
 
 void TimeClass::SetTimer(int timerID, int timeLimit){
@@ -80,4 +92,51 @@ long int TimeClass::TimeLeft(int timerID){
 		}
 	}
 	return -1;
+}
+
+bool TimeClass::AddClock(int& clockID){
+	if (clockCount < MAX_CLOCK_COUNT){
+		clock[clockCount].ID = clockIDCount;
+		clock[clockCount].time = 0;
+		clockID = clockIDCount;
+		clockCount++;
+		clockIDCount++;
+
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
+void TimeClass::SetClock(int clockID, int time){
+	for (int i = 0; i < clockCount; i++){
+		if (clock[i].ID == clockID){
+			clock[i].time = time;
+			break;
+		}
+	}
+}
+
+void TimeClass::DeleteClock(int& clockID){
+	for (int i = 0; i < clockCount; i++){
+		if (clock[i].ID == clockID){
+			for (int j = i; j < clockCount - 1; j++){
+				clock[j].ID = clock[j + 1].ID;
+				clock[j].time = clock[j + 1].time;
+			}
+			clockID = 0;
+			clock[clockCount - 1].ID = -1;
+			clockCount--;
+			break;
+		}
+	}
+}
+
+int TimeClass::CurrentClockTime(int clockID){
+	for (int i = 0; i < clockCount; i++){
+		if (clock[i].ID == clockID){
+			return clock[i].time;
+		}
+	}
 }
