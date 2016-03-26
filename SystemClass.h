@@ -209,6 +209,7 @@ private:
 	bool isCharSelectStarted;//whether character select mode has been initiated
 	bool isVersusModeInit;   //whether the versus match has been initialized
 
+	int mainMenuBackgroundID;     //ID of bitmap of main menu background
 	int cursorSpriteID;            //ID of bitmap of cursor
 	int selectedCharButtonID;      //ID of bitmap that highlights character select button upon hovering the mouse over
 	int reimuAvatarID;             //ID of bitmap of Reimu in character select screen

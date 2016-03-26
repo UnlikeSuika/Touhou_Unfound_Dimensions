@@ -54,6 +54,14 @@ bool SystemClass::Initialize(){
 	//Initialize the game with main menu screen.
 	gameMode = MAIN_MENU;
 	
+	//Initialize the main menu screen background
+	RECT screenRect = { 0, 0, m_screenWidth, m_screenHeight };
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/title.tga", screenRect, m_screenWidth, m_screenHeight, mainMenuBackgroundID);
+	if (!result){
+		return false;
+	}
+	m_Graphics->UpdateBitmap(mainMenuBackgroundID, m_screenWidth / 2, m_screenHeight / 2);
+
 	//Initialize game start button
 	gameStartButton.buttonRect.left = m_screenWidth / 2 - 150;
 	gameStartButton.buttonRect.right = m_screenWidth / 2 + 150;
@@ -320,6 +328,9 @@ void SystemClass::SetFadingEffects(){
 
 //main menu mode
 void SystemClass::OnMainMenu(){
+
+	//render background
+	m_Graphics->RenderBitmap(mainMenuBackgroundID);
 
 	//render Start button
 	m_Graphics->RenderBitmap(gameStartButton.bitmapID);
