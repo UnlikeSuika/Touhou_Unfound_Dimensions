@@ -2,18 +2,24 @@
 
 To-do list or reminders
 
-- Marisa's basic attacks: laser
-	- extend particle bitmaps from where it starts (Marisa) to where it ends (where it hits a wall, character, etc)
+*****next TODO*****
 
 - start working on individual spellcards
 - the player should win when the HP of the opponent is decreased to 0 or below
+    - change unsigned character health to signed
 
 - more elaborate sprite graphics
+    - animation for moving and shooting
+	- in title screen, move that "start" button to somewhere much less distracting
+
+
+*****distant future*****
+
 - tutorial mode
+    - introductory video
+
 - options mode
 	- add full-screen feature later?
-
-- more comments and code proofreads
 
 - add three+ player features
 
