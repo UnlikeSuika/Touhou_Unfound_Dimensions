@@ -13,10 +13,16 @@ const int MAX_ON_SCREEN_BULLETS = 200;   //maximum number of in-game bullets
 const int MAX_ON_SCREEN_LASERS = 10;     //maximum number of in-game lasers
 const float FRICTION = 0.1;              //factor by which speeds of in-game moving objects constantly decrease
 
-// This class mainly initializes variables and the game
-// and runs the game every frame.
+// This class initializes the system objects and
+// runs the game every frame.
 class SystemClass{
 private:
+
+	/*********************************************************
+	
+	TYPE DEFINITIONS
+
+	**********************************************************/
 
 	//enumeration for different game modes
 	typedef enum GameMode{
@@ -160,31 +166,53 @@ private:
 		float* tempAngle;                        //(heap)temporary variable for recording angle
 	};
 
+	/*********************************************************
+
+	PRIVATE FUNCTIONS
+
+	**********************************************************/
+
+	//Windows-related functions
 	bool Frame(); 
 	void InitializeWindows(int& screenWidth, int& screenHeight); 
 	void ShutdownWindows(); 
+
+	//mouse-related functions
 	void SetInitialClickPositions(); 
-	void SetFadingEffects(); 
+	
+	//functions related to fading effect
+	void SetFadingEffects();
+
+	//mode-related functions
 	void OnMainMenu(); 
 	bool OnCharacterSelectMode(); 
-	void OnVersusMode(); 
+	bool OnVersusMode(); 
 	bool InitializeCharSelect(); 
 	bool InitializeVersusMode(); 
 	void ShutdownVersusMode(); 
-	bool Contains(RECT rect, POINT pt); 
-
-	float Distance(float x1, float y1, float x2, float y2);
-	float Distance(POINT p1, POINT p2);
-	float Distance(XMFLOAT2 p1, POINT p2);
-	float Distance(POINT p1, XMFLOAT2 p2);
-	float Distance(XMFLOAT2 p1, XMFLOAT2 p2);
 	
+	//movement-related functions
 	bool CollisionWithWall(XMFLOAT2 pos, float radius);
 	bool CollisionWithCharacter(XMFLOAT2 pos, float radius, int& collidedChar);
 	void Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle);
 	void Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius);
 	void InitializeTempPosSpeedAngle(float x, float y);
 
+	//helper functions
+	bool Contains(RECT rect, POINT pt);
+	float Distance(float x1, float y1, float x2, float y2);
+	float Distance(POINT p1, POINT p2);
+	float Distance(XMFLOAT2 p1, POINT p2);
+	float Distance(POINT p1, XMFLOAT2 p2);
+	float Distance(XMFLOAT2 p1, XMFLOAT2 p2);
+
+	/*********************************************************
+
+	PRIVATE VARIABLES
+
+	**********************************************************/
+
+	//objects and variables related to app system
 	LPCWSTR m_applicationName;        //name of the application
 	HINSTANCE m_hinstance;            //main instance
 	int m_screenWidth;                //screen width of the window
@@ -194,21 +222,32 @@ private:
 	GraphicsClass* m_Graphics;        //GraphicsClass object
 	TimeClass* m_Clock;               //TimeClass object
 
+	//variables related to game modes
 	GameMode gameMode;                                   //current game mode
 	GameMode nextGameMode;                               //which game mode the system is transitioning into
+
+	//variables related to title screen
 	ButtonType gameStartButton;                          //button for starting a game in main menu
 	ButtonType charSelectButton[MAX_CHAR_SELECT_BUTTONS];//array of character select choice buttons in character select screen
-	GameType versusMatch;                                //object of the versus match
 	
+	//mouse-related variables
 	POINT mousePt;           //current cursor position relative to client window
 	POINT lClickPos;         //cursor position upon left clicking
 	POINT rClickPos;         //cursor position upon right clicking
+
+	//variables related to fading effects
 	bool fadingIn;           //whether the screen is fading into another game mode
 	bool fadingOut;          //whether the screen is fading out of the current game mode
+
+	//variables related to character select mode
 	bool isCharSelectInit;   //whether character select has been initialized
 	bool isCharSelectStarted;//whether character select mode has been initiated
-	bool isVersusModeInit;   //whether the versus match has been initialized
 
+	//variables related to versus mode
+	bool isVersusModeInit;   //whether the versus match has been initialized
+	GameType versusMatch;    //object of the versus match
+
+	//IDs of bitmaps or timers
 	int mainMenuBackgroundID;     //ID of bitmap of main menu background
 	int cursorSpriteID;            //ID of bitmap of cursor
 	int selectedCharButtonID;      //ID of bitmap that highlights character select button upon hovering the mouse over
@@ -218,6 +257,14 @@ private:
 	int fadeTimerID;               //ID of timer for the fading effect of screen
 
 public:
+
+	/*********************************************************
+
+	PUBLIC FUNCTIONS
+
+	**********************************************************/
+
+	//initializers and destructors. Only use SystemClass() for creating system object.
 	SystemClass();
 	SystemClass(const SystemClass& other);
 	~SystemClass();

@@ -6,7 +6,7 @@ InputClass::InputClass(const InputClass& other){}
 
 InputClass::~InputClass(){}
 
-bool InputClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight){
+void InputClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight){
 	for (int i = 0; i < 256; i++){
 		m_keyboardState[i] = false;
 		m_prevKeyboardState[i] = false;
@@ -14,16 +14,18 @@ bool InputClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int
 
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
-
-	return true;
 }
 
 void InputClass::Shutdown(){
 }
 
-bool InputClass::Frame(HWND hwnd){
-	ProcessInput(hwnd);
-	return true;
+void InputClass::Frame(HWND hwnd){
+	POINT mousePt;
+	GetCursorPos(&mousePt);
+	ScreenToClient(hwnd, &mousePt);
+
+	m_mouseX = (int)mousePt.x;
+	m_mouseY = (int)mousePt.y;
 }
 
 void InputClass::KeyDown(unsigned int input){
@@ -61,13 +63,4 @@ void InputClass::UpdatePrevKeyboardState(){
 	for (int i = 0; i < 256; i++){
 		m_prevKeyboardState[i] = m_keyboardState[i];
 	}
-}
-
-void InputClass::ProcessInput(HWND hwnd){
-	POINT mousePt;
-	GetCursorPos(&mousePt);
-	ScreenToClient(hwnd, &mousePt);
-
-	m_mouseX = (int)mousePt.x;
-	m_mouseY = (int)mousePt.y;
 }

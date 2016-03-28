@@ -12,7 +12,7 @@ SystemClass::SystemClass(){
 //Do not use this initializer.
 SystemClass::SystemClass(const SystemClass& other){}
 
-//SystemClass deleter. Do not use this deleter.
+//SystemClass destructor. Do not use this deleter.
 //Use SystemClass::Shutdown instead.
 SystemClass::~SystemClass(){}
 
@@ -30,6 +30,7 @@ bool SystemClass::Initialize(){
 	//Initialize InputClass object
 	m_Input = new InputClass;
 	if (!m_Input){
+		MessageBox(m_hwnd, L"Could not create input object.", L"Error", MB_OK);
 		return false;
 	}
 	m_Input->Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
@@ -37,16 +38,19 @@ bool SystemClass::Initialize(){
 	//Initialize GraphicsClass object
 	m_Graphics = new GraphicsClass;
 	if (!m_Graphics){
+		MessageBox(m_hwnd, L"Could not create graphics object.", L"Error", MB_OK);
 		return false;
 	}
 	result = m_Graphics->Initialize(screenWidth, screenHeight, m_hwnd);
 	if (!result){
+		MessageBox(m_hwnd, L"Could not initialize graphics object.", L"Error", MB_OK);
 		return false;
 	}
 
 	//Initialize TimeClass object
 	m_Clock = new TimeClass;
 	if (!m_Clock){
+		MessageBox(m_hwnd, L"Could not create time object.", L"Error", MB_OK);
 		return false;
 	}
 	m_Clock->SetFrameCount(0);
@@ -60,6 +64,8 @@ bool SystemClass::Initialize(){
 	if (!result){
 		return false;
 	}
+
+	//Place the main menu screen background at the middle of the screen
 	m_Graphics->UpdateBitmap(mainMenuBackgroundID, m_screenWidth / 2, m_screenHeight / 2);
 
 	//Initialize game start button
@@ -67,8 +73,7 @@ bool SystemClass::Initialize(){
 	gameStartButton.buttonRect.right = m_screenWidth / 2 + 150;
 	gameStartButton.buttonRect.top = m_screenHeight / 2 - 50;
 	gameStartButton.buttonRect.bottom = m_screenHeight / 2 + 50;
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/gameStartButton.tga", gameStartButton.buttonRect,
-		m_screenWidth, m_screenHeight, gameStartButton.bitmapID);
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/gameStartButton.tga", gameStartButton.buttonRect, m_screenWidth, m_screenHeight, gameStartButton.bitmapID);
 	if (!result){
 		return false;
 	}
@@ -83,13 +88,13 @@ bool SystemClass::Initialize(){
 		versusMatch.player[i].character = UNSELECTED;
 	}
 
-	//Set click positions to default (-1)
+	//Set click positions to default -1
 	lClickPos.x = -1;
 	lClickPos.y = -1;
 	rClickPos.x = -1;
 	rClickPos.y = -1;
 
-	//Not fading in or out at the start of the application
+	//Not fading in or out
 	fadingIn = false;
 	fadingOut = false;
 
@@ -130,14 +135,19 @@ void SystemClass::Run(){
 	ZeroMemory(&msg, sizeof(MSG));
 
 	while (!done){
+
+		//if system message is received
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)){
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 
+		//if system message is WM_QUIT, quit the game
 		if (msg.message == WM_QUIT){
 			done = true;
 		}
+
+		//otherwise, run the game during the given frame
 		else{
 			if (!Frame()){
 				done = true;
@@ -149,12 +159,12 @@ void SystemClass::Run(){
 //Process the application every frame
 bool SystemClass::Frame(){
 	bool result;
-	int mouseX, mouseY;
 
 	//Increase the frame count
 	m_Clock->FrameIncrement();
 
 	//Update mouse position every frame
+	int mouseX, mouseY;
 	m_Input->Frame(m_hwnd);
 	m_Input->GetMouseLocation(mouseX, mouseY);
 	mousePt.x = mouseX;
@@ -178,13 +188,22 @@ bool SystemClass::Frame(){
 	case CHARACTER_SELECT_MODE:
 		result = OnCharacterSelectMode();
 		if (!result){
+			MessageBox(m_hwnd, L"Character select mode crashed.", L"Error", MB_OK);
 			return false;
 		}
 		break;
 
 	case VERSUS_MODE:
-		OnVersusMode();
+		result = OnVersusMode();
+		if (!result){
+			MessageBox(m_hwnd, L"Versus mode crashed.", L"Error", MB_OK);
+			return false;
+		}
 		break;
+
+	default:
+		MessageBox(m_hwnd, L"Unavailable mode. How did you even get here?", L"Error", MB_OK);
+		return false;
 	}
 	
 	//Display what is currently in the buffer
@@ -262,18 +281,26 @@ void SystemClass::ShutdownWindows(){
 
 //Update lClickPos and rClickPos when left/right mouse button is pressed/released
 void SystemClass::SetInitialClickPositions(){
+	
+	//if left mouse button is just pressed this frame, set the click position to screen coord. of cursor
 	if (m_Input->IsKeyJustPressed(VK_LBUTTON)){
 		lClickPos.x = mousePt.x;
 		lClickPos.y = mousePt.y;
 	}
+
+	//if left mouse button is released, reset the click position to (-1, -1)
 	if (!m_Input->IsKeyDown(VK_LBUTTON) && !m_Input->IsKeyJustReleased(VK_LBUTTON)){
 		lClickPos.x = -1;
 		lClickPos.y = -1;
 	}
+
+	//if right mouse button is just pressed this frame, set the click position to screen coord. of cursor
 	if (m_Input->IsKeyJustPressed(VK_RBUTTON)){
 		rClickPos.x = mousePt.x;
 		rClickPos.y = mousePt.y;
 	}
+
+	//if right mouse button is released, reset the click position to (-1, -1)
 	if (!m_Input->IsKeyDown(VK_RBUTTON) && !m_Input->IsKeyJustReleased(VK_RBUTTON)){
 		rClickPos.x = -1;
 		rClickPos.y = -1;
@@ -530,7 +557,7 @@ bool SystemClass::OnCharacterSelectMode(){
 }
 
 //versus mode
-void SystemClass::OnVersusMode(){
+bool SystemClass::OnVersusMode(){
 	
 	//initialize versus mode upon first running
 	if (!isVersusModeInit){
@@ -546,7 +573,7 @@ void SystemClass::OnVersusMode(){
 			fadingOut = true;
 			fadingIn = false;
 			nextGameMode = MAIN_MENU;
-			return;
+			return false;
 		}
 	}
 
@@ -574,13 +601,19 @@ void SystemClass::OnVersusMode(){
 	for (int i = 0; i < versusMatch.numPlayers; i++){
 		PlayerType& player = versusMatch.player[i];
 
+		//X position to render bitmap
 		float renderBitmapPosX = player.position.x;
+
+		//Y position to render bitmap
 		float renderBitmapPosY = player.position.y;
 
+		//current time in character's sprite clock
 		int time = m_Clock->CurrentClockTime(player.spriteClockID);
 
 		switch (player.character){
 		case REIMU:	
+
+			//idle animation
 			if (time % 120 <= 3){
 				player.pInGameSpriteID = &versusMatch.reimuStationaryBitmapID[2];				
 			}
@@ -594,11 +627,14 @@ void SystemClass::OnVersusMode(){
 				player.pInGameSpriteID = &versusMatch.reimuStationaryBitmapID[3];
 			}
 
+			//render Reimu floating up and down
 			renderBitmapPosY = round(3.0f*sin((float)time / 30.0f) + renderBitmapPosY);
 			
 			break;
 
 		case MARISA:
+
+			//idle animation
 			if (time % 32 < 8){
 				player.pInGameSpriteID = &versusMatch.marisaStationaryBitmapID[0];
 			}
@@ -612,9 +648,11 @@ void SystemClass::OnVersusMode(){
 				player.pInGameSpriteID = &versusMatch.marisaStationaryBitmapID[3];
 			}
 
+			//render Marisa floating up and down
 			renderBitmapPosY = round(4.0f*sin((float)time / 15.0f) + renderBitmapPosY);
 		}
 
+		//update bitmap position and render the sprite
 		m_Graphics->UpdateBitmap(*player.pInGameSpriteID, round(renderBitmapPosX), round(renderBitmapPosY));
 		m_Graphics->RenderBitmap(*player.pInGameSpriteID);
 	}
@@ -1043,7 +1081,7 @@ void SystemClass::OnVersusMode(){
 									}
 								}
 
-								//if the lasr has made collision with another character, do not change the collidedChar
+								//if the laser has made collision with another character, do not change the collidedChar
 								//TODO: when laser hits more than one character, an array of players hit will have to be recorded
 								else{
 									int nullChar = -1;
@@ -1073,8 +1111,11 @@ void SystemClass::OnVersusMode(){
 									}
 								}
 
+								//set midpoint between initial and final position of laser entity
 								midPt.x = (posI.x + posF.x) / 2.0f;
 								midPt.y = (posI.y + posF.y) / 2.0f;
+
+								//stretch the laser entity sprite to fit from initial to final position of laser entity
 								dim.left = 0;
 								dim.top = 0;
 								dim.bottom = round(2.0f*versusMatch.player[versusMatch.playerTurn].hitboxRadius / (float)laser.numParticles + 2.0f);
@@ -1094,13 +1135,16 @@ void SystemClass::OnVersusMode(){
 							delete versusMatch.tempAngle;
 							versusMatch.tempAngle = 0;
 
+							//the laser will be on-screen for 3 seconds
 							m_Clock->AddTimer(laser.timerID, 180);
 
 							//increase the laser count by one
 							versusMatch.numLasers++;
 						}
 					}
+
 					LaserType& laser = versusMatch.laser[versusMatch.numLasers - 1];
+					
 					if (!versusMatch.tempPos && !versusMatch.tempSpeed && !versusMatch.tempAngle){
 						if (collidedChar != -1){
 							versusMatch.player[collidedChar].hp -= laser.damage;
@@ -1258,6 +1302,8 @@ void SystemClass::OnVersusMode(){
 		//render the announcement bitmap
 		m_Graphics->RenderBitmap(*versusMatch.pPhaseAnnounceBitmapID);
 	}
+
+	return true;
 }
 
 //initialize variables for character select mode
@@ -1392,25 +1438,31 @@ bool SystemClass::InitializeVersusMode(){
 		return false;
 	}
 
-	//add bitmaps for choice buttons
+	//add bitmap for Pass choice button
 	versusMatch.passButton.buttonRect = { 0, 0, 150, 50 };
 	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_pass_button.tga", versusMatch.passButton.buttonRect,
 		m_screenWidth, m_screenHeight, versusMatch.passButton.bitmapID);
 	if (!result){
 		return false;
 	}
+
+	//add bitmap for Move choice button
 	versusMatch.moveButton.buttonRect = { 0, 0, 150, 50 };
 	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_move_button.tga", versusMatch.moveButton.buttonRect,
 		m_screenWidth, m_screenHeight, versusMatch.moveButton.bitmapID);
 	if (!result){
 		return false;
 	}
+
+	//add bitmap for Shoot choice button
 	versusMatch.shootButton.buttonRect = { 0, 0, 150, 50 };
 	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_shoot_button.tga", versusMatch.shootButton.buttonRect,
 		m_screenWidth, m_screenHeight, versusMatch.shootButton.bitmapID);
 	if (!result){
 		return false;
 	}
+
+	//add bitmap for Spell choice button
 	versusMatch.spellButton.buttonRect = { 0, 0, 150, 50 };
 	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_spell_button.tga", versusMatch.spellButton.buttonRect,
 		m_screenWidth, m_screenHeight, versusMatch.spellButton.bitmapID);
@@ -1636,6 +1688,7 @@ void SystemClass::ShutdownVersusMode(){
 	isVersusModeInit = false;
 }
 
+//returns true if screen coordinates of the given point is contained within the given rectangle
 bool SystemClass::Contains(RECT rect, POINT pt){
 	if (pt.x > rect.left&&pt.x < rect.right&&pt.y > rect.top&&pt.y < rect.bottom){
 		return true;
@@ -1645,26 +1698,32 @@ bool SystemClass::Contains(RECT rect, POINT pt){
 	}
 }
 
+//returns the distance between (x1, y1) and (x2, y2)
 float SystemClass::Distance(float x1, float y1, float x2, float y2){
 	return (float)sqrt(pow(y1 - y2, 2) + pow(x1 - x2, 2));
 }
 
+//returns the distance between p1 and p2
 float SystemClass::Distance(POINT p1, POINT p2){
 	return (float)sqrt(pow(p1.y - p2.y, 2) + pow(p1.x - p2.x, 2));
 }
 
+//returns the distance between p1 and p2
 float SystemClass::Distance(XMFLOAT2 p1, POINT p2){
 	return (float)sqrt(pow(p1.y - (float)p2.y, 2) + pow(p1.x - (float)p2.x, 2));
 }
 
+//returns the distance between p1 and p2
 float SystemClass::Distance(POINT p1, XMFLOAT2 p2){
 	return (float)sqrt(pow((float)p1.y - p2.y, 2) + pow((float)p1.x - p2.x, 2));
 }
 
+//returns the distance between p1 and p2
 float SystemClass::Distance(XMFLOAT2 p1, XMFLOAT2 p2){
 	return (float)sqrt(pow(p1.y - p2.y, 2) + pow(p1.x - p2.x, 2));
 }
 
+//returns true if a wall is present within given radius from pos
 bool SystemClass::CollisionWithWall(XMFLOAT2 pos, float radius){
 	RECT hitboxRect = { (LONG)round(pos.x - radius), (LONG)round(pos.y - radius), (LONG)round(pos.x + radius), (LONG)round(pos.y + radius) };
 	for (int x = hitboxRect.left; x <= hitboxRect.right; x++){
@@ -1678,6 +1737,8 @@ bool SystemClass::CollisionWithWall(XMFLOAT2 pos, float radius){
 	return false;
 }
 
+//returns true if a character hurtbox is present within given radius from pos
+//and sets collidedChar to the currently collided character
 bool SystemClass::CollisionWithCharacter(XMFLOAT2 pos, float radius, int& collidedChar){
 	RECT hitboxRect = { (LONG)round(pos.x - radius), (LONG)round(pos.y - radius), (LONG)round(pos.x + radius), (LONG)round(pos.y + radius) };
 	for (int x = hitboxRect.left; x <= hitboxRect.right; x++){
@@ -1696,6 +1757,8 @@ bool SystemClass::CollisionWithCharacter(XMFLOAT2 pos, float radius, int& collid
 	return false;
 }
 
+//prompts the player to shoot from the player, and records the shot speed,
+//initial position, and angle to given parameters
 void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle){
 	if (versusMatch.shootFrame == -1 && m_Input->IsKeyDown(VK_LBUTTON) && Distance(lClickPos, versusMatch.player[versusMatch.playerTurn].position) <= (float)versusMatch.player[versusMatch.playerTurn].hitboxRadius && (mousePt.x != lClickPos.x || mousePt.y != lClickPos.y)){ //if the player clicked on the character sprite
 		versusMatch.shootFrame = m_Clock->GetFrameCount() - 1;
