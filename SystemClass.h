@@ -136,7 +136,7 @@ private:
 
 		BulletType bullet[MAX_ON_SCREEN_BULLETS];//array of on-screen bullets
 		LaserType laser[MAX_ON_SCREEN_LASERS];   //array of on-screen lasers
-		int shootFrame;                          //the frame when the bullet/character was initially fired
+		int shootFrame;                          //the frame when the mouse click is first made to shoot/move
 		int numBullets;                          //number of on-screen bullets
 		int numLasers;                           //number of on-screen lasers
 		bool shooting;                           //whether the player is currently shooting a bullet/moving a character

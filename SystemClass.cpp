@@ -1146,29 +1146,46 @@ bool SystemClass::OnVersusMode(){
 					LaserType& laser = versusMatch.laser[versusMatch.numLasers - 1];
 					
 					if (!versusMatch.tempPos && !versusMatch.tempSpeed && !versusMatch.tempAngle){
+						
+						//if the opponent character is hit, subtract HP by laser damage
+						//TODO: what if more than one opponent character gets hit by the laser?
 						if (collidedChar != -1){
 							versusMatch.player[collidedChar].hp -= laser.damage;
 							collidedChar = -1;
 						}
 
+						//if the laser reaches time limit (of 3 seconds)
 						if (!m_Clock->IsTimerRunning(laser.timerID)){
+							
+							//delete timer
 							m_Clock->DeleteTimer(laser.timerID);
 							
 							LaserType& laser = versusMatch.laser[versusMatch.numLasers];
+
+							//delete heap particles and set pointer to NULL
 							delete[] laser.particles;
 							laser.particles = 0;
 							
+							//decrease number of on-screen laser by 1
 							versusMatch.numLasers--;
+
+							//Marisa is no longer shooting
+							versusMatch.shooting = false;
+
+							//move on to next player's turn
 							versusMatch.playerTurn++;
 							if (versusMatch.playerTurn >= versusMatch.numPlayers){
 								versusMatch.playerTurn = 0;
 							}
-							versusMatch.shooting = false;
 
+							//move on to Move Phase
 							versusMatch.movePhase = true;
 							versusMatch.actionPhase = false;
 
+							//announce phase
 							m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
+
+							//set player choice to PENDING_CHOICE
 							versusMatch.choice = PENDING_CHOICE;
 						}
 					}
@@ -1644,6 +1661,7 @@ bool SystemClass::InitializeVersusMode(){
 	return true;
 }
 
+//shuts down versus mode
 void SystemClass::ShutdownVersusMode(){
 	for (int i = 0; i < versusMatch.numPlayers; i++){
 		if (versusMatch.player[i].spellCard){
@@ -1766,15 +1784,21 @@ void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle){
 	//Character's velocity will be recorded once player releases the left mouse button,
 	//or the mouse gets certain distance away from the character
 	else if (versusMatch.shootFrame != -1 && (m_Input->IsKeyJustReleased(VK_LBUTTON) || Distance(mousePt, lClickPos) > 50.0f)){
-		speedVec.x = (float)(mousePt.x - lClickPos.x) / (float)(m_Clock->GetFrameCount() - versusMatch.shootFrame); //record x component
-		speedVec.y = (float)(mousePt.y - lClickPos.y) / (float)(m_Clock->GetFrameCount() - versusMatch.shootFrame); //record y component
+		
+		//record x component
+		speedVec.x = (float)(mousePt.x - lClickPos.x) / (float)(m_Clock->GetFrameCount() - versusMatch.shootFrame);
+
+		//record y component
+		speedVec.y = (float)(mousePt.y - lClickPos.y) / (float)(m_Clock->GetFrameCount() - versusMatch.shootFrame); 
 		
 		//record angle
 		angle = atan2(speedVec.y, speedVec.x);
 
+		//reset the shootFrame
 		versusMatch.shootFrame = -1;
 	}
 
+	//if player is currently shooting/moving, update and render aim circle
 	if (m_Input->IsKeyDown(VK_LBUTTON) && Distance(lClickPos, versusMatch.player[versusMatch.playerTurn].position) <= (float)versusMatch.player[versusMatch.playerTurn].hitboxRadius){
 		m_Graphics->UpdateBitmap(versusMatch.aimCircleBitmapID, lClickPos.x, lClickPos.y);
 		m_Graphics->RenderBitmap(versusMatch.aimCircleBitmapID);
@@ -1938,7 +1962,7 @@ void SystemClass::Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float 
 	}
 }
 
-//initializes the temporary variables for recording
+//initializes the temporary heap variables for recording
 //position, speed, and angle
 void SystemClass::InitializeTempPosSpeedAngle(float x, float y){
 	versusMatch.tempAngle = new float;
