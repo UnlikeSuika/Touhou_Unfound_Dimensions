@@ -1,5 +1,7 @@
 #include "GraphicsClass.h"
 
+//GraphicsClass object initializer.
+//Use GraphicsClass::Initialize to initialize the system.
 GraphicsClass::GraphicsClass(){
 	m_D3D = 0;
 	m_Camera = 0;
@@ -9,54 +11,81 @@ GraphicsClass::GraphicsClass(){
 	m_FadeBitmap = 0;
 }
 
+//GraphicsClass object initializer via GraphicsClass& argument.
+//Do not use this initializer.
 GraphicsClass::GraphicsClass(const GraphicsClass& other){}
 
+//GraphicsClass destructor. Do not use this deleter.
+//Use GraphicsClass::Shutdown instead.
 GraphicsClass::~GraphicsClass(){}
 
+//Initializes GraphicsClass variables
 bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd){
 	bool result;
-	XMMATRIX baseViewMatrix;
 
+	//create D3DClass object
 	m_D3D = new D3DClass;
 	if (!m_D3D){
+		MessageBox(hwnd, L"Could not create Direct3D object.", L"Error", MB_OK);
 		return false;
 	}
+
+	//initialize D3DClass object
 	result = m_D3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, false, SCREEN_DEPTH, SCREEN_NEAR);
 	if (!result){
 		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
 		return false;
 	}
 
+	//create CameraClass object
 	m_Camera = new CameraClass;
 	if (!m_Camera){
+		MessageBox(hwnd, L"Could not create camera object.", L"Error", MB_OK);
 		return false;
 	}
+
+	//set camera position to (0, 0, -10)
 	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
+
+	//set up view matrix
 	m_Camera->Render();
+
+	//get view matrix
+	XMMATRIX baseViewMatrix;
 	m_Camera->GetViewMatrix(baseViewMatrix);
 
+	//create TextureShaderClass object
 	m_TextureShader = new TextureShaderClass;
 	if (!m_TextureShader){
+		MessageBox(hwnd, L"Could not create texture shader object.", L"Error", MB_OK);
 		return false;
 	}
+
+	//initialize TextureShaderClass object
 	result = m_TextureShader->Initialize(m_D3D->GetDevice(), hwnd);
 	if (!result){
-		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize texture shader object.", L"Error", MB_OK);
 		return false;
 	}
 
+	//create heap BitmapType array
 	m_Bitmap = new BitmapType[MAX_BITMAP_COUNT];
 	if (!m_Bitmap){
+		MessageBox(hwnd, L"Could not create bitmap array.", L"Error", MB_OK);
 		return false;
 	}
 
+	//create heap SentenceClass array
 	m_Sentence = new SentenceClass[MAX_SENTENCE_COUNT];
 	if (!m_Sentence){
+		MessageBox(hwnd, L"Could not create sentence object array.", L"Error", MB_OK);
 		return false;
 	}
 
+	//initialize fading effect
 	result = InitializeFadingEffect(hwnd, screenWidth, screenHeight);
 	if (!result){
+		MessageBox(hwnd, L"Could not initialize fading effect.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -67,6 +96,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd){
 	return true;
 }
 
+//Shuts down GraphicsClass variables
 void GraphicsClass::Shutdown(){
 	if (m_FadeBitmap){
 		if (m_FadeBitmap->bitmap){
@@ -111,6 +141,8 @@ void GraphicsClass::Shutdown(){
 	}
 }
 
+//Marks the start of rendering. Before this function call,
+//no bitmaps can be rendered within the given frame.
 void GraphicsClass::BeginRendering(){
 	bool result;
 	XMMATRIX worldMatrix, viewMatrix, orthoMatrix, projectionMatrix;
@@ -127,6 +159,8 @@ void GraphicsClass::BeginRendering(){
 	m_orthoMatrix = XMMatrixTranspose(orthoMatrix);
 }
 
+//Marks the end of rendering. After this function call,
+//no bitmaps can be rendered within the given frame.
 bool GraphicsClass::EndRendering(int screenWidth, int screenHeight){
 	bool result;
 	if (fading){
@@ -146,6 +180,7 @@ bool GraphicsClass::EndRendering(int screenWidth, int screenHeight){
 	return true;
 }
 
+//Add a bitmap from given TGA path and with given location (bitmapRect), angle, alpha value, and a hue colour
 bool GraphicsClass::AddBitmap(HWND hwnd, char* path, RECT bitmapRect, int screenWidth, int screenHeight, int& bitmapID, float angle, float blend, XMFLOAT4 hueColor){
 	bool result;
 	int posX = (bitmapRect.left + bitmapRect.right) / 2;
@@ -195,6 +230,7 @@ bool GraphicsClass::AddBitmap(HWND hwnd, char* path, RECT bitmapRect, int screen
 	return true;
 }
 
+//Update a bitmap with given location (posX, posY), angle, alpha value, and a hue colour
 void GraphicsClass::UpdateBitmap(int bitmapID, int posX, int posY, float angle, float blend, XMFLOAT4 hueColor){
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
@@ -208,6 +244,7 @@ void GraphicsClass::UpdateBitmap(int bitmapID, int posX, int posY, float angle, 
 	}
 }
 
+//Update a bitmap with given location (rc), angle, alpha value, and a hue colour
 void GraphicsClass::UpdateBitmap(int bitmapID, RECT rc, float angle, float blend, XMFLOAT4 hueColor){
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
@@ -223,12 +260,14 @@ void GraphicsClass::UpdateBitmap(int bitmapID, RECT rc, float angle, float blend
 	}
 }
 
+//Delete the bitmap with the given ID
 void GraphicsClass::DeleteBitmap(int bitmapID){
 	int index = -1;
 
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
 			index = i;
+			break;
 		}
 	}
 	if (index == -1){
@@ -255,6 +294,7 @@ void GraphicsClass::DeleteBitmap(int bitmapID){
 	m_bitmapCount--;
 }
 
+//Render the bitmap with given ID
 bool GraphicsClass::RenderBitmap(int bitmapID){
 	bool result;
 	int index = -1;
@@ -280,6 +320,7 @@ bool GraphicsClass::RenderBitmap(int bitmapID){
 	return true;
 }
 
+//Turn on horizontal flip for the bitmap
 void GraphicsClass::EnableBitmapXFlip(int bitmapID){
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
@@ -289,6 +330,7 @@ void GraphicsClass::EnableBitmapXFlip(int bitmapID){
 	}
 }
 
+//Turn off horizontal flip for the bitmap
 void GraphicsClass::DisableBitmapXFlip(int bitmapID){
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
@@ -298,6 +340,7 @@ void GraphicsClass::DisableBitmapXFlip(int bitmapID){
 	}
 }
 
+//Turn on vertical flip for the bitmap
 void GraphicsClass::EnableBitmapYFlip(int bitmapID){
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
@@ -307,6 +350,7 @@ void GraphicsClass::EnableBitmapYFlip(int bitmapID){
 	}
 }
 
+//Turn off vertical flip for the bitmap
 void GraphicsClass::DisableBitmapYFlip(int bitmapID){
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
@@ -316,6 +360,7 @@ void GraphicsClass::DisableBitmapYFlip(int bitmapID){
 	}
 }
 
+//Returns width of bitmap in pixels
 int GraphicsClass::GetBitmapWidth(int bitmapID){
 
 	for (int i = 0; i < m_bitmapCount; i++){
@@ -325,6 +370,7 @@ int GraphicsClass::GetBitmapWidth(int bitmapID){
 	}
 }
 
+//Returns height of bitmap in pixels
 int GraphicsClass::GetBitmapHeight(int bitmapID){
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
@@ -333,6 +379,7 @@ int GraphicsClass::GetBitmapHeight(int bitmapID){
 	}
 }
 
+//Adds a sentence with given text, position (posX, posY), and text colour
 bool GraphicsClass::AddSentence(HWND hwnd, char* text, int posX, int posY, int screenWidth, int screenHeight, XMFLOAT4 textColor, int& id){
 	bool result;
 	result = m_Sentence[m_sentenceCount].Initialize(text, posX, posY, textColor, m_D3D->GetDevice(), m_D3D->GetDeviceContext(), hwnd, screenWidth, screenHeight);
@@ -346,6 +393,7 @@ bool GraphicsClass::AddSentence(HWND hwnd, char* text, int posX, int posY, int s
 	return true;
 }
 
+//Updates the sentence with given text, position (posX, posY), and text colour
 void GraphicsClass::UpdateSentence(int sentenceID, char* text, int posX, int posY, XMFLOAT4 textColor){
 	for (int i = 0; i < m_sentenceCount; i++){
 		if (sentenceID == m_Sentence[i].GetSentenceID()){
@@ -355,6 +403,7 @@ void GraphicsClass::UpdateSentence(int sentenceID, char* text, int posX, int pos
 	}
 }
 
+//Renders the sentence
 bool GraphicsClass::RenderSentence(int sentenceID){
 	bool result;
 	int index = -1;
@@ -377,6 +426,7 @@ bool GraphicsClass::RenderSentence(int sentenceID){
 	return true;
 }
 
+//Deletes the sentence
 void GraphicsClass::DeleteSentence(int& sentenceID){
 	int index = -1;
 	for (int i = 0; i < m_sentenceCount; i++){
@@ -396,6 +446,7 @@ void GraphicsClass::DeleteSentence(int& sentenceID){
 	m_sentenceCount--;
 }
 
+//Initializes the fading effect
 bool GraphicsClass::InitializeFadingEffect(HWND hwnd, int screenWidth, int screenHeight){
 	bool result;
 
@@ -430,14 +481,17 @@ bool GraphicsClass::InitializeFadingEffect(HWND hwnd, int screenWidth, int scree
 	return true;
 }
 
+//Marks the start of fading effect
 void GraphicsClass::StartFadingEffect(){
 	fading = true;
 }
 
+//Set how much the screen should fade (by alpha value)
 void GraphicsClass::SetFadingEffect(float blend){
 	m_FadeBitmap->blend = blend;
 }
 
+//Marks the end of fading effect
 void GraphicsClass::StopFadingEffect(){
 	fading = false;
 }

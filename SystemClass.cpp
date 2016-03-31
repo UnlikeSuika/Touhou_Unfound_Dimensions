@@ -582,8 +582,7 @@ bool SystemClass::OnVersusMode(){
 	//in debug mode, R key resets and reloads the versus mode
 	if (m_Input->IsKeyJustPressed(0x52)){ 
 		ShutdownVersusMode();
-		InitializeVersusMode();
-		return;
+		return InitializeVersusMode();
 	}
 #endif
 

@@ -13,24 +13,32 @@
 #include "SentenceClass.h"
 
 //const bool FULL_SCREEN = true;
-const bool VSYNC_ENABLED = true;
-const float SCREEN_DEPTH = 1000.0f;
-const float SCREEN_NEAR = 0.1f;
 
-const int MAX_BITMAP_COUNT = 100;
-const int MAX_SENTENCE_COUNT = 30;
+const bool VSYNC_ENABLED = true; 
+const float SCREEN_DEPTH = 1000.0f;  //far distance for depth buffer
+const float SCREEN_NEAR = 0.1f;      //near distance for depth buffer
 
+const int MAX_BITMAP_COUNT = 100;    //maximum number of bitmaps
+const int MAX_SENTENCE_COUNT = 30;   //maximum number of sentences
+
+// This class manages the graphical components
+// of DirectX.
 class GraphicsClass{
 public:
+
+	//initializers and destructors. Only use SystemClass() for creating system object.
 	GraphicsClass();
 	GraphicsClass(const GraphicsClass& other);
 	~GraphicsClass();
 
 	bool Initialize(int screenWidth, int screenHeight, HWND hwnd);
 	void Shutdown();
+
+	//functions for marking the beginning or the end of rendering
 	void BeginRendering();
 	bool EndRendering(int screenWidth, int screenHeight);
 
+	//bitmap-related functions
 	bool AddBitmap(HWND hwnd, char* path, RECT bitmapRect, int screenWidth, int screenHeight, int& bitmapID, float angle = 0.0f, float blend = 1.0f, XMFLOAT4 hueColor = NULL_COLOR);
 	void UpdateBitmap(int bitmapID, int posX, int posY, float angle = 0.0f, float blend = 1.0f, XMFLOAT4 hueColor = NULL_COLOR);
 	void UpdateBitmap(int bitmapID, RECT rc, float angle = 0.0f, float blend = 1.0f, XMFLOAT4 hueColor = NULL_COLOR);
@@ -43,39 +51,50 @@ public:
 	int GetBitmapWidth(int bitmapID);
 	int GetBitmapHeight(int bitmapID);
 
+	//sentence-related functions
 	bool AddSentence(HWND hwnd, char* text, int posX, int posY, int screenWidth, int screenHeight, XMFLOAT4 textColor, int& id);
 	void UpdateSentence(int sentenceID, char* text, int posX, int posY, XMFLOAT4 textColor);
 	bool RenderSentence(int sentenceID);
 	void DeleteSentence(int& sentenceID);
-	//void TurnOnSentence(int sentenceID);
-	//void TurnOffSentence(int sentenceID);
 
+	//functions related to fading effect
 	bool InitializeFadingEffect(HWND hwnd, int screenWidth, int screenHeight);
 	void StartFadingEffect();
 	void SetFadingEffect(float blend);
 	void StopFadingEffect();
+
 private:
+
+	//represents a bitmap
 	struct BitmapType{
-		BitmapClass* bitmap;
-		int bitmapWidth, bitmapHeight;
-		int posX, posY;
-		float blend;
-		XMFLOAT4 hueColor;
-		bool xFlip, yFlip;
-		float rotation;
-		int ID;
+		BitmapClass* bitmap; //bitmap object in heap
+		int bitmapWidth;     //width of bitmap in pixels
+		int bitmapHeight;    //height of bitmap in pixels
+		int posX;            //x-position of the centre of the bitmap
+		int posY;            //y-position of the centre of the bitmap
+		float blend;         //transparency of the bitmap
+		XMFLOAT4 hueColor;   //colour blend into the bitmap
+		bool xFlip;          //whether bitmap is horizontally flipped
+		bool yFlip;          //whether bitmap is vertically flipped
+		float rotation;      //clockwise rotation of the bitmap in radians
+		int ID;              //ID for the bitmap
 	};
 	
-	D3DClass* m_D3D;
-	CameraClass* m_Camera;
-	TextureShaderClass* m_TextureShader;
-	BitmapType* m_Bitmap;
-	SentenceClass* m_Sentence;
-	int m_bitmapCount, m_bitmapIDCount;
-	int m_sentenceCount;
-	BitmapType* m_FadeBitmap;
-	bool fading;
-	XMMATRIX m_viewMatrix, m_projectionMatrix, m_worldMatrix, m_orthoMatrix;
+	//objects and variables related to app system
+	D3DClass* m_D3D;                    //D3DClass object
+	CameraClass* m_Camera;              //CameraClass object
+	TextureShaderClass* m_TextureShader;//TextureShaderClass object
+	BitmapType* m_Bitmap;               //heap array of current bitmaps
+	SentenceClass* m_Sentence;          //heap array of current sentences
+	int m_bitmapCount;                  //number of bitmaps
+	int m_bitmapIDCount;                //bitmap ID to mark for the next new bitmap
+	int m_sentenceCount;                //number of sentences
+	BitmapType* m_FadeBitmap;           //bitmap for fading the screen to black
+	bool fading;                        //whether the screen is currently fading to or from black
+	XMMATRIX m_viewMatrix;              //view matrix
+	XMMATRIX m_projectionMatrix;        //projection matrix
+	XMMATRIX m_worldMatrix;             //world matrix
+	XMMATRIX m_orthoMatrix;             //ortho matrix
 };
 
 #endif

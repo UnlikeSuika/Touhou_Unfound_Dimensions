@@ -264,7 +264,7 @@ public:
 
 	**********************************************************/
 
-	//initializers and destructors. Only use SystemClass() for creating system object.
+	//initializers and destructors
 	SystemClass();
 	SystemClass(const SystemClass& other);
 	~SystemClass();
