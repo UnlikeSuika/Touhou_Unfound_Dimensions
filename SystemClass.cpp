@@ -771,16 +771,16 @@ bool SystemClass::OnVersusMode(){
 	}
 
 	//if it is currently Move Phase and player has made a choice
-	if (versusMatch.movePhase && versusMatch.choice != PENDING_CHOICE){  
-	
+	if (versusMatch.movePhase && versusMatch.choice != PENDING_CHOICE){
+
 		XMFLOAT2& pos = versusMatch.player[versusMatch.playerTurn].position;
 		XMFLOAT2& speedVec = versusMatch.player[versusMatch.playerTurn].moveSpeed;
-		float& angle = versusMatch.player[versusMatch.playerTurn].moveAngle;  
-		
+		float& angle = versusMatch.player[versusMatch.playerTurn].moveAngle;
+
 		//Move Phase choice handling
 		switch (versusMatch.choice){
-		
-		//Move choice
+
+			//Move choice
 		case MOVE:
 
 			//the user will move the character
@@ -793,7 +793,7 @@ bool SystemClass::OnVersusMode(){
 
 			//if the player has moved the character and character is still moving
 			else if (versusMatch.shooting){
-				
+
 				//move the character in the initial speed/direction of the mouse
 				//until it gradually slows down to zero speed or it collides into a wall
 				//after which shooting = false
@@ -805,7 +805,7 @@ bool SystemClass::OnVersusMode(){
 					//change the current phase to Act Phase
 					versusMatch.movePhase = false;
 					versusMatch.actionPhase = true;
-					
+
 					//announce Act Phase
 					m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
 
@@ -815,9 +815,9 @@ bool SystemClass::OnVersusMode(){
 			}
 			break;
 
-		//Pass choice
+			//Pass choice
 		case PASS:
-			
+
 			//change the current phase to Act Phase
 			versusMatch.movePhase = false;
 			versusMatch.actionPhase = true;
@@ -829,6 +829,18 @@ bool SystemClass::OnVersusMode(){
 			versusMatch.choice = PENDING_CHOICE;
 
 			break;
+
+			//error-handling: any other choice just passes the turn
+		default:
+			//change the current phase to Act Phase
+			versusMatch.movePhase = false;
+			versusMatch.actionPhase = true;
+
+			//announce Act Phase
+			m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
+
+			//reset the player's choice to PENDING_CHOICE
+			versusMatch.choice = PENDING_CHOICE;
 		}
 	}
 
@@ -1214,7 +1226,33 @@ bool SystemClass::OnVersusMode(){
 			break;
 
 		//Spell choice
+		//TODO
 		case SPELL:
+
+			//if a spell card is not yet selected
+			if (!versusMatch.isSpellSelected){
+
+				for (int i = 0; i < 5; i++){
+					ButtonType& button = versusMatch.spellNameButton[i];
+				
+					//update bitmap position
+					button.buttonRect = { 20, 435 + 30 * i, 520, 465 + 30 * i };
+					m_Graphics->UpdateBitmap(button.bitmapID, button.buttonRect);
+
+					//render bitmap
+					m_Graphics->RenderBitmap(button.bitmapID);
+
+					if (i < versusMatch.player[versusMatch.playerTurn].numSpellCards){
+
+						//update position of spell card name sentence
+						m_Graphics->UpdateSentence(versusMatch.spellDescSentID, versusMatch.player[versusMatch.playerTurn].spellCard[i].cardName, 30, 450 + 30 * i, SOLID_BLACK);
+						
+						//render spell card name sentence
+						m_Graphics->RenderSentence(versusMatch.spellDescSentID);
+					}
+				}
+			}
+
 			break;
 
 		//error handling: anything else just skips the turn
@@ -1555,6 +1593,34 @@ bool SystemClass::InitializeVersusMode(){
 		}
 	}
 
+	//initialize button for spell titles
+	for (int i = 0; i < 5; i++){
+		versusMatch.spellNameButton[i].buttonRect = { 0, 0, 500, 30 };
+		result = m_Graphics->AddBitmap(m_hwnd, "/Data/spell_name_box.tga", versusMatch.spellNameButton[i].buttonRect, m_screenWidth, m_screenHeight, versusMatch.spellNameButton[i].bitmapID);
+		if (!result){
+			return false;
+		}
+	}
+
+	//add bitmap for spell description box
+	RECT spellDescRect = { 0, 0, 280, 161 };
+	result = m_Graphics->AddBitmap(m_hwnd, "/Data/spell_desc_box.tga", spellDescRect, m_screenWidth, m_screenHeight, versusMatch.spellDescBitmapID);
+	if (!result){
+		return false;
+	}
+
+	//add sentence object for showing spell card list
+	result = m_Graphics->AddSentence(m_hwnd, " ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.spellNameSentID);
+	if (!result){
+		return false;
+	}
+
+	//add sentence object for showing spell card description
+	result = m_Graphics->AddSentence(m_hwnd, " ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.spellDescSentID);
+	if (!result){
+		return false;
+	}
+
 	//add sentence object for showing current HP
 	result = m_Graphics->AddSentence(m_hwnd, " ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.hpDispSentID);
 	if (!result){
@@ -1566,6 +1632,9 @@ bool SystemClass::InitializeVersusMode(){
 	if (!result){
 		return false;
 	}
+
+	//spell card is currently not selected
+	versusMatch.isSpellSelected = false;
 
 	//set the map's wall collision detection
 	for (int y = 0; y < 600; y++){
@@ -1696,7 +1765,11 @@ void SystemClass::ShutdownVersusMode(){
 	for (int i = 0; i < 4; i++){
 		m_Graphics->DeleteBitmap(versusMatch.reimuStationaryBitmapID[i]);
 	}
-
+	for (int i = 0; i < 5; i++){
+		m_Graphics->DeleteBitmap(versusMatch.spellNameButton[i].bitmapID);
+	}
+	m_Graphics->DeleteSentence(versusMatch.spellNameSentID);
+	m_Graphics->DeleteSentence(versusMatch.spellDescSentID);
 	m_Graphics->DeleteSentence(versusMatch.hpDispSentID);
 	m_Graphics->DeleteSentence(versusMatch.mpDispSentID);
 

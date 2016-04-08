@@ -156,6 +156,11 @@ private:
 		ButtonType moveButton;                   //Move choice button
 		ButtonType shootButton;                  //Shoot choice button
 		ButtonType spellButton;                  //Spell choice button
+		int spellNameSentID;                     //ID of sentence object that displays spell card names
+		int spellDescSentID;                     //ID of sentence object that displays spell card description
+		bool isSpellSelected;                    //whether spell card is selected
+		ButtonType spellNameButton[5];           //buttons for showing list of individual spell names
+		int spellDescBitmapID;                   //ID of bitmap for spell description box
 
 		int statsWindowBitmapID;                 //ID of bitmap that displays character's status window
 		int hpDispSentID;                        //ID of sentence object that displays character's current HP
