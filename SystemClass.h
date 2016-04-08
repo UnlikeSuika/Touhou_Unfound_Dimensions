@@ -58,6 +58,7 @@ private:
 	struct SpellCardType{
 		char cardName[MAX_CHARACTER_COUNT];//title of spellcard
 		int mpCost;                        //amount of user's MP that will be required to use the spell
+		char desc[MAX_CHARACTER_COUNT];    //spell card description
 	};
 
 	//represents an in-game bullet

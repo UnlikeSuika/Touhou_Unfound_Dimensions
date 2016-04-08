@@ -1235,6 +1235,9 @@ bool SystemClass::OnVersusMode(){
 			//if a spell card is not yet selected
 			if (!versusMatch.isSpellSelected){
 
+				//which spell card button the mouse hovers over
+				int hover = -1;
+
 				for (int i = 0; i < 5; i++){
 					ButtonType& button = versusMatch.spellNameButton[i];
 				
@@ -1248,11 +1251,25 @@ bool SystemClass::OnVersusMode(){
 					if (i < versusMatch.player[versusMatch.playerTurn].numSpellCards){
 
 						//update position of spell card name sentence
-						m_Graphics->UpdateSentence(versusMatch.spellDescSentID, versusMatch.player[versusMatch.playerTurn].spellCard[i].cardName, 30, 450 + 30 * i, SOLID_BLACK);
+						m_Graphics->UpdateSentence(versusMatch.spellNameSentID, versusMatch.player[versusMatch.playerTurn].spellCard[i].cardName, 30, 450 + 30 * i, SOLID_BLACK);
 						
 						//render spell card name sentence
-						m_Graphics->RenderSentence(versusMatch.spellDescSentID);
+						m_Graphics->RenderSentence(versusMatch.spellNameSentID);
+
+						//if mouse is hovering over the button, set hover to current spell card index
+						if (Contains(button.buttonRect, mousePt)){
+							hover = i;
+						}
 					}
+				}
+
+				//if mouse is hovering over a button, display spell description box
+				if (hover != -1){
+					m_Graphics->UpdateBitmap(versusMatch.spellDescBitmapID, 630, 510);
+					m_Graphics->RenderBitmap(versusMatch.spellDescBitmapID);
+
+					m_Graphics->UpdateSentence(versusMatch.spellDescSentID, versusMatch.player[versusMatch.playerTurn].spellCard[hover].desc, 507, 442, SOLID_BLACK);
+					m_Graphics->RenderSentence(versusMatch.spellDescSentID);
 				}
 			}
 
@@ -1685,8 +1702,10 @@ bool SystemClass::InitializeVersusMode(){
 			versusMatch.player[i].spellCard = new SpellCardType[versusMatch.player[i].numSpellCards];
 			strcpy(versusMatch.player[i].spellCard[0].cardName, "Spirit Sign \"Fantasy Seal\"");
 			versusMatch.player[i].spellCard[0].mpCost = 6;
+			strcpy(versusMatch.player[i].spellCard[0].desc, "Shoots five homing orbs at the opponent,\neach with 4 damage.");
 			strcpy(versusMatch.player[i].spellCard[1].cardName, "Dream Sign \"Evil-Sealing Circle\"");
 			versusMatch.player[i].spellCard[1].mpCost = 8;
+			strcpy(versusMatch.player[i].spellCard[1].desc, "Surrounds herself with a circular barrier\nthat deals 5 damage and stuns opponent\nfor one turn.");
 
 			break;
 
@@ -1700,8 +1719,10 @@ bool SystemClass::InitializeVersusMode(){
 			versusMatch.player[i].spellCard = new SpellCardType[versusMatch.player[i].numSpellCards];
 			strcpy(versusMatch.player[i].spellCard[0].cardName, "Magic Sign \"Stardust Reverie\"");
 			versusMatch.player[i].spellCard[0].mpCost = 12;
+			strcpy(versusMatch.player[i].spellCard[0].desc, "Rides her broom to charge at the opponent,\ndealing 5 damage and knocking back.");
 			strcpy(versusMatch.player[i].spellCard[1].cardName, "Love Sign \"Master Spark\"");
 			versusMatch.player[i].spellCard[1].mpCost = 15;
+			strcpy(versusMatch.player[i].spellCard[1].desc, "Shoots some lovely laser,\ndealing 8 damage.");
 
 			break;
 		}

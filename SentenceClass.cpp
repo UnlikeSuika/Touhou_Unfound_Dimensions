@@ -54,7 +54,8 @@ void SentenceClass::UpdateSentence(char* text, int posX, int posY, XMFLOAT4 text
 		}
 		else if (text[i] == '\n'){
 			m_Sentence.character[i].pBitmap = NULL;
-			currentYPos += m_Font->GetCharacterHeight(text[i]);
+			currentXPos = posX;
+			currentYPos += 12;
 		}
 		else{
 			m_Sentence.character[i].pBitmap = m_Font->GetCharacterBitmap(text[i]);
