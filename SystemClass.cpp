@@ -418,15 +418,18 @@ bool SystemClass::OnCharacterSelectMode(){
 
 	RECT rc = { 0, 0, m_screenWidth, m_screenHeight };
 
-	//if right-clicked the mouse, currently selected character will be cancelled
-	if (m_Input->IsKeyJustReleased(VK_RBUTTON) && Contains(rc, rClickPos)){
-		if (versusMatch.player[1].character != UNSELECTED){
-			versusMatch.player[1].character = UNSELECTED;
-			m_Clock->DeleteTimer(versusMatch.player[1].flashTimerID);
-		}
-		else if (versusMatch.player[0].character != UNSELECTED){
-			versusMatch.player[0].character = UNSELECTED;
-			m_Clock->DeleteTimer(versusMatch.player[0].flashTimerID);
+	//if right-clicked the mouse, currently selected character will be cancelled,
+	//as long as the screen is not fading into different game mode
+	if (!fadingOut){
+		if (m_Input->IsKeyJustReleased(VK_RBUTTON) && Contains(rc, rClickPos)){
+			if (versusMatch.player[1].character != UNSELECTED){
+				versusMatch.player[1].character = UNSELECTED;
+				m_Clock->DeleteTimer(versusMatch.player[1].flashTimerID);
+			}
+			else if (versusMatch.player[0].character != UNSELECTED){
+				versusMatch.player[0].character = UNSELECTED;
+				m_Clock->DeleteTimer(versusMatch.player[0].flashTimerID);
+			}
 		}
 	}
 
