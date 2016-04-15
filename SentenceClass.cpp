@@ -46,11 +46,9 @@ void SentenceClass::UpdateSentence(char* text, int posX, int posY, XMFLOAT4 text
 	}
 
 	for (int i = 0; i < m_Sentence.length; i++){
-		m_Sentence.character[i].posX = currentXPos;
-		m_Sentence.character[i].posY = currentYPos;
 		if (text[i] == ' '){
 			m_Sentence.character[i].pBitmap = NULL;
-			currentXPos += 3;
+			currentXPos += 5;
 		}
 		else if (text[i] == '\n'){
 			m_Sentence.character[i].pBitmap = NULL;
@@ -58,8 +56,11 @@ void SentenceClass::UpdateSentence(char* text, int posX, int posY, XMFLOAT4 text
 			currentYPos += 12;
 		}
 		else{
+			int width = m_Font->GetCharacterWidth(text[i]);
+			m_Sentence.character[i].ctrX = currentXPos + width / 2;
+			m_Sentence.character[i].ctrY = currentYPos;
 			m_Sentence.character[i].pBitmap = m_Font->GetCharacterBitmap(text[i]);
-			currentXPos += m_Font->GetCharacterWidth(text[i]) + 1;
+			currentXPos += width + 2;
 		}
 	}
 
@@ -81,7 +82,7 @@ bool SentenceClass::Render(TextureShaderClass* textureShader, ID3D11DeviceContex
 	for (int i = 0; i < m_Sentence.length; i++){
 		if (m_Sentence.character[i].pBitmap){
 			XMFLOAT4 processedTextColor = { m_Sentence.textColor.x, m_Sentence.textColor.y, m_Sentence.textColor.z, 1.0f };
-			result = m_Sentence.character[i].pBitmap->Render(deviceContext, m_Sentence.character[i].posX, m_Sentence.character[i].posY, m_Sentence.character[i].pBitmap->GetWidth(), m_Sentence.character[i].pBitmap->GetHeight());
+			result = m_Sentence.character[i].pBitmap->Render(deviceContext, m_Sentence.character[i].ctrX, m_Sentence.character[i].ctrY, m_Sentence.character[i].pBitmap->GetWidth(), m_Sentence.character[i].pBitmap->GetHeight());
 			if (!result){
 				return false;
 			}

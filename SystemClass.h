@@ -254,13 +254,17 @@ private:
 	GameType versusMatch;    //object of the versus match
 
 	//IDs of bitmaps or timers
-	int mainMenuBackgroundID;     //ID of bitmap of main menu background
+	int mainMenuBackgroundID;      //ID of bitmap of main menu background
 	int cursorSpriteID;            //ID of bitmap of cursor
 	int selectedCharButtonID;      //ID of bitmap that highlights character select button upon hovering the mouse over
 	int reimuAvatarID;             //ID of bitmap of Reimu in character select screen
 	int marisaAvatarID;            //ID of bitmap of Marisa in character select screen
 	int charSelectModeBackgroundID;//ID of background bitmap in character select screen
 	int fadeTimerID;               //ID of timer for the fading effect of screen
+
+#ifdef _DEBUG
+	int testSpriteID;
+#endif
 
 public:
 
