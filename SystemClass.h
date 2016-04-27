@@ -160,6 +160,7 @@ private:
 		int spellNameSentID;                     //ID of sentence object that displays spell card names
 		int spellDescSentID;                     //ID of sentence object that displays spell card description
 		bool isSpellSelected;                    //whether spell card is selected
+		int spellSelected;                       //index of the spell card selected
 		ButtonType spellNameButton[5];           //buttons for showing list of individual spell names
 		int spellDescBitmapID;                   //ID of bitmap for spell description box
 
@@ -211,6 +212,7 @@ private:
 	float Distance(XMFLOAT2 p1, POINT p2);
 	float Distance(POINT p1, XMFLOAT2 p2);
 	float Distance(XMFLOAT2 p1, XMFLOAT2 p2);
+	bool buttonLeftClicked(RECT rect);
 
 	/*********************************************************
 

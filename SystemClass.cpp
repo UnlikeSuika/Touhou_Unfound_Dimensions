@@ -371,8 +371,7 @@ void SystemClass::OnMainMenu(){
 	else if (!fadingOut){
 	
 		//if Started button is pressed
-		if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(gameStartButton.buttonRect, lClickPos) &&
-			Contains(gameStartButton.buttonRect, mousePt)){
+		if (buttonLeftClicked(gameStartButton.buttonRect)){
 			
 			//fade into character select screen
 			fadingOut = true;
@@ -461,7 +460,7 @@ bool SystemClass::OnCharacterSelectMode(){
 
 				//if user clicked and released the left mouse button on the character select button,
 				//the character indicated by the char. sel. button will be selected
-				if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(charSelectButton[i].buttonRect, lClickPos)){
+				if (buttonLeftClicked(charSelectButton[i].buttonRect)){
 					if (i == 0){
 						versusMatch.player[0].character = REIMU;
 						versusMatch.player[0].pCharacterAvatarID = &reimuAvatarID;
@@ -495,7 +494,7 @@ bool SystemClass::OnCharacterSelectMode(){
 
 				//if user clicked and released the left mouse button on the character select button,
 				//the character indicated by the char. sel. button will be selected
-				if (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(charSelectButton[i].buttonRect, lClickPos)){
+				if (buttonLeftClicked(charSelectButton[i].buttonRect)){
 					if (i == 0){
 						versusMatch.player[1].character = REIMU;
 						versusMatch.player[1].pCharacterAvatarID = &reimuAvatarID;
@@ -1235,7 +1234,7 @@ bool SystemClass::OnVersusMode(){
 			//if a spell card is not yet selected
 			if (!versusMatch.isSpellSelected){
 
-				//which spell card button the mouse hovers over
+				//index of spell card which the mouse hovers over
 				int hover = -1;
 
 				for (int i = 0; i < 5; i++){
@@ -1260,6 +1259,12 @@ bool SystemClass::OnVersusMode(){
 						if (Contains(button.buttonRect, mousePt)){
 							hover = i;
 						}
+
+						//if left clicked the button
+						if (buttonLeftClicked(button.buttonRect)){
+							versusMatch.spellSelected = i;
+							versusMatch.isSpellSelected = true;
+						}
 					}
 				}
 
@@ -1270,6 +1275,34 @@ bool SystemClass::OnVersusMode(){
 
 					m_Graphics->UpdateSentence(versusMatch.spellDescSentID, versusMatch.player[versusMatch.playerTurn].spellCard[hover].desc, 507, 442, SOLID_BLACK);
 					m_Graphics->RenderSentence(versusMatch.spellDescSentID);
+				}
+			}
+
+			//if spell card is selected
+			else{
+				switch (versusMatch.player[versusMatch.playerTurn].character){
+				case REIMU:
+					switch (versusMatch.spellSelected){
+					
+					//Spirit Sign "Fantasy Seal"
+					case 0:
+
+						break;
+
+					//Dream Sign "Evil-Sealing Circle"
+					case 1:
+
+						break;
+
+					default:
+						break;
+					}
+					break;
+
+				case MARISA:
+					//TODO
+
+					break;
 				}
 			}
 
@@ -1719,10 +1752,10 @@ bool SystemClass::InitializeVersusMode(){
 			versusMatch.player[i].spellCard = new SpellCardType[versusMatch.player[i].numSpellCards];
 			strcpy(versusMatch.player[i].spellCard[0].cardName, "Magic Sign \"Stardust Reverie\"");
 			versusMatch.player[i].spellCard[0].mpCost = 12;
-			strcpy(versusMatch.player[i].spellCard[0].desc, "Rides her broom to charge at the opponent,\ndealing 5 damage and knocking back.");
+			strcpy(versusMatch.player[i].spellCard[0].desc, "Rides her broom to charge at the opponent,\ncausing 5 damage and knocking back.");
 			strcpy(versusMatch.player[i].spellCard[1].cardName, "Love Sign \"Master Spark\"");
 			versusMatch.player[i].spellCard[1].mpCost = 15;
-			strcpy(versusMatch.player[i].spellCard[1].desc, "Shoots some lovely laser,\ndealing 8 damage.");
+			strcpy(versusMatch.player[i].spellCard[1].desc, "Shoots some lovely laser, dealing \n8 damage.");
 
 			break;
 		}
@@ -1775,6 +1808,7 @@ void SystemClass::ShutdownVersusMode(){
 		versusMatch.tempSpeed = 0;
 	}
 	m_Graphics->DeleteBitmap(versusMatch.map.mapBitmapID);
+	m_Graphics->DeleteBitmap(versusMatch.type01color01bulletID);
 	m_Graphics->DeleteBitmap(versusMatch.movePhaseAnnounceBitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.actPhaseAnnounceBitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.passButton.bitmapID);
@@ -1783,11 +1817,15 @@ void SystemClass::ShutdownVersusMode(){
 	m_Graphics->DeleteBitmap(versusMatch.spellButton.bitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.aimCircleBitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.statsWindowBitmapID);
+	m_Graphics->DeleteBitmap(versusMatch.spellDescBitmapID);
 	for (int i = 0; i < 18; i++){
 		m_Graphics->DeleteBitmap(versusMatch.color01laserParticleID[i]);
 	}
 	for (int i = 0; i < 4; i++){
 		m_Graphics->DeleteBitmap(versusMatch.reimuStationaryBitmapID[i]);
+	}
+	for (int i = 0; i < 4; i++){
+		m_Graphics->DeleteBitmap(versusMatch.marisaStationaryBitmapID[i]);
 	}
 	for (int i = 0; i < 5; i++){
 		m_Graphics->DeleteBitmap(versusMatch.spellNameButton[i].bitmapID);
@@ -1849,6 +1887,11 @@ bool SystemClass::CollisionWithWall(XMFLOAT2 pos, float radius){
 		}
 	}
 	return false;
+}
+
+//returns true if a button is left-clicked
+bool SystemClass::buttonLeftClicked(RECT rect){
+	return (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(rect, lClickPos) && Contains(rect, mousePt));
 }
 
 //returns true if a character hurtbox is present within given radius from pos
