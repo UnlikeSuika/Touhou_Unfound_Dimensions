@@ -157,12 +157,17 @@ private:
 		ButtonType moveButton;                   //Move choice button
 		ButtonType shootButton;                  //Shoot choice button
 		ButtonType spellButton;                  //Spell choice button
+
 		int spellNameSentID;                     //ID of sentence object that displays spell card names
 		int spellDescSentID;                     //ID of sentence object that displays spell card description
 		bool isSpellSelected;                    //whether spell card is selected
 		int spellSelected;                       //index of the spell card selected
 		ButtonType spellNameButton[5];           //buttons for showing list of individual spell names
 		int spellDescBitmapID;                   //ID of bitmap for spell description box
+
+		int reimuSpell01Bullet[3];               //array of IDs of bitmaps for orbs of "Fantasy Seal"
+		int reimuSpell01BulletBg[3];             //array of IDs of bitmaps for backgrounds of "Fantasy Seal"
+		int reimuSpell01Tail[3];                 //array of IDs of bitmaps for tails of "Fantasy Seal"
 
 		int statsWindowBitmapID;                 //ID of bitmap that displays character's status window
 		int hpDispSentID;                        //ID of sentence object that displays character's current HP
@@ -171,6 +176,7 @@ private:
 		XMFLOAT2* tempPos;                       //(heap)temporary variable for recording position
 		XMFLOAT2* tempSpeed;                     //(heap)temporary variable for recording velocity
 		float* tempAngle;                        //(heap)temporary variable for recording angle
+		BulletType* tempBullet;                  //heap array of temporary bullets
 	};
 
 	/*********************************************************
@@ -202,7 +208,7 @@ private:
 	bool CollisionWithWall(XMFLOAT2 pos, float radius);
 	bool CollisionWithCharacter(XMFLOAT2 pos, float radius, int& collidedChar);
 	void Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle);
-	void Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius);
+	bool Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius);
 	void InitializeTempPosSpeedAngle(float x, float y);
 
 	//helper functions
@@ -213,6 +219,8 @@ private:
 	float Distance(POINT p1, XMFLOAT2 p2);
 	float Distance(XMFLOAT2 p1, XMFLOAT2 p2);
 	bool buttonLeftClicked(RECT rect);
+	bool isStationary(XMFLOAT2 speed);
+	bool allStationary(XMFLOAT2* speedList, int size);
 
 	/*********************************************************
 

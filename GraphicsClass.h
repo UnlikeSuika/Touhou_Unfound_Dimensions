@@ -18,7 +18,7 @@ const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 1000.0f;  //far distance for depth buffer
 const float SCREEN_NEAR = 0.1f;      //near distance for depth buffer
 
-const int MAX_BITMAP_COUNT = 100;    //maximum number of bitmaps
+const int MAX_BITMAP_COUNT = 300;    //maximum number of bitmaps
 const int MAX_SENTENCE_COUNT = 30;   //maximum number of sentences
 
 // This class manages the graphical components

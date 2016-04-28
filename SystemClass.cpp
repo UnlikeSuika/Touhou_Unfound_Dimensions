@@ -796,13 +796,11 @@ bool SystemClass::OnVersusMode(){
 			//if the player has moved the character and character is still moving
 			else if (versusMatch.shooting){
 
-				//move the character in the initial speed/direction of the mouse
-				//until it gradually slows down to zero speed or it collides into a wall
-				//after which shooting = false
-				Moving(pos, speedVec, angle, versusMatch.player[versusMatch.playerTurn].hitboxRadius);
-
 				//if the character has stopped moving
-				if (!versusMatch.shooting){
+				if (!Moving(pos, speedVec, angle, versusMatch.player[versusMatch.playerTurn].hitboxRadius)){
+
+					//character is stationary
+					versusMatch.shooting = false;
 
 					//change the current phase to Act Phase
 					versusMatch.movePhase = false;
@@ -927,13 +925,13 @@ bool SystemClass::OnVersusMode(){
 						XMFLOAT2& bulletSpeed = versusMatch.bullet[versusMatch.numBullets - 1].moveSpeed;
 						float& bulletAngle = versusMatch.bullet[versusMatch.numBullets - 1].moveAngle;
 
-						//the bullet is being shot
-						Moving(bulletPos, bulletSpeed, bulletAngle, 6.0f);
-
 						//if the bullet stopped moving
-						if (!versusMatch.shooting){
+						if (!Moving(bulletPos,bulletSpeed,bulletAngle,6.0f)){
 
 							int collidedChar;
+
+							//bullet is not being shot
+							versusMatch.shooting = false;
 
 							//detect whether bullet has collided with opponent character
 							if (CollisionWithCharacter(bulletPos, 6.0f, collidedChar)){
@@ -1287,6 +1285,70 @@ bool SystemClass::OnVersusMode(){
 					//Spirit Sign "Fantasy Seal"
 					case 0:
 
+						//orbs have not been created
+						if (!versusMatch.tempBullet){
+
+							versusMatch.tempBullet = new BulletType[6];
+
+							for (int i = 0; i < 6; i++){
+
+								//each orb gives 3 damage
+								versusMatch.tempBullet[i].damage = 3;
+
+								//each orb will start at character's position
+								versusMatch.tempBullet[i].position = versusMatch.player[versusMatch.playerTurn].position;
+
+								//each orb will spread out from the player character's position to surround the character
+								versusMatch.tempBullet[i].moveAngle = (-1.0f)*XM_PI / 2.0f + (float)i*XM_2PI / 6.0f;
+								versusMatch.tempBullet[i].moveSpeed.x = 5.0f*cos(versusMatch.tempBullet[i].moveAngle);
+								versusMatch.tempBullet[i].moveSpeed.y = 5.0f*sin(versusMatch.tempBullet[i].moveAngle);
+
+								//orb will be set to R B G R B G colours in order
+								versusMatch.tempBullet[i].pBitmapID = &versusMatch.reimuSpell01Bullet[i % 3];
+							}
+						}
+
+						//orbs have been created
+						else{
+							if (!versusMatch.shooting){
+								XMFLOAT2 spdList[6];
+								for (int i = 0; i < 6; i++){
+									spdList[i] = versusMatch.tempBullet[i].moveSpeed;
+								}
+
+								//if orbs are still moving
+								if (!allStationary(spdList, 6)){
+									for (int i = 0; i < 6; i++){
+										BulletType& bullet = versusMatch.tempBullet[i];
+
+										//process moving orb
+										Moving(bullet.position, bullet.moveSpeed, bullet.moveAngle, 32.0f);
+									}
+								}
+
+								//if all orbs have stopped
+								else{
+									versusMatch.shooting = true;
+
+
+								}
+							}
+							else{
+
+							}
+
+							for (int i = 0; i < 6; i++){
+								BulletType& bullet = versusMatch.tempBullet[i];
+
+								//the orb spins two 720 degrees per 60 frames
+								float angle = (float)m_Clock->GetFrameCount()*XM_PI / 15.0f;
+
+								//render orb
+								m_Graphics->UpdateBitmap(*bullet.pBitmapID, (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
+								m_Graphics->RenderBitmap(*bullet.pBitmapID);
+							}
+						}
+
 						break;
 
 					//Dream Sign "Evil-Sealing Circle"
@@ -1520,6 +1582,7 @@ bool SystemClass::InitializeVersusMode(){
 	versusMatch.tempAngle = 0;
 	versusMatch.tempPos = 0;
 	versusMatch.tempSpeed = 0;
+	versusMatch.tempBullet = 0;
 
 	//add timer for announcement of current phase
 	m_Clock->AddTimer(versusMatch.phaseAnnounceTimerID, 240);
@@ -1660,6 +1723,37 @@ bool SystemClass::InitializeVersusMode(){
 	result = m_Graphics->AddBitmap(m_hwnd, "/Data/spell_desc_box.tga", spellDescRect, m_screenWidth, m_screenHeight, versusMatch.spellDescBitmapID);
 	if (!result){
 		return false;
+	}
+
+	//add bitmaps for Reimu's "Fantasy Seal"
+	for (int i = 0; i < 3; i++){
+		char path[MAX_CHARACTER_COUNT];
+		string pathStr;
+		RECT bitmapRect;
+
+		pathStr = "/Data/spell/reimu/spell_01_color_0" + to_string(i + 1) + "_bullet.tga";
+		strcpy(path, pathStr.c_str());
+		bitmapRect = { 0, 0, 256, 256 };
+		result = m_Graphics->AddBitmap(m_hwnd, path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01Bullet[i]);
+		if (!result){
+			return false;
+		}
+
+		pathStr = "/Data/spell/reimu/spell_01_color_0" + to_string(i + 1) + "_bulletbg.tga";
+		strcpy(path, pathStr.c_str());
+		bitmapRect = { 0, 0, 128, 128 };
+		result = m_Graphics->AddBitmap(m_hwnd, path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01BulletBg[i]);
+		if (!result){
+			return false;
+		}
+
+		pathStr = "/Data/spell/reimu/spell_01_color_0" + to_string(i + 1) + "_tail.tga";
+		strcpy(path, pathStr.c_str());
+		bitmapRect = { 0, 0, 774, 60 };
+		result = m_Graphics->AddBitmap(m_hwnd, path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01Tail[i]);
+		if (!result){
+			return false;
+		}
 	}
 
 	//add sentence object for showing spell card list
@@ -1807,6 +1901,10 @@ void SystemClass::ShutdownVersusMode(){
 		delete versusMatch.tempSpeed;
 		versusMatch.tempSpeed = 0;
 	}
+	if (versusMatch.tempBullet){
+		delete[] versusMatch.tempBullet;
+		versusMatch.tempBullet = 0;
+	}
 	m_Graphics->DeleteBitmap(versusMatch.map.mapBitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.type01color01bulletID);
 	m_Graphics->DeleteBitmap(versusMatch.movePhaseAnnounceBitmapID);
@@ -1829,6 +1927,11 @@ void SystemClass::ShutdownVersusMode(){
 	}
 	for (int i = 0; i < 5; i++){
 		m_Graphics->DeleteBitmap(versusMatch.spellNameButton[i].bitmapID);
+	}
+	for (int i = 0; i < 3; i++){
+		m_Graphics->DeleteBitmap(versusMatch.reimuSpell01Bullet[i]);
+		m_Graphics->DeleteBitmap(versusMatch.reimuSpell01BulletBg[i]);
+		m_Graphics->DeleteBitmap(versusMatch.reimuSpell01Tail[i]);
 	}
 	m_Graphics->DeleteSentence(versusMatch.spellNameSentID);
 	m_Graphics->DeleteSentence(versusMatch.spellDescSentID);
@@ -1894,6 +1997,21 @@ bool SystemClass::buttonLeftClicked(RECT rect){
 	return (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(rect, lClickPos) && Contains(rect, mousePt));
 }
 
+//returns true if given velocity is zero
+bool SystemClass::isStationary(XMFLOAT2 speed){
+	return ((speed.x == 0) && (speed.y == 0));
+}
+
+//returns true if all given velocities are zero
+bool SystemClass::allStationary(XMFLOAT2* speedList, int size){
+	for (int i = 0; i < size; i++){
+		if (!(isStationary(speedList[i]))){
+			return false;
+		}
+	}
+	return true;
+}
+
 //returns true if a character hurtbox is present within given radius from pos
 //and sets collidedChar to the currently collided character
 bool SystemClass::CollisionWithCharacter(XMFLOAT2 pos, float radius, int& collidedChar){
@@ -1945,8 +2063,9 @@ void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle){
 
 }
 
-//processes a currently moving object
-void SystemClass::Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius){
+//processes a currently moving object, returns true if
+//the object is still moving, false otherwise
+bool SystemClass::Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius){
 	
 	//update x position
 	pos.x += speedVec.x; 
@@ -2097,8 +2216,10 @@ void SystemClass::Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float 
 	if (speedVec.x == 0 && speedVec.y == 0){
 		
 		//the object is no longer moving
-		versusMatch.shooting = false;
+		return false;
 	}
+
+	return true;
 }
 
 //initializes the temporary heap variables for recording
