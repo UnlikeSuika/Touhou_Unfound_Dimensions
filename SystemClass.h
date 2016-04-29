@@ -177,6 +177,7 @@ private:
 		XMFLOAT2* tempSpeed;                     //(heap)temporary variable for recording velocity
 		float* tempAngle;                        //(heap)temporary variable for recording angle
 		BulletType* tempBullet;                  //heap array of temporary bullets
+		int tempBulletNum;                       //number of temporary bullets
 	};
 
 	/*********************************************************
@@ -207,7 +208,7 @@ private:
 	//movement-related functions
 	bool CollisionWithWall(XMFLOAT2 pos, float radius);
 	bool CollisionWithCharacter(XMFLOAT2 pos, float radius, int& collidedChar);
-	void Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle);
+	void Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius);
 	bool Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius);
 	void InitializeTempPosSpeedAngle(float x, float y);
 

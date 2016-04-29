@@ -790,7 +790,7 @@ bool SystemClass::OnVersusMode(){
 
 			//if the player hasn't moved the character yet
 			if (versusMatch.shooting && speedVec.x == 0 && speedVec.y == 0){
-				Shoot(pos, speedVec, angle);
+				Shoot(pos, speedVec, angle, versusMatch.player[versusMatch.playerTurn].hitboxRadius);
 			}
 
 			//if the player has moved the character and character is still moving
@@ -879,7 +879,7 @@ bool SystemClass::OnVersusMode(){
 
 						//if the speed, position, and angle have not yet been recorded
 						if (versusMatch.tempSpeed->x == 0.0f && versusMatch.tempSpeed->y == 0.0f){
-							Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle);
+							Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle, versusMatch.player[versusMatch.playerTurn].hitboxRadius);
 						}
 
 						//if the speed, position, and angle have been recorded
@@ -988,15 +988,11 @@ bool SystemClass::OnVersusMode(){
 
 						//if the speed, position, and angle have not yet been recorded
 						if (versusMatch.tempSpeed->x == 0 && versusMatch.tempSpeed->y == 0){
-							Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle);
+							Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle, versusMatch.player[versusMatch.playerTurn].hitboxRadius);
 						}
 
 						//if the speed, position, and angle have been recorded
 						else{
-
-
-							//TODO
-							//laser particles
 
 							LaserType& laser = versusMatch.laser[versusMatch.numLasers];
 
@@ -1288,9 +1284,10 @@ bool SystemClass::OnVersusMode(){
 						//orbs have not been created
 						if (!versusMatch.tempBullet){
 
-							versusMatch.tempBullet = new BulletType[6];
+							versusMatch.tempBulletNum = 6;
+							versusMatch.tempBullet = new BulletType[versusMatch.tempBulletNum];
 
-							for (int i = 0; i < 6; i++){
+							for (int i = 0; i < versusMatch.tempBulletNum; i++){
 
 								//each orb gives 3 damage
 								versusMatch.tempBullet[i].damage = 3;
@@ -1310,40 +1307,82 @@ bool SystemClass::OnVersusMode(){
 
 						//orbs have been created
 						else{
+
+							BulletType* bullet = versusMatch.tempBullet;
+
 							if (!versusMatch.shooting){
 								XMFLOAT2 spdList[6];
 								for (int i = 0; i < 6; i++){
-									spdList[i] = versusMatch.tempBullet[i].moveSpeed;
+									spdList[i] = bullet[i].moveSpeed;
 								}
 
 								//if orbs are still moving
 								if (!allStationary(spdList, 6)){
 									for (int i = 0; i < 6; i++){
-										BulletType& bullet = versusMatch.tempBullet[i];
 
 										//process moving orb
-										Moving(bullet.position, bullet.moveSpeed, bullet.moveAngle, 32.0f);
+										Moving(bullet[i].position, bullet[i].moveSpeed, bullet[i].moveAngle, 32.0f);
 									}
 								}
-
-								//if all orbs have stopped
+								//if all orbs have been spawned and are stationary
 								else{
 									versusMatch.shooting = true;
 
-
+									if (!versusMatch.tempPos){
+										versusMatch.tempPos = new XMFLOAT2;
+										versusMatch.tempSpeed = new XMFLOAT2;
+										versusMatch.tempAngle = new float;
+										versusMatch.tempSpeed->x = 0.0f;
+										versusMatch.tempSpeed->y = 0.0f;
+										*versusMatch.tempAngle = 0.0f;
+									}
 								}
 							}
 							else{
 
+								int bulletIndex = -1;
+
+								if (m_Input->IsKeyDown(VK_LBUTTON) || m_Input->IsKeyJustReleased(VK_LBUTTON)){
+									for (int i = 0; i < versusMatch.tempBulletNum; i++){
+										if (Distance(lClickPos, bullet[i].position) <= 32.0f && bullet[i].moveSpeed.x == 0.0f && bullet[i].moveSpeed.y == 0.0f){
+											versusMatch.tempPos->x = (float)lClickPos.x;
+											versusMatch.tempPos->y = (float)lClickPos.y;
+											bulletIndex = i;
+											break;
+										}
+									}
+								}
+
+								if (bulletIndex != -1){
+									if (versusMatch.tempSpeed->x == 0.0f && versusMatch.tempSpeed->y == 0.0f){
+										Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle, 36.0f);
+									}
+									else{
+										bullet[bulletIndex].moveAngle = *versusMatch.tempAngle;
+										bullet[bulletIndex].moveSpeed.x = 10.0f*cos(*versusMatch.tempAngle);
+										bullet[bulletIndex].moveSpeed.y = 10.0f*sin(*versusMatch.tempAngle);
+
+										versusMatch.tempSpeed->x = 0.0f;
+										versusMatch.tempSpeed->y = 0.0f;
+									}
+								}
+
+								for (int i = 0; i < versusMatch.tempBulletNum; i++){
+									bullet[i].position.x += bullet[i].moveSpeed.x;
+									bullet[i].position.y += bullet[i].moveSpeed.y;
+								}
 							}
 
-							for (int i = 0; i < 6; i++){
+
+							for (int i = 0; i < versusMatch.tempBulletNum; i++){
 								BulletType& bullet = versusMatch.tempBullet[i];
 
 								//the orb spins two 720 degrees per 60 frames
 								float angle = (float)m_Clock->GetFrameCount()*XM_PI / 15.0f;
 
 								//render orb
+								m_Graphics->UpdateBitmap(versusMatch.reimuSpell01BulletBg[i % 3], (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
+								m_Graphics->RenderBitmap(versusMatch.reimuSpell01BulletBg[i % 3]);
 								m_Graphics->UpdateBitmap(*bullet.pBitmapID, (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
 								m_Graphics->RenderBitmap(*bullet.pBitmapID);
 							}
@@ -1583,6 +1622,7 @@ bool SystemClass::InitializeVersusMode(){
 	versusMatch.tempPos = 0;
 	versusMatch.tempSpeed = 0;
 	versusMatch.tempBullet = 0;
+	versusMatch.tempBulletNum = 0;
 
 	//add timer for announcement of current phase
 	m_Clock->AddTimer(versusMatch.phaseAnnounceTimerID, 240);
@@ -1829,7 +1869,7 @@ bool SystemClass::InitializeVersusMode(){
 			versusMatch.player[i].spellCard = new SpellCardType[versusMatch.player[i].numSpellCards];
 			strcpy(versusMatch.player[i].spellCard[0].cardName, "Spirit Sign \"Fantasy Seal\"");
 			versusMatch.player[i].spellCard[0].mpCost = 6;
-			strcpy(versusMatch.player[i].spellCard[0].desc, "Shoots five homing orbs at the opponent,\neach with 4 damage.");
+			strcpy(versusMatch.player[i].spellCard[0].desc, "Shoots six homing orbs at the opponent,\neach with 3 damage.");
 			strcpy(versusMatch.player[i].spellCard[1].cardName, "Dream Sign \"Evil-Sealing Circle\"");
 			versusMatch.player[i].spellCard[1].mpCost = 8;
 			strcpy(versusMatch.player[i].spellCard[1].desc, "Surrounds herself with a circular barrier\nthat deals 5 damage and stuns opponent\nfor one turn.");
@@ -2034,8 +2074,8 @@ bool SystemClass::CollisionWithCharacter(XMFLOAT2 pos, float radius, int& collid
 
 //prompts the player to shoot from the player, and records the shot speed,
 //initial position, and angle to given parameters
-void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle){
-	if (versusMatch.shootFrame == -1 && m_Input->IsKeyDown(VK_LBUTTON) && Distance(lClickPos, versusMatch.player[versusMatch.playerTurn].position) <= (float)versusMatch.player[versusMatch.playerTurn].hitboxRadius && (mousePt.x != lClickPos.x || mousePt.y != lClickPos.y)){ //if the player clicked on the character sprite
+void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius){
+	if (versusMatch.shootFrame == -1 && m_Input->IsKeyDown(VK_LBUTTON) && Distance(lClickPos, pos) <= radius && (mousePt.x != lClickPos.x || mousePt.y != lClickPos.y)){ //if the player clicked on the character sprite
 		versusMatch.shootFrame = m_Clock->GetFrameCount() - 1;
 	}
 	//Character's velocity will be recorded once player releases the left mouse button,
