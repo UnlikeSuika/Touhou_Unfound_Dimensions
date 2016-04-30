@@ -28,7 +28,7 @@ public:
 private:
 	struct CharacterType{
 		BitmapClass* pBitmap;
-		int posX, posY;
+		int ctrX, ctrY;
 	};
 	struct SentenceType{
 		CharacterType character[MAX_CHARACTER_COUNT];

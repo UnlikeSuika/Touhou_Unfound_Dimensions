@@ -58,6 +58,7 @@ private:
 	struct SpellCardType{
 		char cardName[MAX_CHARACTER_COUNT];//title of spellcard
 		int mpCost;                        //amount of user's MP that will be required to use the spell
+		char desc[MAX_CHARACTER_COUNT];    //spell card description
 	};
 
 	//represents an in-game bullet
@@ -114,7 +115,8 @@ private:
 
 	//represents a map
 	struct MapType{
-		bool isWall[800][600]; //array of the map's collision detection for every on-screen pixel
+		RECT* rectWall;        //heap array of rectangular wall detection
+		int numRectWall;       //number of rectangular walls
 		int mapBitmapID;       //ID of map's bitmap
 	};
 	
@@ -157,6 +159,17 @@ private:
 		ButtonType shootButton;                  //Shoot choice button
 		ButtonType spellButton;                  //Spell choice button
 
+		int spellNameSentID;                     //ID of sentence object that displays spell card names
+		int spellDescSentID;                     //ID of sentence object that displays spell card description
+		bool isSpellSelected;                    //whether spell card is selected
+		int spellSelected;                       //index of the spell card selected
+		ButtonType spellNameButton[5];           //buttons for showing list of individual spell names
+		int spellDescBitmapID;                   //ID of bitmap for spell description box
+
+		int reimuSpell01Bullet[3];               //array of IDs of bitmaps for orbs of "Fantasy Seal"
+		int reimuSpell01BulletBg[3];             //array of IDs of bitmaps for backgrounds of "Fantasy Seal"
+		int reimuSpell01Tail[3];                 //array of IDs of bitmaps for tails of "Fantasy Seal"
+
 		int statsWindowBitmapID;                 //ID of bitmap that displays character's status window
 		int hpDispSentID;                        //ID of sentence object that displays character's current HP
 		int mpDispSentID;                        //ID of sentence object that displays character's current MP
@@ -164,6 +177,8 @@ private:
 		XMFLOAT2* tempPos;                       //(heap)temporary variable for recording position
 		XMFLOAT2* tempSpeed;                     //(heap)temporary variable for recording velocity
 		float* tempAngle;                        //(heap)temporary variable for recording angle
+		BulletType* tempBullet;                  //heap array of temporary bullets
+		int tempBulletNum;                       //number of temporary bullets
 	};
 
 	/*********************************************************
@@ -194,8 +209,8 @@ private:
 	//movement-related functions
 	bool CollisionWithWall(XMFLOAT2 pos, float radius);
 	bool CollisionWithCharacter(XMFLOAT2 pos, float radius, int& collidedChar);
-	void Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle);
-	void Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius);
+	void Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius);
+	bool Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius);
 	void InitializeTempPosSpeedAngle(float x, float y);
 
 	//helper functions
@@ -205,6 +220,9 @@ private:
 	float Distance(XMFLOAT2 p1, POINT p2);
 	float Distance(POINT p1, XMFLOAT2 p2);
 	float Distance(XMFLOAT2 p1, XMFLOAT2 p2);
+	bool buttonLeftClicked(RECT rect);
+	bool isStationary(XMFLOAT2 speed);
+	bool allStationary(XMFLOAT2* speedList, int size);
 
 	/*********************************************************
 
@@ -248,13 +266,17 @@ private:
 	GameType versusMatch;    //object of the versus match
 
 	//IDs of bitmaps or timers
-	int mainMenuBackgroundID;     //ID of bitmap of main menu background
+	int mainMenuBackgroundID;      //ID of bitmap of main menu background
 	int cursorSpriteID;            //ID of bitmap of cursor
 	int selectedCharButtonID;      //ID of bitmap that highlights character select button upon hovering the mouse over
 	int reimuAvatarID;             //ID of bitmap of Reimu in character select screen
 	int marisaAvatarID;            //ID of bitmap of Marisa in character select screen
 	int charSelectModeBackgroundID;//ID of background bitmap in character select screen
 	int fadeTimerID;               //ID of timer for the fading effect of screen
+
+#ifdef _DEBUG
+	int testSpriteID;
+#endif
 
 public:
 

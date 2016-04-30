@@ -27,7 +27,7 @@ bool FontClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 		const char *tgaNoCStr = tgaNoStr.c_str();
 		strcat(tgaDirectory, tgaNoCStr);
 		strcat(tgaDirectory, ".tga");
-		
+
 		m_Font[i].bitmap = new BitmapClass;
 		if (!m_Font[i].bitmap){
 			return false;

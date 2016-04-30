@@ -2,3 +2,5 @@
 *.filters
 shader-error.txt
 *.vcxproj
+/Debug
+/Touhou_Unfound_Dimensions

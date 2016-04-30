@@ -8,6 +8,8 @@ To-do list or reminders
 - the player should win when the HP of the opponent is decreased to 0 or below
     - change unsigned character health to signed
 
+- loading screen
+
 - more elaborate sprite graphics
     - animation for moving and shooting
 	- in title screen, move that "start" button to somewhere much less distracting
