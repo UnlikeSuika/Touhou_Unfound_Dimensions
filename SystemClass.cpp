@@ -1824,27 +1824,12 @@ bool SystemClass::InitializeVersusMode(){
 	versusMatch.isSpellSelected = false;
 
 	//set the map's wall collision detection
-	for (int y = 0; y < 600; y++){
-		for (int x = 0; x < 800; x++){
-			versusMatch.map.isWall[x][y] = false;
-		}
-	}
-	for (int x = 0; x < 800; x++){
-		for (int y = 0; y < 30; y++){
-			versusMatch.map.isWall[x][y] = true;
-		}
-		for (int y = 570; y < 600; y++){
-			versusMatch.map.isWall[x][y] = true;
-		}
-	}
-	for (int y = 30; y < 570; y++){
-		for (int x = 0; x < 30; x++){
-			versusMatch.map.isWall[x][y] = true;
-		}
-		for (int x = 770; x < 800; x++){
-			versusMatch.map.isWall[x][y] = true;
-		}
-	}
+	versusMatch.map.numRectWall = 4;
+	versusMatch.map.rectWall = new RECT[4];
+	versusMatch.map.rectWall[0] = { 0, 0, 800, 30 };
+	versusMatch.map.rectWall[1] = { 0, 570, 800, 600 };
+	versusMatch.map.rectWall[2] = { 0, 30, 30, 570 };
+	versusMatch.map.rectWall[3] = { 770, 30, 800, 570 };
 
 	for (int i = 0; i < versusMatch.numPlayers; i++){
 		 
@@ -1928,6 +1913,10 @@ void SystemClass::ShutdownVersusMode(){
 			versusMatch.player[i].spellCard = 0;
 		}
 		m_Clock->DeleteClock(versusMatch.player[i].spriteClockID);
+	}
+	if (versusMatch.map.rectWall){
+		delete[] versusMatch.map.rectWall;
+		versusMatch.map.rectWall = 0;
 	}
 	if (versusMatch.tempAngle){
 		delete versusMatch.tempAngle;
@@ -2020,11 +2009,74 @@ float SystemClass::Distance(XMFLOAT2 p1, XMFLOAT2 p2){
 
 //returns true if a wall is present within given radius from pos
 bool SystemClass::CollisionWithWall(XMFLOAT2 pos, float radius){
-	RECT hitboxRect = { (LONG)round(pos.x - radius), (LONG)round(pos.y - radius), (LONG)round(pos.x + radius), (LONG)round(pos.y + radius) };
-	for (int x = hitboxRect.left; x <= hitboxRect.right; x++){
-		for (int y = hitboxRect.top; y <= hitboxRect.bottom; y++){
-			XMFLOAT2 testCoord = { (float)x, (float)y };
-			if (Distance(testCoord, pos) <= radius && versusMatch.map.isWall[x - 1][y - 1]){
+	
+	//check every rectangular wall
+	for (int i = 0; i < versusMatch.map.numRectWall; i++){
+		
+		RECT& wallRect = versusMatch.map.rectWall[i];
+		
+		//if X position is left to the wall
+		if (pos.x < wallRect.left){
+
+			//if Y position is below the wall
+			if (pos.y > wallRect.bottom){
+				if (Distance(pos.x, pos.y, wallRect.left, wallRect.bottom) >= radius){
+					return true;
+				}
+			}
+
+			//if Y position is above the wall
+			else if(pos.y < wallRect.top){
+				if (Distance(pos.x, pos.y, wallRect.left, wallRect.top) >= radius){
+					return true;
+				}
+			}
+
+			//if Y position is between top and bottom side of the wall
+			else{
+				if (pos.x + radius >= wallRect.left){
+					return true;
+				}
+			}
+		}
+
+		//if X position is right to the wall
+		else if (pos.x>wallRect.right){
+			//if Y position is below the wall
+			if (pos.y > wallRect.bottom){
+				if (Distance(pos.x, pos.y, wallRect.right, wallRect.bottom) >= radius){
+					return true;
+				}
+			}
+
+			//if Y position is above the wall
+			else if (pos.y < wallRect.top){
+				if (Distance(pos.x, pos.y, wallRect.right, wallRect.top) >= radius){
+					return true;
+				}
+			}
+
+			//if Y position is between top and bottom side of the wall
+			else{
+				if (pos.x - radius <= wallRect.left){
+					return true;
+				}
+			}
+		}
+
+		//if X position is between left and right side of the wall
+		else{
+			if (pos.y < wallRect.top){
+				if (pos.y + radius > wallRect.top){
+					return true;
+				}
+			}
+			else if (pos.y > wallRect.bottom){
+				if (pos.y - radius < wallRect.bottom){
+					return true;
+				}
+			}
+			else{
 				return true;
 			}
 		}
@@ -2055,17 +2107,11 @@ bool SystemClass::allStationary(XMFLOAT2* speedList, int size){
 //returns true if a character hurtbox is present within given radius from pos
 //and sets collidedChar to the currently collided character
 bool SystemClass::CollisionWithCharacter(XMFLOAT2 pos, float radius, int& collidedChar){
-	RECT hitboxRect = { (LONG)round(pos.x - radius), (LONG)round(pos.y - radius), (LONG)round(pos.x + radius), (LONG)round(pos.y + radius) };
-	for (int x = hitboxRect.left; x <= hitboxRect.right; x++){
-		for (int y = hitboxRect.top; y <= hitboxRect.bottom; y++){
-			XMFLOAT2 testCoord = { (float)x, (float)y };
-			for (int i = 0; i < versusMatch.numPlayers; i++){
-				if (i != versusMatch.playerTurn){
-					if (Distance(testCoord, pos) <= radius && Distance(testCoord, versusMatch.player[i].position) <= versusMatch.player[i].hitboxRadius){
-						collidedChar = i;
-						return true;
-					}
-				}
+	for (int i = 0; i < versusMatch.numPlayers; i++){
+		if (i != versusMatch.playerTurn){
+			if (Distance(pos, versusMatch.player[i].position) <= radius + versusMatch.player[i].hitboxRadius){
+				collidedChar = i;
+				return true;
 			}
 		}
 	}

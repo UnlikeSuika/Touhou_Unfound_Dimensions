@@ -115,7 +115,8 @@ private:
 
 	//represents a map
 	struct MapType{
-		bool isWall[800][600]; //array of the map's collision detection for every on-screen pixel
+		RECT* rectWall;        //heap array of rectangular wall detection
+		int numRectWall;       //number of rectangular walls
 		int mapBitmapID;       //ID of map's bitmap
 	};
 	
