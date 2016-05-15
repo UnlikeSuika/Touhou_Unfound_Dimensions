@@ -1311,6 +1311,8 @@ bool SystemClass::OnVersusMode(){
 							BulletType* bullet = versusMatch.tempBullet;
 
 							if (!versusMatch.shooting){
+								
+								//array of velocities of the orbs
 								XMFLOAT2 spdList[6];
 								for (int i = 0; i < 6; i++){
 									spdList[i] = bullet[i].moveSpeed;
@@ -1328,6 +1330,7 @@ bool SystemClass::OnVersusMode(){
 								else{
 									versusMatch.shooting = true;
 
+									//initialize temporary position, speed, angle
 									if (!versusMatch.tempPos){
 										versusMatch.tempPos = new XMFLOAT2;
 										versusMatch.tempSpeed = new XMFLOAT2;
@@ -1344,7 +1347,11 @@ bool SystemClass::OnVersusMode(){
 
 								if (m_Input->IsKeyDown(VK_LBUTTON) || m_Input->IsKeyJustReleased(VK_LBUTTON)){
 									for (int i = 0; i < versusMatch.tempBulletNum; i++){
+
+										//if left clicked the current orb
 										if (Distance(lClickPos, bullet[i].position) <= 32.0f && bullet[i].moveSpeed.x == 0.0f && bullet[i].moveSpeed.y == 0.0f){
+
+											//update the temporary position to left click position
 											versusMatch.tempPos->x = (float)lClickPos.x;
 											versusMatch.tempPos->y = (float)lClickPos.y;
 											bulletIndex = i;
@@ -1353,23 +1360,53 @@ bool SystemClass::OnVersusMode(){
 									}
 								}
 
+								//if shooting the orb
 								if (bulletIndex != -1){
+
+									//if temporary speed is zero
 									if (versusMatch.tempSpeed->x == 0.0f && versusMatch.tempSpeed->y == 0.0f){
-										Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle, 36.0f);
+										Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle, 32.0f);
 									}
+
+									//if temporary speed is not zero, set velocity and angle of the orb to temporary values
 									else{
 										bullet[bulletIndex].moveAngle = *versusMatch.tempAngle;
 										bullet[bulletIndex].moveSpeed.x = 10.0f*cos(*versusMatch.tempAngle);
 										bullet[bulletIndex].moveSpeed.y = 10.0f*sin(*versusMatch.tempAngle);
 
+										//reset temporary speed to zero
 										versusMatch.tempSpeed->x = 0.0f;
 										versusMatch.tempSpeed->y = 0.0f;
 									}
 								}
 
 								for (int i = 0; i < versusMatch.tempBulletNum; i++){
+									//update positions of the orb
 									bullet[i].position.x += bullet[i].moveSpeed.x;
 									bullet[i].position.y += bullet[i].moveSpeed.y;
+
+									int collidedChar = -1;
+
+									//if the orb is moving and is within 100 pixels from the opponent
+									if (CollisionWithCharacter(bullet[i].position, 100.0f, collidedChar) && bullet[i].moveSpeed.x != 0.0f && bullet[i].moveSpeed.y != 0.0f){
+										float angleToOpponent = atan2(versusMatch.player[collidedChar].position.y - bullet[i].position.y, versusMatch.player[collidedChar].position.x - bullet[i].position.x);
+										float angleIncrement = XM_PI / 60.0f;
+										
+										if (bullet[i].moveAngle - angleToOpponent >= XM_PI/9.0f){
+											bullet[i].moveAngle -= angleIncrement;
+										}
+										else if (bullet[i].moveAngle - angleToOpponent < -XM_PI/9.0f){
+											bullet[i].moveAngle += angleIncrement;
+										}
+										else{
+											bullet[i].moveAngle = angleToOpponent;
+										}
+
+										//update bullet's velocity
+										bullet[i].moveSpeed.x = 10.0f*cos(bullet[i].moveAngle);
+										bullet[i].moveSpeed.x = 10.0f*sin(bullet[i].moveAngle);
+									}
+
 								}
 							}
 
@@ -1377,10 +1414,10 @@ bool SystemClass::OnVersusMode(){
 							for (int i = 0; i < versusMatch.tempBulletNum; i++){
 								BulletType& bullet = versusMatch.tempBullet[i];
 
-								//the orb spins two 720 degrees per 60 frames
+								//the orb spins 720 degrees per 60 frames
 								float angle = (float)m_Clock->GetFrameCount()*XM_PI / 15.0f;
 
-								//render orb
+								//update and render orb bitmaps
 								m_Graphics->UpdateBitmap(versusMatch.reimuSpell01BulletBg[i % 3], (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
 								m_Graphics->RenderBitmap(versusMatch.reimuSpell01BulletBg[i % 3]);
 								m_Graphics->UpdateBitmap(*bullet.pBitmapID, (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
@@ -1854,10 +1891,10 @@ bool SystemClass::InitializeVersusMode(){
 			versusMatch.player[i].spellCard = new SpellCardType[versusMatch.player[i].numSpellCards];
 			strcpy(versusMatch.player[i].spellCard[0].cardName, "Spirit Sign \"Fantasy Seal\"");
 			versusMatch.player[i].spellCard[0].mpCost = 6;
-			strcpy(versusMatch.player[i].spellCard[0].desc, "Shoots six homing orbs at the opponent,\neach with 3 damage.");
+			strcpy(versusMatch.player[i].spellCard[0].desc, "Shoots six homing orbs at the opponent,\neach of which inflicts 3 damage.");
 			strcpy(versusMatch.player[i].spellCard[1].cardName, "Dream Sign \"Evil-Sealing Circle\"");
 			versusMatch.player[i].spellCard[1].mpCost = 8;
-			strcpy(versusMatch.player[i].spellCard[1].desc, "Surrounds herself with a circular barrier\nthat deals 5 damage and stuns opponent\nfor one turn.");
+			strcpy(versusMatch.player[i].spellCard[1].desc, "Surrounds herself with a circular barrier\nthat inflicts 5 damage and stuns opponent\nfor one turn.");
 
 			break;
 
@@ -1871,10 +1908,10 @@ bool SystemClass::InitializeVersusMode(){
 			versusMatch.player[i].spellCard = new SpellCardType[versusMatch.player[i].numSpellCards];
 			strcpy(versusMatch.player[i].spellCard[0].cardName, "Magic Sign \"Stardust Reverie\"");
 			versusMatch.player[i].spellCard[0].mpCost = 12;
-			strcpy(versusMatch.player[i].spellCard[0].desc, "Rides her broom to charge at the opponent,\ncausing 5 damage and knocking back.");
+			strcpy(versusMatch.player[i].spellCard[0].desc, "Rides her broom to charge at the opponent,\ninflicting 5 damage and causing the\nopponent to knock back.");
 			strcpy(versusMatch.player[i].spellCard[1].cardName, "Love Sign \"Master Spark\"");
 			versusMatch.player[i].spellCard[1].mpCost = 15;
-			strcpy(versusMatch.player[i].spellCard[1].desc, "Shoots some lovely laser, dealing \n8 damage.");
+			strcpy(versusMatch.player[i].spellCard[1].desc, "Shoots some lovely laser, inflicting \n8 damage.");
 
 			break;
 		}
@@ -2142,15 +2179,15 @@ void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float r
 	}
 
 	//if player is currently shooting/moving, update and render aim circle
-	if (m_Input->IsKeyDown(VK_LBUTTON) && Distance(lClickPos, versusMatch.player[versusMatch.playerTurn].position) <= (float)versusMatch.player[versusMatch.playerTurn].hitboxRadius){
+	if (m_Input->IsKeyDown(VK_LBUTTON) && Distance(lClickPos, mousePt) <= radius){
 		m_Graphics->UpdateBitmap(versusMatch.aimCircleBitmapID, lClickPos.x, lClickPos.y);
 		m_Graphics->RenderBitmap(versusMatch.aimCircleBitmapID);
 	}
 
 }
 
-//processes a currently moving object, returns true if
-//the object is still moving, false otherwise
+//moves the object in the current velocity, decreasing the speed by
+//friction. returns true if the object is still moving, false otherwise
 bool SystemClass::Moving(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float radius){
 	
 	//update x position
