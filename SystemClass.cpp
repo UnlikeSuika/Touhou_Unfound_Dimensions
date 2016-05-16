@@ -1387,24 +1387,32 @@ bool SystemClass::OnVersusMode(){
 
 									int collidedChar = -1;
 
-									//if the orb is moving and is within 100 pixels from the opponent
-									if (CollisionWithCharacter(bullet[i].position, 100.0f, collidedChar) && bullet[i].moveSpeed.x != 0.0f && bullet[i].moveSpeed.y != 0.0f){
+									//if the orb is moving and is within 150 pixels from the opponent
+									if (CollisionWithCharacter(bullet[i].position, 150.0f, collidedChar) && bullet[i].moveSpeed.x != 0.0f && bullet[i].moveSpeed.y != 0.0f){
 										float angleToOpponent = atan2(versusMatch.player[collidedChar].position.y - bullet[i].position.y, versusMatch.player[collidedChar].position.x - bullet[i].position.x);
 										float angleIncrement = XM_PI / 60.0f;
+										float angleDiff = bullet[i].moveAngle - angleToOpponent;
 										
-										if (bullet[i].moveAngle - angleToOpponent >= XM_PI/9.0f){
+										//tilt the move angle towards the opponent
+										if (angleDiff > XM_PI){
+											bullet[i].moveAngle += angleIncrement;
+										}
+										else if (angleDiff < -1.0f*XM_PI){
 											bullet[i].moveAngle -= angleIncrement;
 										}
-										else if (bullet[i].moveAngle - angleToOpponent < -XM_PI/9.0f){
+										else if (angleDiff >= angleIncrement){
+											bullet[i].moveAngle -= angleIncrement;
+										}
+										else if (angleDiff < -1.0f*angleIncrement){
 											bullet[i].moveAngle += angleIncrement;
 										}
 										else{
 											bullet[i].moveAngle = angleToOpponent;
 										}
 
-										//update bullet's velocity
+										//update orb's velocity
 										bullet[i].moveSpeed.x = 10.0f*cos(bullet[i].moveAngle);
-										bullet[i].moveSpeed.x = 10.0f*sin(bullet[i].moveAngle);
+										bullet[i].moveSpeed.y = 10.0f*sin(bullet[i].moveAngle);
 									}
 
 								}
