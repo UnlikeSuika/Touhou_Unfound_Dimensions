@@ -102,8 +102,8 @@ private:
 		SpellCardType* spellCard;   //heap array of available spellcards for the chosen character
 		unsigned int numSpellCards; //total number of available spellcards
 		unsigned int maxHp;         //character's maximum HP
-		unsigned int hp;            //character's current HP
-		unsigned int mp;            //character's current MP
+		int hp;            //character's current HP
+		int mp;            //character's current MP
 		float hitboxRadius;         //character's circular collision detection radius
 		                            //	  Note: only Reimu will have a small hitbox
 		                            //    radius though, unless I change my mind
@@ -224,9 +224,10 @@ private:
 	float Distance(XMFLOAT2 p1, POINT p2);
 	float Distance(POINT p1, XMFLOAT2 p2);
 	float Distance(XMFLOAT2 p1, XMFLOAT2 p2);
-	bool buttonLeftClicked(RECT rect);
-	bool isStationary(XMFLOAT2 speed);
-	bool allStationary(XMFLOAT2* speedList, int size);
+	bool ButtonLeftClicked(RECT rect);
+	bool IsStationary(XMFLOAT2 speed);
+	bool AllStationary(XMFLOAT2* speedList, int size);
+	void NextPhase();
 
 	/*********************************************************
 

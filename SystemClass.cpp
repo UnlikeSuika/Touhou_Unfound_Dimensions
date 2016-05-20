@@ -371,7 +371,7 @@ void SystemClass::OnMainMenu(){
 	else if (!fadingOut){
 	
 		//if Started button is pressed
-		if (buttonLeftClicked(gameStartButton.buttonRect)){
+		if (ButtonLeftClicked(gameStartButton.buttonRect)){
 			
 			//fade into character select screen
 			fadingOut = true;
@@ -460,7 +460,7 @@ bool SystemClass::OnCharacterSelectMode(){
 
 				//if user clicked and released the left mouse button on the character select button,
 				//the character indicated by the char. sel. button will be selected
-				if (buttonLeftClicked(charSelectButton[i].buttonRect)){
+				if (ButtonLeftClicked(charSelectButton[i].buttonRect)){
 					if (i == 0){
 						versusMatch.player[0].character = REIMU;
 						versusMatch.player[0].pCharacterAvatarID = &reimuAvatarID;
@@ -494,7 +494,7 @@ bool SystemClass::OnCharacterSelectMode(){
 
 				//if user clicked and released the left mouse button on the character select button,
 				//the character indicated by the char. sel. button will be selected
-				if (buttonLeftClicked(charSelectButton[i].buttonRect)){
+				if (ButtonLeftClicked(charSelectButton[i].buttonRect)){
 					if (i == 0){
 						versusMatch.player[1].character = REIMU;
 						versusMatch.player[1].pCharacterAvatarID = &reimuAvatarID;
@@ -580,11 +580,17 @@ bool SystemClass::OnVersusMode(){
 	}
 
 #ifdef _DEBUG
-
-	//in debug mode, R key resets and reloads the versus mode
+	//debug mode
+	
+	//R key resets and reloads the versus mode
 	if (m_Input->IsKeyJustPressed(0x52)){ 
 		ShutdownVersusMode();
 		return InitializeVersusMode();
+	}
+
+	//0 key adds 5 MP to current character's turn
+	if (m_Input->IsKeyJustPressed(0x30)){
+		versusMatch.player[versusMatch.playerTurn].mp += 5;
 	}
 #endif
 
@@ -803,14 +809,7 @@ bool SystemClass::OnVersusMode(){
 					versusMatch.shooting = false;
 
 					//change the current phase to Act Phase
-					versusMatch.movePhase = false;
-					versusMatch.actionPhase = true;
-
-					//announce Act Phase
-					m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
-
-					//reset the player's choice to PENDING_CHOICE
-					versusMatch.choice = PENDING_CHOICE;
+					NextPhase();
 				}
 			}
 			break;
@@ -819,28 +818,14 @@ bool SystemClass::OnVersusMode(){
 		case PASS:
 
 			//change the current phase to Act Phase
-			versusMatch.movePhase = false;
-			versusMatch.actionPhase = true;
-
-			//announce Act Phase
-			m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
-
-			//reset the player's choice to PENDING_CHOICE
-			versusMatch.choice = PENDING_CHOICE;
+			NextPhase();
 
 			break;
 
 			//error-handling: any other choice just passes the turn
 		default:
 			//change the current phase to Act Phase
-			versusMatch.movePhase = false;
-			versusMatch.actionPhase = true;
-
-			//announce Act Phase
-			m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
-
-			//reset the player's choice to PENDING_CHOICE
-			versusMatch.choice = PENDING_CHOICE;
+			NextPhase();
 		}
 	}
 
@@ -941,22 +926,8 @@ bool SystemClass::OnVersusMode(){
 							//bullet is erased
 							versusMatch.numBullets--;
 
-
 							//move on to next player's turn
-							versusMatch.playerTurn++;
-							if (versusMatch.playerTurn >= versusMatch.numPlayers){
-								versusMatch.playerTurn = 0;
-							}
-
-							//move on to Move Phase
-							versusMatch.movePhase = true;
-							versusMatch.actionPhase = false;
-
-							//announce Move Phase
-							m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
-
-							//reset the player's choice to PENDING_CHOICE
-							versusMatch.choice = PENDING_CHOICE;
+							NextPhase();
 						}
 					}
 				}
@@ -1180,20 +1151,7 @@ bool SystemClass::OnVersusMode(){
 							versusMatch.shooting = false;
 
 							//move on to next player's turn
-							versusMatch.playerTurn++;
-							if (versusMatch.playerTurn >= versusMatch.numPlayers){
-								versusMatch.playerTurn = 0;
-							}
-
-							//move on to Move Phase
-							versusMatch.movePhase = true;
-							versusMatch.actionPhase = false;
-
-							//announce phase
-							m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
-
-							//set player choice to PENDING_CHOICE
-							versusMatch.choice = PENDING_CHOICE;
+							NextPhase();
 						}
 					}
 				}
@@ -1205,28 +1163,19 @@ bool SystemClass::OnVersusMode(){
 		case PASS:
 
 			//move on to Move Phase
-			versusMatch.movePhase = true;
-			versusMatch.actionPhase = false;
-
-			//switch player turn
-			versusMatch.playerTurn++;
-			if (versusMatch.playerTurn >= versusMatch.numPlayers){
-				versusMatch.playerTurn = 0;
-			}
-
-			//announce Move Phase
-			m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
-
-			//reset the player choice to PENDING_CHOICE
-			versusMatch.choice = PENDING_CHOICE;
+			NextPhase();
 			break;
 
 		//Spell choice
-		//TODO
 		case SPELL:
 
 			//if a spell card is not yet selected
 			if (!versusMatch.isSpellSelected){
+
+				//if right mouse button is pressed, go back to previous choices
+				if (m_Input->IsKeyJustPressed(VK_RBUTTON)){
+					versusMatch.choice = PENDING_CHOICE;
+				}
 
 				//index of spell card which the mouse hovers over
 				int hover = -1;
@@ -1254,8 +1203,9 @@ bool SystemClass::OnVersusMode(){
 							hover = i;
 						}
 
-						//if left clicked the button
-						if (buttonLeftClicked(button.buttonRect)){
+						//if left clicked the button and player has sufficient MP
+						if (ButtonLeftClicked(button.buttonRect) && versusMatch.player[versusMatch.playerTurn].mp >= versusMatch.player[versusMatch.playerTurn].spellCard[i].mpCost){
+							versusMatch.player[versusMatch.playerTurn].mp -= versusMatch.player[versusMatch.playerTurn].spellCard[i].mpCost;
 							versusMatch.spellSelected = i;
 							versusMatch.isSpellSelected = true;
 						}
@@ -1267,7 +1217,13 @@ bool SystemClass::OnVersusMode(){
 					m_Graphics->UpdateBitmap(versusMatch.spellDescBitmapID, 630, 510);
 					m_Graphics->RenderBitmap(versusMatch.spellDescBitmapID);
 
-					m_Graphics->UpdateSentence(versusMatch.spellDescSentID, versusMatch.player[versusMatch.playerTurn].spellCard[hover].desc, 507, 442, SOLID_BLACK);
+					char mpCostCStr[MAX_CHARACTER_COUNT];
+					string mpCostStr = "MP Cost: " + to_string(versusMatch.player[versusMatch.playerTurn].spellCard[hover].mpCost);
+					strcpy(mpCostCStr, mpCostStr.c_str());
+					m_Graphics->UpdateSentence(versusMatch.spellDescSentID, mpCostCStr, 507, 442, SOLID_BLACK);
+					m_Graphics->RenderSentence(versusMatch.spellDescSentID);
+
+					m_Graphics->UpdateSentence(versusMatch.spellDescSentID, versusMatch.player[versusMatch.playerTurn].spellCard[hover].desc, 507, 474, SOLID_BLACK);
 					m_Graphics->RenderSentence(versusMatch.spellDescSentID);
 				}
 			}
@@ -1321,7 +1277,7 @@ bool SystemClass::OnVersusMode(){
 								}
 
 								//if orbs are still moving
-								if (!allStationary(spdList, 6)){
+								if (!AllStationary(spdList, 6)){
 									for (int i = 0; i < 6; i++){
 
 										//process moving orb
@@ -1394,13 +1350,17 @@ bool SystemClass::OnVersusMode(){
 									if (bullet[i].moveSpeed.x != 0.0f || bullet[i].moveSpeed.y != 0.0f){
 
 										//if the orb has made collision with the opponent
-										// !!!
-
 										if (CollisionWithCharacter(bullet[i].position, 10.0f, collidedChar)){
 											bullet[i].position = versusMatch.player[collidedChar].position;
 											bullet[i].moveSpeed.x = 0.0f;
 											bullet[i].moveSpeed.y = 0.0f;
 											versusMatch.player[collidedChar].hp -= bullet[i].damage;											
+										}
+
+										//if the orb has made collision with the wall
+										else if (CollisionWithWall(bullet[i].position, 10.0f)){
+											bullet[i].moveSpeed.x = 0.0f;
+											bullet[i].moveSpeed.y = 0.0f;
 										}
 
 										//if the orb is within 150 pixels from the opponent
@@ -1434,7 +1394,7 @@ bool SystemClass::OnVersusMode(){
 									//if the orb is not moving
 									else{
 										int collidedChar = -1;
-										if (CollisionWithCharacter(bullet[i].position, 10.0f, collidedChar)){
+										if (CollisionWithCharacter(bullet[i].position, 10.0f, collidedChar) || CollisionWithWall(bullet[i].position, 10.0f)){
 											int& timer = versusMatch.tempTimerID[i];
 
 											if (!m_Clock->IsTimerRunning(timer)){
@@ -1447,6 +1407,11 @@ bool SystemClass::OnVersusMode(){
 													bullet = 0;
 													delete[] versusMatch.tempTimerID;
 													versusMatch.tempTimerID = 0;
+
+													versusMatch.shooting = false;
+													versusMatch.isSpellSelected = false;
+
+													NextPhase();
 												}
 												else{
 													for (int j = i; j < versusMatch.tempBulletNum - 1; j++){
@@ -1514,16 +1479,19 @@ bool SystemClass::OnVersusMode(){
 					//Dream Sign "Evil-Sealing Circle"
 					case 1:
 
+						NextPhase();
 						break;
 
 					default:
+
+						NextPhase();
 						break;
 					}
 					break;
 
 				case MARISA:
-					//TODO
 
+					NextPhase();
 					break;
 				}
 			}
@@ -1532,27 +1500,13 @@ bool SystemClass::OnVersusMode(){
 
 		//error handling: anything else just skips the turn
 		default:
-
-			//change from Act Phase to Move Phase
-			versusMatch.movePhase = true;
-			versusMatch.actionPhase = false;
-
-			//switch player turn
-			versusMatch.playerTurn++;
-			if (versusMatch.playerTurn >= versusMatch.numPlayers){
-				versusMatch.playerTurn = 0;
-			}
-
-			//announce Move Phase
-			m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
-
-			//reset the player choice to PENDING_CHOICE
-			versusMatch.choice = PENDING_CHOICE;
+			NextPhase();
 		}
 	}
 	
-	//display the character's status window if player hasn't made a choice yet
-	if (versusMatch.choice == PENDING_CHOICE){
+	//display the character's status window if player hasn't made a move or
+	//has not yet chosen a spell card while selecting spell cards
+	if (versusMatch.choice == PENDING_CHOICE || (versusMatch.choice == SPELL && !versusMatch.isSpellSelected)){
 		for (int i = 0; i < versusMatch.numPlayers; i++){
 			
 			//set rectangle containing character sprite
@@ -2235,23 +2189,62 @@ bool SystemClass::CollisionWithWall(XMFLOAT2 pos, float radius){
 }
 
 //returns true if a button is left-clicked
-bool SystemClass::buttonLeftClicked(RECT rect){
+bool SystemClass::ButtonLeftClicked(RECT rect){
 	return (m_Input->IsKeyJustReleased(VK_LBUTTON) && Contains(rect, lClickPos) && Contains(rect, mousePt));
 }
 
 //returns true if given velocity is zero
-bool SystemClass::isStationary(XMFLOAT2 speed){
+bool SystemClass::IsStationary(XMFLOAT2 speed){
 	return ((speed.x == 0) && (speed.y == 0));
 }
 
 //returns true if all given velocities are zero
-bool SystemClass::allStationary(XMFLOAT2* speedList, int size){
+bool SystemClass::AllStationary(XMFLOAT2* speedList, int size){
 	for (int i = 0; i < size; i++){
-		if (!(isStationary(speedList[i]))){
+		if (!(IsStationary(speedList[i]))){
 			return false;
 		}
 	}
 	return true;
+}
+
+//moves onto next phase or next player's turn
+void SystemClass::NextPhase(){
+	
+	//if current phase is Move Phase
+	if (versusMatch.movePhase){
+		//move on to Act Phase
+		versusMatch.movePhase = false;
+		versusMatch.actionPhase = true;
+
+		//announce Move Phase
+		m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
+
+		//reset the player choice to PENDING_CHOICE
+		versusMatch.choice = PENDING_CHOICE;
+	}
+
+	//if current phase is Act Phase
+	else{
+		//move on to Move Phase
+		versusMatch.movePhase = true;
+		versusMatch.actionPhase = false;
+
+		//add 2 MP to current player
+		versusMatch.player[versusMatch.playerTurn].mp += 2;
+
+		//next player turn
+		versusMatch.playerTurn++;
+		if (versusMatch.playerTurn >= versusMatch.numPlayers){
+			versusMatch.playerTurn = 0;
+		}
+
+		//announce Move Phase
+		m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
+
+		//reset the player choice to PENDING_CHOICE
+		versusMatch.choice = PENDING_CHOICE;
+	}
 }
 
 //returns true if a character hurtbox is present within given radius from pos
