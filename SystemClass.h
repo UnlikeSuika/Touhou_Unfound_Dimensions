@@ -170,6 +170,8 @@ private:
 		int reimuSpell01BulletBg[3];             //array of IDs of bitmaps for backgrounds of "Fantasy Seal"
 		int reimuSpell01Tail[3];                 //array of IDs of bitmaps for tails of "Fantasy Seal"
 
+		int hit01BitmapID[19];                   //array of IDs of bitmaps for physical impact 1
+
 		int statsWindowBitmapID;                 //ID of bitmap that displays character's status window
 		int hpDispSentID;                        //ID of sentence object that displays character's current HP
 		int mpDispSentID;                        //ID of sentence object that displays character's current MP
@@ -179,6 +181,8 @@ private:
 		float* tempAngle;                        //(heap)temporary variable for recording angle
 		BulletType* tempBullet;                  //heap array of temporary bullets
 		int tempBulletNum;                       //number of temporary bullets
+		int* tempTimerID;                        //heap array of IDs of temporary timers
+		int tempTimerIDNum;                      //number of IDs of temporary timers
 	};
 
 	/*********************************************************

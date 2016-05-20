@@ -1286,6 +1286,8 @@ bool SystemClass::OnVersusMode(){
 
 							versusMatch.tempBulletNum = 6;
 							versusMatch.tempBullet = new BulletType[versusMatch.tempBulletNum];
+							versusMatch.tempTimerIDNum = 6;
+							versusMatch.tempTimerID = new int[versusMatch.tempTimerIDNum];
 
 							for (int i = 0; i < versusMatch.tempBulletNum; i++){
 
@@ -1369,7 +1371,7 @@ bool SystemClass::OnVersusMode(){
 									}
 
 									//if temporary speed is not zero, set velocity and angle of the orb to temporary values
-									else{
+									if (versusMatch.tempSpeed->x != 0.0f || versusMatch.tempSpeed->y != 0.0f){
 										bullet[bulletIndex].moveAngle = *versusMatch.tempAngle;
 										bullet[bulletIndex].moveSpeed.x = 10.0f*cos(*versusMatch.tempAngle);
 										bullet[bulletIndex].moveSpeed.y = 10.0f*sin(*versusMatch.tempAngle);
@@ -1385,36 +1387,83 @@ bool SystemClass::OnVersusMode(){
 									bullet[i].position.x += bullet[i].moveSpeed.x;
 									bullet[i].position.y += bullet[i].moveSpeed.y;
 
+									//index of the character that made collision
 									int collidedChar = -1;
 
-									//if the orb is moving and is within 150 pixels from the opponent
-									if (CollisionWithCharacter(bullet[i].position, 150.0f, collidedChar) && bullet[i].moveSpeed.x != 0.0f && bullet[i].moveSpeed.y != 0.0f){
-										float angleToOpponent = atan2(versusMatch.player[collidedChar].position.y - bullet[i].position.y, versusMatch.player[collidedChar].position.x - bullet[i].position.x);
-										float angleIncrement = XM_PI / 60.0f;
-										float angleDiff = bullet[i].moveAngle - angleToOpponent;
-										
-										//tilt the move angle towards the opponent
-										if (angleDiff > XM_PI){
-											bullet[i].moveAngle += angleIncrement;
-										}
-										else if (angleDiff < -1.0f*XM_PI){
-											bullet[i].moveAngle -= angleIncrement;
-										}
-										else if (angleDiff >= angleIncrement){
-											bullet[i].moveAngle -= angleIncrement;
-										}
-										else if (angleDiff < -1.0f*angleIncrement){
-											bullet[i].moveAngle += angleIncrement;
-										}
-										else{
-											bullet[i].moveAngle = angleToOpponent;
+									//if the orb is moving
+									if (bullet[i].moveSpeed.x != 0.0f || bullet[i].moveSpeed.y != 0.0f){
+
+										//if the orb has made collision with the opponent
+										// !!!
+
+										if (CollisionWithCharacter(bullet[i].position, 10.0f, collidedChar)){
+											bullet[i].position = versusMatch.player[collidedChar].position;
+											bullet[i].moveSpeed.x = 0.0f;
+											bullet[i].moveSpeed.y = 0.0f;
+											versusMatch.player[collidedChar].hp -= bullet[i].damage;											
 										}
 
-										//update orb's velocity
-										bullet[i].moveSpeed.x = 10.0f*cos(bullet[i].moveAngle);
-										bullet[i].moveSpeed.y = 10.0f*sin(bullet[i].moveAngle);
+										//if the orb is within 150 pixels from the opponent
+										else if (CollisionWithCharacter(bullet[i].position, 150.0f, collidedChar)){
+											float angleToOpponent = atan2(versusMatch.player[collidedChar].position.y - bullet[i].position.y, versusMatch.player[collidedChar].position.x - bullet[i].position.x);
+											float angleIncrement = XM_PI / 60.0f;
+											float angleDiff = bullet[i].moveAngle - angleToOpponent;
+
+											//tilt the move angle towards the opponent
+											if (angleDiff > XM_PI){
+												bullet[i].moveAngle += angleIncrement;
+											}
+											else if (angleDiff < -1.0f*XM_PI){
+												bullet[i].moveAngle -= angleIncrement;
+											}
+											else if (angleDiff >= angleIncrement){
+												bullet[i].moveAngle -= angleIncrement;
+											}
+											else if (angleDiff < -1.0f*angleIncrement){
+												bullet[i].moveAngle += angleIncrement;
+											}
+											else{
+												bullet[i].moveAngle = angleToOpponent;
+											}
+
+											//update orb's velocity
+											bullet[i].moveSpeed.x = 10.0f*cos(bullet[i].moveAngle);
+											bullet[i].moveSpeed.y = 10.0f*sin(bullet[i].moveAngle);
+										}
 									}
+									//if the orb is not moving
+									else{
+										int collidedChar = -1;
+										if (CollisionWithCharacter(bullet[i].position, 10.0f, collidedChar)){
+											int& timer = versusMatch.tempTimerID[i];
 
+											if (!m_Clock->IsTimerRunning(timer)){
+												m_Clock->AddTimer(timer, 18);
+											}
+											if (m_Clock->TimeLeft(timer) == 0){
+
+												if (versusMatch.tempBulletNum == 1){
+													delete[] bullet;
+													bullet = 0;
+													delete[] versusMatch.tempTimerID;
+													versusMatch.tempTimerID = 0;
+												}
+												else{
+													for (int j = i; j < versusMatch.tempBulletNum - 1; j++){
+														bullet[j].moveAngle = bullet[j + 1].moveAngle;
+														bullet[j].moveSpeed = bullet[j + 1].moveSpeed;
+														bullet[j].pBitmapID = bullet[j + 1].pBitmapID;
+														bullet[j].position = bullet[j + 1].position;
+
+														versusMatch.tempTimerID[j] = versusMatch.tempTimerID[j + 1];
+													}
+												}
+
+												versusMatch.tempBulletNum--;
+												versusMatch.tempTimerIDNum--;
+											}
+										}
+									}
 								}
 							}
 
@@ -1425,11 +1474,38 @@ bool SystemClass::OnVersusMode(){
 								//the orb spins 720 degrees per 60 frames
 								float angle = (float)m_Clock->GetFrameCount()*XM_PI / 15.0f;
 
-								//update and render orb bitmaps
-								m_Graphics->UpdateBitmap(versusMatch.reimuSpell01BulletBg[i % 3], (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
-								m_Graphics->RenderBitmap(versusMatch.reimuSpell01BulletBg[i % 3]);
-								m_Graphics->UpdateBitmap(*bullet.pBitmapID, (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
-								m_Graphics->RenderBitmap(*bullet.pBitmapID);
+								//if the timer for physical impact is running
+								if (m_Clock->IsTimerRunning(versusMatch.tempTimerID[i])){
+
+									int timeLeft = (int)m_Clock->TimeLeft(versusMatch.tempTimerID[i]);
+
+									//update and render orb bitmaps if time left >= 8
+									if (timeLeft >= 8){
+										for (int j = 0; j < 3; j++){
+											if (*bullet.pBitmapID == versusMatch.reimuSpell01Bullet[j]){
+												m_Graphics->UpdateBitmap(versusMatch.reimuSpell01BulletBg[j], (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
+												m_Graphics->RenderBitmap(versusMatch.reimuSpell01BulletBg[j]);
+												break;
+											}
+										}
+										m_Graphics->UpdateBitmap(*bullet.pBitmapID, (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
+										m_Graphics->RenderBitmap(*bullet.pBitmapID);
+									}
+
+									m_Graphics->UpdateBitmap(versusMatch.hit01BitmapID[18 - timeLeft], (int)round(bullet.position.x), (int)round(bullet.position.y));
+									m_Graphics->RenderBitmap(versusMatch.hit01BitmapID[18 - timeLeft]);
+								}
+								else{
+									for (int j = 0; j < 3; j++){
+										if (*bullet.pBitmapID == versusMatch.reimuSpell01Bullet[j]){
+											m_Graphics->UpdateBitmap(versusMatch.reimuSpell01BulletBg[j], (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
+											m_Graphics->RenderBitmap(versusMatch.reimuSpell01BulletBg[j]);
+											break;
+										}
+									}
+									m_Graphics->UpdateBitmap(*bullet.pBitmapID, (int)round(bullet.position.x), (int)round(bullet.position.y), angle);
+									m_Graphics->RenderBitmap(*bullet.pBitmapID);
+								}
 							}
 						}
 
@@ -1668,6 +1744,8 @@ bool SystemClass::InitializeVersusMode(){
 	versusMatch.tempSpeed = 0;
 	versusMatch.tempBullet = 0;
 	versusMatch.tempBulletNum = 0;
+	versusMatch.tempTimerID = 0;
+	versusMatch.tempTimerIDNum = 0;
 
 	//add timer for announcement of current phase
 	m_Clock->AddTimer(versusMatch.phaseAnnounceTimerID, 240);
@@ -1841,6 +1919,26 @@ bool SystemClass::InitializeVersusMode(){
 		}
 	}
 
+	//add bitmaps for physical impact 1
+	for (int i = 0; i < 19; i++){
+		char path[MAX_CHARACTER_COUNT];
+		string pathStr;
+		RECT bitmapRect = { 0, 0, 288, 288 };
+
+		if (i + 1 < 10){
+			pathStr = "/Data/general/hit_01_0" + to_string(i + 1) + ".tga";
+		}
+		else{
+			pathStr = "/Data/general/hit_01_" + to_string(i + 1) + ".tga";
+		}
+		strcpy(path, pathStr.c_str());
+
+		result = m_Graphics->AddBitmap(m_hwnd, path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.hit01BitmapID[i]);
+		if (!result){
+			return false;
+		}
+	}
+
 	//add sentence object for showing spell card list
 	result = m_Graphics->AddSentence(m_hwnd, " ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.spellNameSentID);
 	if (!result){
@@ -1979,6 +2077,10 @@ void SystemClass::ShutdownVersusMode(){
 		delete[] versusMatch.tempBullet;
 		versusMatch.tempBullet = 0;
 	}
+	if (versusMatch.tempTimerID){
+		delete[] versusMatch.tempTimerID;
+		versusMatch.tempTimerID = 0;
+	}
 	m_Graphics->DeleteBitmap(versusMatch.map.mapBitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.type01color01bulletID);
 	m_Graphics->DeleteBitmap(versusMatch.movePhaseAnnounceBitmapID);
@@ -2006,6 +2108,9 @@ void SystemClass::ShutdownVersusMode(){
 		m_Graphics->DeleteBitmap(versusMatch.reimuSpell01Bullet[i]);
 		m_Graphics->DeleteBitmap(versusMatch.reimuSpell01BulletBg[i]);
 		m_Graphics->DeleteBitmap(versusMatch.reimuSpell01Tail[i]);
+	}
+	for (int i = 0; i < 19; i++){
+		m_Graphics->DeleteBitmap(versusMatch.hit01BitmapID[i]);
 	}
 	m_Graphics->DeleteSentence(versusMatch.spellNameSentID);
 	m_Graphics->DeleteSentence(versusMatch.spellDescSentID);
@@ -2187,7 +2292,7 @@ void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float r
 	}
 
 	//if player is currently shooting/moving, update and render aim circle
-	if (m_Input->IsKeyDown(VK_LBUTTON) && Distance(lClickPos, mousePt) <= radius){
+	if (m_Input->IsKeyDown(VK_LBUTTON) && Distance(lClickPos, mousePt) <= 50.0f){
 		m_Graphics->UpdateBitmap(versusMatch.aimCircleBitmapID, lClickPos.x, lClickPos.y);
 		m_Graphics->RenderBitmap(versusMatch.aimCircleBitmapID);
 	}
