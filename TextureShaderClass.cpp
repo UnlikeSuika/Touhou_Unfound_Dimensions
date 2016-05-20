@@ -82,11 +82,13 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 
 	hr = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader);
 	if (FAILED(hr)){
+		MessageBox(hwnd, L"Could not create vertex shader.", L"Error", MB_OK);
 		return false;
 	}
 
 	hr = device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &m_pixelShader);
 	if (FAILED(hr)){
+		MessageBox(hwnd, L"Could not create pixel shader.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -109,6 +111,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	
 	hr = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_layout);
 	if (FAILED(hr)){
+		MessageBox(hwnd, L"Could not create input layout.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -126,6 +129,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	matrixBufferDesc.StructureByteStride = 0;
 	hr = device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
 	if (FAILED(hr)){
+		MessageBox(hwnd, L"Could not create matrix buffer.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -138,6 +142,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	transparentBufferDesc.StructureByteStride = 0;
 	hr = device->CreateBuffer(&transparentBufferDesc, NULL, &m_pixelShaderCBuffer);
 	if (FAILED(hr)){
+		MessageBox(hwnd, L"Could not create transparent buffer.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -157,6 +162,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	hr = device->CreateSamplerState(&samplerDesc, &m_sampleState);
 	if (FAILED(hr)){
+		MessageBox(hwnd, L"Could not create sampler state.", L"Error", MB_OK);
 		return false;
 	}
 
