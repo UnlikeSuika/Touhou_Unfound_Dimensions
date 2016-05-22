@@ -6,12 +6,16 @@
 #include <Windows.h>
 #include <DirectXMath.h>
 #include <fstream>
+#include <string>
+#include <sstream>
 
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"d3d11.lib")
 
 using namespace std;
 using namespace DirectX;
+
+const int MAX_WCHAR_COUNT = 100;
 
 const XMFLOAT4 NULL_COLOR = { 0.0f, 0.0f, 0.0f, 0.0f };
 const XMFLOAT4 SOLID_RED = { 1.0f, 0.0f, 0.0f, 1.0f };
