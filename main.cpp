@@ -30,7 +30,7 @@ To-do list or reminders
 #include "SystemClass.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdShow){
-	
+
 	SystemClass* System = new SystemClass; //main SystemClass object
 	if (!System){
 		MessageBox(NULL, L"Could not create system object.", L"Error", MB_OK);

@@ -146,7 +146,6 @@ void GraphicsClass::Shutdown(){
 //Marks the start of rendering. Before this function call,
 //no bitmaps can be rendered within the given frame.
 void GraphicsClass::BeginRendering(){
-	bool result;
 	XMMATRIX worldMatrix, viewMatrix, orthoMatrix, projectionMatrix;
 	m_D3D->BeginScene(0.1f, 0.3f, 0.3f, 1.0f);
 	m_Camera->Render();
@@ -362,23 +361,24 @@ void GraphicsClass::DisableBitmapYFlip(int bitmapID){
 	}
 }
 
-//Returns width of bitmap in pixels
+//Returns width of bitmap in pixels, returns -1 if bitmap not found
 int GraphicsClass::GetBitmapWidth(int bitmapID){
-
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
 			return m_Bitmap[i].bitmapWidth;
 		}
 	}
+	return -1;
 }
 
-//Returns height of bitmap in pixels
+//Returns height of bitmap in pixels, returns -1 if bitmap not found
 int GraphicsClass::GetBitmapHeight(int bitmapID){
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
 			return m_Bitmap[i].bitmapHeight;
 		}
 	}
+	return -1;
 }
 
 //Adds a sentence with given text, position (posX, posY), and text colour

@@ -11,7 +11,7 @@
 const int MAX_CHAR_SELECT_BUTTONS = 8;   //maximum number of character options in character select screen
 const int MAX_ON_SCREEN_BULLETS = 200;   //maximum number of in-game bullets
 const int MAX_ON_SCREEN_LASERS = 10;     //maximum number of in-game lasers
-const float FRICTION = 0.1;              //factor by which speeds of in-game moving objects constantly decrease
+const float FRICTION = 0.1f;             //factor by which speeds of in-game moving objects constantly decrease
 
 // This class initializes the system objects and
 // runs the game every frame.

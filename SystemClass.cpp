@@ -660,13 +660,13 @@ bool SystemClass::OnVersusMode(){
 		}
 
 		//update bitmap position and render the sprite
-		m_Graphics->UpdateBitmap(*player.pInGameSpriteID, round(renderBitmapPosX), round(renderBitmapPosY));
+		m_Graphics->UpdateBitmap(*player.pInGameSpriteID, (int)round(renderBitmapPosX), (int)round(renderBitmapPosY));
 		m_Graphics->RenderBitmap(*player.pInGameSpriteID);
 	}
 
 	//render bullet sprites
 	for (int i = 0; i < versusMatch.numBullets; i++){
-		m_Graphics->UpdateBitmap(*versusMatch.bullet[i].pBitmapID, versusMatch.bullet[i].position.x, versusMatch.bullet[i].position.y, versusMatch.bullet[i].moveAngle);
+		m_Graphics->UpdateBitmap(*versusMatch.bullet[i].pBitmapID, (int)round(versusMatch.bullet[i].position.x), (int)round(versusMatch.bullet[i].position.y), versusMatch.bullet[i].moveAngle);
 		m_Graphics->RenderBitmap(*versusMatch.bullet[i].pBitmapID);
 	}
 
@@ -682,7 +682,7 @@ bool SystemClass::OnVersusMode(){
 			m_Graphics->UpdateBitmap(*particle.pBitmapID, particle.dimensions);
 
 			//set laser sprite's centre position
-			m_Graphics->UpdateBitmap(*particle.pBitmapID, particle.midPt.x, particle.midPt.y, laser.angle);
+			m_Graphics->UpdateBitmap(*particle.pBitmapID, (int)round(particle.midPt.x), (int)round(particle.midPt.y), laser.angle);
 
 			//render laser sprite
 			m_Graphics->RenderBitmap(*particle.pBitmapID);
@@ -1096,8 +1096,8 @@ bool SystemClass::OnVersusMode(){
 								//stretch the laser entity sprite to fit from initial to final position of laser entity
 								dim.left = 0;
 								dim.top = 0;
-								dim.bottom = round(2.0f*versusMatch.player[versusMatch.playerTurn].hitboxRadius / (float)laser.numParticles + 2.0f);
-								dim.right = round(Distance(posI, posF));
+								dim.bottom = (long)round(2.0f*versusMatch.player[versusMatch.playerTurn].hitboxRadius / (float)laser.numParticles + 2.0f);
+								dim.right = (long)round(Distance(posI, posF));
 							}
 
 							//temporary position variable is deleted
@@ -2124,14 +2124,14 @@ bool SystemClass::CollisionWithWall(XMFLOAT2 pos, float radius){
 
 			//if Y position is below the wall
 			if (pos.y > wallRect.bottom){
-				if (Distance(pos.x, pos.y, wallRect.left, wallRect.bottom) >= radius){
+				if (Distance(pos.x, pos.y, (float)wallRect.left, (float)wallRect.bottom) >= radius){
 					return true;
 				}
 			}
 
 			//if Y position is above the wall
 			else if(pos.y < wallRect.top){
-				if (Distance(pos.x, pos.y, wallRect.left, wallRect.top) >= radius){
+				if (Distance(pos.x, pos.y, (float)wallRect.left, (float)wallRect.top) >= radius){
 					return true;
 				}
 			}
@@ -2148,14 +2148,14 @@ bool SystemClass::CollisionWithWall(XMFLOAT2 pos, float radius){
 		else if (pos.x>wallRect.right){
 			//if Y position is below the wall
 			if (pos.y > wallRect.bottom){
-				if (Distance(pos.x, pos.y, wallRect.right, wallRect.bottom) >= radius){
+				if (Distance(pos.x, pos.y, (float)wallRect.right, (float)wallRect.bottom) >= radius){
 					return true;
 				}
 			}
 
 			//if Y position is above the wall
 			else if (pos.y < wallRect.top){
-				if (Distance(pos.x, pos.y, wallRect.right, wallRect.top) >= radius){
+				if (Distance(pos.x, pos.y, (float)wallRect.right, (float)wallRect.top) >= radius){
 					return true;
 				}
 			}
