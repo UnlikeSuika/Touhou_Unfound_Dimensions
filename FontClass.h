@@ -1,5 +1,5 @@
-#ifndef FONTCLASSH
-#define FONTCLASSH
+#ifndef _FONT_CLASS_H_
+#define _FONT_CLASS_H_
 
 #define _CRT_SECURE_NO_WARNINGS
 

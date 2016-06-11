@@ -1,5 +1,5 @@
-#ifndef BITMAPCLASSH
-#define BITMAPCLASSH
+#ifndef _BITMAP_CLASS_H_
+#define _BITMAP_CLASS_H_
 
 #include <D3D11.h>
 #include <directxmath.h>

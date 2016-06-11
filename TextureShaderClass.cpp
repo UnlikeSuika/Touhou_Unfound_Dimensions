@@ -34,8 +34,8 @@ void TextureShaderClass::Shutdown(){
 	ShutdownShader();
 }
 
-bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float blend, XMFLOAT4 hueColor, bool xFlip, bool yFlip){
-	bool result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, blend, hueColor, xFlip, yFlip);
+bool TextureShaderClass::Render(HWND hwnd, ID3D11DeviceContext* deviceContext, int indexCount, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float blend, XMFLOAT4 hueColor, bool xFlip, bool yFlip){
+	bool result = SetShaderParameters(hwnd, deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, blend, hueColor, xFlip, yFlip);
 	if (!result){
 		return false;
 	}
@@ -82,27 +82,13 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 
 	hr = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader);
 	if (FAILED(hr)){
-		wstringstream wstream;
-		wstream << hex << hr;
-		wstring hrStr(wstream.str());
-		
-		WCHAR errStr[MAX_WCHAR_COUNT] = { 0 };
-		wcscat_s(errStr, MAX_WCHAR_COUNT, L"Could not create vertex shader with error: ");
-		wcscat_s(errStr, MAX_WCHAR_COUNT, hrStr.c_str());
-		MessageBox(hwnd, errStr, L"Error", MB_OK);
+		OutputErrorMessage(hwnd, hr, L"Could not create vertex shader with error: ");
 		return false;
 	}
 
 	hr = device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &m_pixelShader);
 	if (FAILED(hr)){
-		wstringstream wstream;
-		wstream << hex << hr;
-		wstring hrStr(wstream.str());
-
-		WCHAR errStr[MAX_WCHAR_COUNT] = { 0 };
-		wcscat_s(errStr, MAX_WCHAR_COUNT, L"Could not create pixel shader with error: ");
-		wcscat_s(errStr, MAX_WCHAR_COUNT, hrStr.c_str());
-		MessageBox(hwnd, errStr, L"Error", MB_OK);
+		OutputErrorMessage(hwnd, hr, L"Could not create pixel shader with error: ");
 		return false;
 	}
 
@@ -125,14 +111,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	
 	hr = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_layout);
 	if (FAILED(hr)){
-		wstringstream wstream;
-		wstream << hex << hr;
-		wstring hrStr(wstream.str());
-
-		WCHAR errStr[MAX_WCHAR_COUNT] = { 0 };
-		wcscat_s(errStr, MAX_WCHAR_COUNT, L"Could not create input layout with error: ");
-		wcscat_s(errStr, MAX_WCHAR_COUNT, hrStr.c_str());
-		MessageBox(hwnd, errStr, L"Error", MB_OK);
+		OutputErrorMessage(hwnd, hr, L"Could not create input layout with error: ");
 		return false;
 	}
 
@@ -150,14 +129,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	matrixBufferDesc.StructureByteStride = 0;
 	hr = device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
 	if (FAILED(hr)){
-		wstringstream wstream;
-		wstream << hex << hr;
-		wstring hrStr(wstream.str());
-
-		WCHAR errStr[MAX_WCHAR_COUNT] = { 0 };
-		wcscat_s(errStr, MAX_WCHAR_COUNT, L"Could not create matrix buffer with error: ");
-		wcscat_s(errStr, MAX_WCHAR_COUNT, hrStr.c_str());
-		MessageBox(hwnd, errStr, L"Error", MB_OK);
+		OutputErrorMessage(hwnd, hr, L"Could not create matrix buffer with error: ");
 		return false;
 	}
 
@@ -170,14 +142,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	transparentBufferDesc.StructureByteStride = 0;
 	hr = device->CreateBuffer(&transparentBufferDesc, NULL, &m_pixelShaderCBuffer);
 	if (FAILED(hr)){
-		wstringstream wstream;
-		wstream << hex << hr;
-		wstring hrStr(wstream.str());
-
-		WCHAR errStr[MAX_WCHAR_COUNT] = { 0 };
-		wcscat_s(errStr, MAX_WCHAR_COUNT, L"Could not create transparent buffer with error: ");
-		wcscat_s(errStr, MAX_WCHAR_COUNT, hrStr.c_str());
-		MessageBox(hwnd, errStr, L"Error", MB_OK);
+		OutputErrorMessage(hwnd, hr, L"Could not create transparent buffer with error: ");
 		return false;
 	}
 
@@ -197,14 +162,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	hr = device->CreateSamplerState(&samplerDesc, &m_sampleState);
 	if (FAILED(hr)){
-		wstringstream wstream;
-		wstream << hex << hr;
-		wstring hrStr(wstream.str());
-
-		WCHAR errStr[MAX_WCHAR_COUNT] = { 0 };
-		wcscat_s(errStr, MAX_WCHAR_COUNT, L"Could not create sampler state with error: ");
-		wcscat_s(errStr, MAX_WCHAR_COUNT, hrStr.c_str());
-		MessageBox(hwnd, errStr, L"Error", MB_OK);
+		OutputErrorMessage(hwnd, hr, L"Could not create sampler state with error: ");
 		return false;
 	}
 
@@ -254,7 +212,7 @@ void TextureShaderClass::OutputShaderErrorMessage(ID3DBlob* errorMessage, HWND h
 	MessageBox(hwnd, L"Error compiling shader. Check shader-error.txt for message.", shaderFilename, MB_OK);
 }
 
-bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float blend, XMFLOAT4 hueColor, bool xFlip, bool yFlip){
+bool TextureShaderClass::SetShaderParameters(HWND hwnd, ID3D11DeviceContext* deviceContext, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float blend, XMFLOAT4 hueColor, bool xFlip, bool yFlip){
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
@@ -263,6 +221,7 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 
 	hr = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(hr)){
+		OutputErrorMessage(hwnd, hr, L"Could not map matrix buffer with error: ");
 		return false;
 	}
 
@@ -281,6 +240,7 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 
 	hr = deviceContext->Map(m_pixelShaderCBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(hr)){
+		OutputErrorMessage(hwnd, hr, L"Could not map pixel shader C buffer with error: ");
 		return false;
 	}
 	

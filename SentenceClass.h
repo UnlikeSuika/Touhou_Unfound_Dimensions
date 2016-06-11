@@ -1,5 +1,5 @@
-#ifndef SENTENCECLASSH
-#define SENTENCECLASSH
+#ifndef _SENTENCE_CLASS_H_
+#define _SENTENCE_CLASS_H_
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -19,7 +19,7 @@ public:
 	bool Initialize(char* text, int posX, int posY, XMFLOAT4 textColor, ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight);
 	void Shutdown();
 	void UpdateSentence(char* text, int posX, int posY, XMFLOAT4 textColor);
-	bool Render(TextureShaderClass* textureShader, ID3D11DeviceContext* deviceContext, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& orthoMatrix);
+	bool Render(HWND hwnd, TextureShaderClass* textureShader, ID3D11DeviceContext* deviceContext, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& orthoMatrix);
 	int GetSentenceID();
 	int GetSentencePosX();
 	int GetSentencePosY();

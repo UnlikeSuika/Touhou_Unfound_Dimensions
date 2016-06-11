@@ -1,5 +1,5 @@
-#ifndef SYSTEMCLASSH
-#define SYSTEMCLASSH
+#ifndef _SYSTEM_CLASS_H_
+#define _SYSTEM_CLASS_H_
 
 #define WIN32_LEAN_AND_MEAN
 #define _CRT_SECURE_NO_WARNINGS

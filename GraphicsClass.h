@@ -1,5 +1,5 @@
-#ifndef GRAPHICSCLASSH
-#define GRAPHICSCLASSH
+#ifndef _GRAPHICS_CLASS_H_
+#define _GRAPHICS_CLASS_H_
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -39,7 +39,7 @@ public:
 	bool EndRendering(int screenWidth, int screenHeight);
 
 	//bitmap-related functions
-	bool AddBitmap(HWND hwnd, char* path, RECT bitmapRect, int screenWidth, int screenHeight, int& bitmapID, float angle = 0.0f, float blend = 1.0f, XMFLOAT4 hueColor = NULL_COLOR);
+	bool AddBitmap(char* path, RECT bitmapRect, int screenWidth, int screenHeight, int& bitmapID, float angle = 0.0f, float blend = 1.0f, XMFLOAT4 hueColor = NULL_COLOR);
 	void UpdateBitmap(int bitmapID, int posX, int posY, float angle = 0.0f, float blend = 1.0f, XMFLOAT4 hueColor = NULL_COLOR);
 	void UpdateBitmap(int bitmapID, RECT rc, float angle = 0.0f, float blend = 1.0f, XMFLOAT4 hueColor = NULL_COLOR);
 	void DeleteBitmap(int bitmapID);
@@ -52,13 +52,13 @@ public:
 	int GetBitmapHeight(int bitmapID);
 
 	//sentence-related functions
-	bool AddSentence(HWND hwnd, char* text, int posX, int posY, int screenWidth, int screenHeight, XMFLOAT4 textColor, int& id);
+	bool AddSentence(char* text, int posX, int posY, int screenWidth, int screenHeight, XMFLOAT4 textColor, int& id);
 	void UpdateSentence(int sentenceID, char* text, int posX, int posY, XMFLOAT4 textColor);
 	bool RenderSentence(int sentenceID);
 	void DeleteSentence(int& sentenceID);
 
 	//functions related to fading effect
-	bool InitializeFadingEffect(HWND hwnd, int screenWidth, int screenHeight);
+	bool InitializeFadingEffect(int screenWidth, int screenHeight);
 	void StartFadingEffect();
 	void SetFadingEffect(float blend);
 	void StopFadingEffect();
@@ -81,6 +81,7 @@ private:
 	};
 	
 	//objects and variables related to app system
+	HWND m_hwnd;                        //handle to window
 	D3DClass* m_D3D;                    //D3DClass object
 	CameraClass* m_Camera;              //CameraClass object
 	TextureShaderClass* m_TextureShader;//TextureShaderClass object

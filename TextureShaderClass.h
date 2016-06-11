@@ -1,5 +1,5 @@
-#ifndef TEXTURESHADERCLASSH
-#define TEXTURESHADERCLASSH
+#ifndef _TEXTURE_SHADER_CLASS_H_
+#define _TEXTURE_SHADER_CLASS_H_
 
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
@@ -7,7 +7,7 @@
 #include <DirectXMath.h>
 #include <fstream>
 #include <string>
-#include <sstream>
+#include "HResultErrorMessage.h"
 
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"d3d11.lib")
@@ -34,7 +34,7 @@ public:
 	~TextureShaderClass();
 	bool virtual Initialize(ID3D11Device* device, HWND hwnd);
 	void virtual Shutdown();
-	bool virtual Render(ID3D11DeviceContext* deviceContext, int indexCount, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float blend, XMFLOAT4 hueColor, bool xFlip = false, bool yFlip = false);
+	bool virtual Render(HWND hwnd, ID3D11DeviceContext* deviceContext, int indexCount, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float blend, XMFLOAT4 hueColor, bool xFlip = false, bool yFlip = false);
 private:
 	struct MatrixBufferType{
 		XMMATRIX world;
@@ -61,7 +61,7 @@ private:
 	bool virtual InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename);
 	void virtual ShutdownShader();
 	void virtual OutputShaderErrorMessage(ID3DBlob* errorMessage, HWND hwnd, WCHAR* shaderFilename);
-	bool virtual SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float blend, XMFLOAT4 hueColor, bool xFlip, bool yFlip);
+	bool virtual SetShaderParameters(HWND hwnd, ID3D11DeviceContext* deviceContext, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float blend, XMFLOAT4 hueColor, bool xFlip, bool yFlip);
 	void virtual RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
 };
 

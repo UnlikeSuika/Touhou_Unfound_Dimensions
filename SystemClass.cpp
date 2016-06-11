@@ -60,7 +60,7 @@ bool SystemClass::Initialize(){
 	
 	//Initialize the main menu screen background
 	RECT screenRect = { 0, 0, m_screenWidth, m_screenHeight };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/title.tga", screenRect, m_screenWidth, m_screenHeight, mainMenuBackgroundID);
+	result = m_Graphics->AddBitmap("/Data/title.tga", screenRect, m_screenWidth, m_screenHeight, mainMenuBackgroundID);
 	if (!result){
 		return false;
 	}
@@ -73,7 +73,7 @@ bool SystemClass::Initialize(){
 	gameStartButton.buttonRect.right = m_screenWidth / 2 + 150;
 	gameStartButton.buttonRect.top = m_screenHeight / 2 - 50;
 	gameStartButton.buttonRect.bottom = m_screenHeight / 2 + 50;
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/gameStartButton.tga", gameStartButton.buttonRect, m_screenWidth, m_screenHeight, gameStartButton.bitmapID);
+	result = m_Graphics->AddBitmap("/Data/gameStartButton.tga", gameStartButton.buttonRect, m_screenWidth, m_screenHeight, gameStartButton.bitmapID);
 	if (!result){
 		return false;
 	}
@@ -1606,14 +1606,14 @@ bool SystemClass::InitializeCharSelect(){
 	}
 
 	//add bitmap for Reimu's character select button
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_reimu.tga", charSelectButton[0].buttonRect,
+	result = m_Graphics->AddBitmap("/Data/character_select_screen_reimu.tga", charSelectButton[0].buttonRect,
 		m_screenWidth, m_screenHeight, charSelectButton[0].bitmapID);
 	if (!result){
 		return false;
 	}
 
 	//add bitmap for Marisa's character select button
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_marisa.tga", charSelectButton[1].buttonRect,
+	result = m_Graphics->AddBitmap("/Data/character_select_screen_marisa.tga", charSelectButton[1].buttonRect,
 		m_screenWidth, m_screenHeight, charSelectButton[1].bitmapID);
 	if (!result){
 		return false;
@@ -1621,7 +1621,7 @@ bool SystemClass::InitializeCharSelect(){
 
 	//add bitmaps for rest of the char. sel. buttons (unselectable)
 	for (int i = 2; i < MAX_CHAR_SELECT_BUTTONS; i++){
-		result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_locked.tga", charSelectButton[i].buttonRect,
+		result = m_Graphics->AddBitmap("/Data/character_select_screen_locked.tga", charSelectButton[i].buttonRect,
 			m_screenWidth, m_screenHeight, charSelectButton[i].bitmapID);
 		if (!result){
 			return false;
@@ -1632,7 +1632,7 @@ bool SystemClass::InitializeCharSelect(){
 	//over which the mouse cursor is hovering. this bitmap is used to
 	//highlight such select button.
 	rc = { 0, 100, 0, 100 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_selected.tga", rc, m_screenWidth,
+	result = m_Graphics->AddBitmap("/Data/character_select_screen_selected.tga", rc, m_screenWidth,
 		m_screenHeight, selectedCharButtonID);
 	if (!result){
 		return false;
@@ -1640,7 +1640,7 @@ bool SystemClass::InitializeCharSelect(){
 
 	//background bitmap for char. sel. mode
 	rc = { 0, 0, m_screenWidth, m_screenHeight };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_background.tga", rc, m_screenWidth,
+	result = m_Graphics->AddBitmap("/Data/character_select_screen_background.tga", rc, m_screenWidth,
 		m_screenHeight, charSelectModeBackgroundID);
 	if (!result){
 		return false;
@@ -1649,14 +1649,14 @@ bool SystemClass::InitializeCharSelect(){
 	rc = { 0, 0, 400, 500 };
 
 	//avatar bitmap for Reimu
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_reimu_avatar.tga", rc, m_screenWidth,
+	result = m_Graphics->AddBitmap("/Data/character_select_screen_reimu_avatar.tga", rc, m_screenWidth,
 		m_screenHeight, reimuAvatarID);
 	if (!result){
 		return false;
 	}
 
 	//avatar bitmap for Marisa
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/character_select_screen_marisa_avatar.tga", rc, m_screenWidth,
+	result = m_Graphics->AddBitmap("/Data/character_select_screen_marisa_avatar.tga", rc, m_screenWidth,
 		m_screenHeight, marisaAvatarID);
 	if (!result){
 		return false;
@@ -1706,20 +1706,20 @@ bool SystemClass::InitializeVersusMode(){
 
 	//add bitmap of the background map
 	RECT screenRect = { 0, 0, m_screenWidth, m_screenHeight };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/test_map.tga", screenRect, m_screenWidth, m_screenHeight, versusMatch.map.mapBitmapID);
+	result = m_Graphics->AddBitmap("/Data/test_map.tga", screenRect, m_screenWidth, m_screenHeight, versusMatch.map.mapBitmapID);
 	if (!result){
 		return false;
 	}
 
 	//add bitmaps for the phase announcement
 	RECT announceRect = { 0, 0, 398, 37 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_move_phase_announce.tga", announceRect,
+	result = m_Graphics->AddBitmap("/Data/in_game_move_phase_announce.tga", announceRect,
 		m_screenWidth, m_screenHeight, versusMatch.movePhaseAnnounceBitmapID);
 	if (!result){
 		return false;
 	}
 	announceRect = { 0, 0, 338, 37 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_act_phase_announce.tga", announceRect,
+	result = m_Graphics->AddBitmap("/Data/in_game_act_phase_announce.tga", announceRect,
 		m_screenWidth, m_screenHeight, versusMatch.actPhaseAnnounceBitmapID);
 	if (!result){
 		return false;
@@ -1727,7 +1727,7 @@ bool SystemClass::InitializeVersusMode(){
 
 	//add bitmap for Pass choice button
 	versusMatch.passButton.buttonRect = { 0, 0, 150, 50 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_pass_button.tga", versusMatch.passButton.buttonRect,
+	result = m_Graphics->AddBitmap("/Data/in_game_pass_button.tga", versusMatch.passButton.buttonRect,
 		m_screenWidth, m_screenHeight, versusMatch.passButton.bitmapID);
 	if (!result){
 		return false;
@@ -1735,7 +1735,7 @@ bool SystemClass::InitializeVersusMode(){
 
 	//add bitmap for Move choice button
 	versusMatch.moveButton.buttonRect = { 0, 0, 150, 50 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_move_button.tga", versusMatch.moveButton.buttonRect,
+	result = m_Graphics->AddBitmap("/Data/in_game_move_button.tga", versusMatch.moveButton.buttonRect,
 		m_screenWidth, m_screenHeight, versusMatch.moveButton.bitmapID);
 	if (!result){
 		return false;
@@ -1743,7 +1743,7 @@ bool SystemClass::InitializeVersusMode(){
 
 	//add bitmap for Shoot choice button
 	versusMatch.shootButton.buttonRect = { 0, 0, 150, 50 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_shoot_button.tga", versusMatch.shootButton.buttonRect,
+	result = m_Graphics->AddBitmap("/Data/in_game_shoot_button.tga", versusMatch.shootButton.buttonRect,
 		m_screenWidth, m_screenHeight, versusMatch.shootButton.bitmapID);
 	if (!result){
 		return false;
@@ -1751,7 +1751,7 @@ bool SystemClass::InitializeVersusMode(){
 
 	//add bitmap for Spell choice button
 	versusMatch.spellButton.buttonRect = { 0, 0, 150, 50 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_spell_button.tga", versusMatch.spellButton.buttonRect,
+	result = m_Graphics->AddBitmap("/Data/in_game_spell_button.tga", versusMatch.spellButton.buttonRect,
 		m_screenWidth, m_screenHeight, versusMatch.spellButton.bitmapID);
 	if (!result){
 		return false;
@@ -1759,7 +1759,7 @@ bool SystemClass::InitializeVersusMode(){
 
 	//add bitmap of aiming circle
 	RECT aimCircleRect = { 0, 0, 100, 100 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_aim.tga", aimCircleRect, m_screenWidth, m_screenHeight,
+	result = m_Graphics->AddBitmap("/Data/in_game_aim.tga", aimCircleRect, m_screenWidth, m_screenHeight,
 		versusMatch.aimCircleBitmapID);
 	if (!result){
 		return false;
@@ -1767,7 +1767,7 @@ bool SystemClass::InitializeVersusMode(){
 
 	//add bitmaps for all types of bullets
 	RECT bulletRect = { 0, 0, 14, 12 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/bullet/type_01_color_01.tga", bulletRect, m_screenWidth,
+	result = m_Graphics->AddBitmap("/Data/bullet/type_01_color_01.tga", bulletRect, m_screenWidth,
 		m_screenHeight, versusMatch.type01color01bulletID);
 	if (!result){
 		return false;
@@ -1775,7 +1775,7 @@ bool SystemClass::InitializeVersusMode(){
 
 	//add bitmap for the character status window
 	RECT statsRect = { 0, 0, 100, 80 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/in_game_stats_window.tga", statsRect, m_screenWidth,
+	result = m_Graphics->AddBitmap("/Data/in_game_stats_window.tga", statsRect, m_screenWidth,
 		m_screenHeight, versusMatch.statsWindowBitmapID);
 	if (!result){
 		return false;
@@ -1787,7 +1787,7 @@ bool SystemClass::InitializeVersusMode(){
 		char path[MAX_CHARACTER_COUNT];
 		string pathStr = "/Data/in_game_reimu_stationary_0" + to_string(i + 1) + ".tga";
 		strcpy(path, pathStr.c_str());
-		result = m_Graphics->AddBitmap(m_hwnd, path, charRect, m_screenWidth, m_screenHeight, versusMatch.reimuStationaryBitmapID[i]);
+		result = m_Graphics->AddBitmap(path, charRect, m_screenWidth, m_screenHeight, versusMatch.reimuStationaryBitmapID[i]);
 		if (!result){
 			return false;
 		}
@@ -1799,7 +1799,7 @@ bool SystemClass::InitializeVersusMode(){
 		char path[MAX_CHARACTER_COUNT];
 		string pathStr = "/Data/in_game_marisa_stationary_0" + to_string(i + 1) + ".tga";
 		strcpy(path, pathStr.c_str());
-		result = m_Graphics->AddBitmap(m_hwnd, path, charRect, m_screenWidth, m_screenHeight, versusMatch.marisaStationaryBitmapID[i]);
+		result = m_Graphics->AddBitmap(path, charRect, m_screenWidth, m_screenHeight, versusMatch.marisaStationaryBitmapID[i]);
 		if (!result){
 			return false;
 		}
@@ -1820,7 +1820,7 @@ bool SystemClass::InitializeVersusMode(){
 			pathStr = "/Data/bullet/laser_color_01_particle_" + to_string(i + 1) + ".tga";
 		}
 		strcpy(path, pathStr.c_str());
-		result = m_Graphics->AddBitmap(m_hwnd, path, particleRect, m_screenWidth, m_screenHeight, versusMatch.color01laserParticleID[i]);
+		result = m_Graphics->AddBitmap(path, particleRect, m_screenWidth, m_screenHeight, versusMatch.color01laserParticleID[i]);
 		if (!result){
 			return false;
 		}
@@ -1829,7 +1829,7 @@ bool SystemClass::InitializeVersusMode(){
 	//initialize button for spell titles
 	for (int i = 0; i < 5; i++){
 		versusMatch.spellNameButton[i].buttonRect = { 0, 0, 500, 30 };
-		result = m_Graphics->AddBitmap(m_hwnd, "/Data/spell_name_box.tga", versusMatch.spellNameButton[i].buttonRect, m_screenWidth, m_screenHeight, versusMatch.spellNameButton[i].bitmapID);
+		result = m_Graphics->AddBitmap("/Data/spell_name_box.tga", versusMatch.spellNameButton[i].buttonRect, m_screenWidth, m_screenHeight, versusMatch.spellNameButton[i].bitmapID);
 		if (!result){
 			return false;
 		}
@@ -1837,7 +1837,7 @@ bool SystemClass::InitializeVersusMode(){
 
 	//add bitmap for spell description box
 	RECT spellDescRect = { 0, 0, 280, 161 };
-	result = m_Graphics->AddBitmap(m_hwnd, "/Data/spell_desc_box.tga", spellDescRect, m_screenWidth, m_screenHeight, versusMatch.spellDescBitmapID);
+	result = m_Graphics->AddBitmap("/Data/spell_desc_box.tga", spellDescRect, m_screenWidth, m_screenHeight, versusMatch.spellDescBitmapID);
 	if (!result){
 		return false;
 	}
@@ -1851,7 +1851,7 @@ bool SystemClass::InitializeVersusMode(){
 		pathStr = "/Data/spell/reimu/spell_01_color_0" + to_string(i + 1) + "_bullet.tga";
 		strcpy(path, pathStr.c_str());
 		bitmapRect = { 0, 0, 256, 256 };
-		result = m_Graphics->AddBitmap(m_hwnd, path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01Bullet[i]);
+		result = m_Graphics->AddBitmap(path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01Bullet[i]);
 		if (!result){
 			return false;
 		}
@@ -1859,7 +1859,7 @@ bool SystemClass::InitializeVersusMode(){
 		pathStr = "/Data/spell/reimu/spell_01_color_0" + to_string(i + 1) + "_bulletbg.tga";
 		strcpy(path, pathStr.c_str());
 		bitmapRect = { 0, 0, 128, 128 };
-		result = m_Graphics->AddBitmap(m_hwnd, path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01BulletBg[i]);
+		result = m_Graphics->AddBitmap(path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01BulletBg[i]);
 		if (!result){
 			return false;
 		}
@@ -1867,7 +1867,7 @@ bool SystemClass::InitializeVersusMode(){
 		pathStr = "/Data/spell/reimu/spell_01_color_0" + to_string(i + 1) + "_tail.tga";
 		strcpy(path, pathStr.c_str());
 		bitmapRect = { 0, 0, 774, 60 };
-		result = m_Graphics->AddBitmap(m_hwnd, path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01Tail[i]);
+		result = m_Graphics->AddBitmap(path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01Tail[i]);
 		if (!result){
 			return false;
 		}
@@ -1887,32 +1887,32 @@ bool SystemClass::InitializeVersusMode(){
 		}
 		strcpy(path, pathStr.c_str());
 
-		result = m_Graphics->AddBitmap(m_hwnd, path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.hit01BitmapID[i]);
+		result = m_Graphics->AddBitmap(path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.hit01BitmapID[i]);
 		if (!result){
 			return false;
 		}
 	}
 
 	//add sentence object for showing spell card list
-	result = m_Graphics->AddSentence(m_hwnd, " ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.spellNameSentID);
+	result = m_Graphics->AddSentence(" ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.spellNameSentID);
 	if (!result){
 		return false;
 	}
 
 	//add sentence object for showing spell card description
-	result = m_Graphics->AddSentence(m_hwnd, " ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.spellDescSentID);
+	result = m_Graphics->AddSentence(" ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.spellDescSentID);
 	if (!result){
 		return false;
 	}
 
 	//add sentence object for showing current HP
-	result = m_Graphics->AddSentence(m_hwnd, " ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.hpDispSentID);
+	result = m_Graphics->AddSentence(" ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.hpDispSentID);
 	if (!result){
 		return false;
 	}
 
 	//add sentence object for showing current MP
-	result = m_Graphics->AddSentence(m_hwnd, " ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.mpDispSentID);
+	result = m_Graphics->AddSentence(" ", 0, 0, m_screenWidth, m_screenHeight, SOLID_BLACK, versusMatch.mpDispSentID);
 	if (!result){
 		return false;
 	}

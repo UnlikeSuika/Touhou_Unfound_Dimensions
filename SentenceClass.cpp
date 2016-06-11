@@ -77,7 +77,7 @@ void SentenceClass::Shutdown(){
 	}
 }
 
-bool SentenceClass::Render(TextureShaderClass* textureShader, ID3D11DeviceContext* deviceContext, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& orthoMatrix){
+bool SentenceClass::Render(HWND hwnd, TextureShaderClass* textureShader, ID3D11DeviceContext* deviceContext, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& orthoMatrix){
 	bool result;
 	for (int i = 0; i < m_Sentence.length; i++){
 		if (m_Sentence.character[i].pBitmap){
@@ -86,7 +86,7 @@ bool SentenceClass::Render(TextureShaderClass* textureShader, ID3D11DeviceContex
 			if (!result){
 				return false;
 			}
-			result = textureShader->Render(deviceContext, m_Sentence.character[i].pBitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Sentence.character[i].pBitmap->GetTexture(), m_Sentence.textColor.w, processedTextColor);
+			result = textureShader->Render(hwnd, deviceContext, m_Sentence.character[i].pBitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Sentence.character[i].pBitmap->GetTexture(), m_Sentence.textColor.w, processedTextColor);
 			if (!result){
 				return false;
 			}

@@ -1,5 +1,5 @@
-#ifndef CAMERACLASSH
-#define CAMERACLASSH
+#ifndef _CAMERA_CLASS_H_
+#define _CAMERA_CLASS_H_
 
 #include <directxmath.h>
 

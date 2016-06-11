@@ -1,5 +1,5 @@
-#ifndef TIMECLASSH
-#define TIMECLASSH
+#ifndef _TIME_CLASS_H_
+#define _TIME_CLASS_H_
 
 const int MAX_TIMER_COUNT = 30;
 const int MAX_CLOCK_COUNT = 30;

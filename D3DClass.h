@@ -1,5 +1,5 @@
-#ifndef D3DCLASSH
-#define D3DCLASSH
+#ifndef _D3D_CLASS_H_
+#define _D3D_CLASS_H_
 
 #include <d3dcommon.h>
 #include <d3d11_1.h>

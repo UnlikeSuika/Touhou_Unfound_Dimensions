@@ -83,11 +83,13 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd){
 	}
 
 	//initialize fading effect
-	result = InitializeFadingEffect(hwnd, screenWidth, screenHeight);
+	result = InitializeFadingEffect(screenWidth, screenHeight);
 	if (!result){
 		MessageBox(hwnd, L"Could not initialize fading effect.", L"Error", MB_OK);
 		return false;
 	}
+
+	m_hwnd = hwnd;
 
 	m_bitmapCount = 0;
 	m_bitmapIDCount = 1;
@@ -168,7 +170,7 @@ bool GraphicsClass::EndRendering(int screenWidth, int screenHeight){
 		if (!result){
 			return false;
 		}
-		result = m_TextureShader->Render(m_D3D->GetDeviceContext(), m_FadeBitmap->bitmap->GetIndexCount(), m_worldMatrix, m_viewMatrix, m_orthoMatrix, m_FadeBitmap->bitmap->GetTexture(), m_FadeBitmap->blend, NULL_COLOR);
+		result = m_TextureShader->Render(m_hwnd, m_D3D->GetDeviceContext(), m_FadeBitmap->bitmap->GetIndexCount(), m_worldMatrix, m_viewMatrix, m_orthoMatrix, m_FadeBitmap->bitmap->GetTexture(), m_FadeBitmap->blend, NULL_COLOR);
 		if (!result){
 			return false;
 		}
@@ -181,7 +183,7 @@ bool GraphicsClass::EndRendering(int screenWidth, int screenHeight){
 }
 
 //Add a bitmap from given TGA path and with given location (bitmapRect), angle, alpha value, and a hue colour
-bool GraphicsClass::AddBitmap(HWND hwnd, char* path, RECT bitmapRect, int screenWidth, int screenHeight, int& bitmapID, float angle, float blend, XMFLOAT4 hueColor){
+bool GraphicsClass::AddBitmap(char* path, RECT bitmapRect, int screenWidth, int screenHeight, int& bitmapID, float angle, float blend, XMFLOAT4 hueColor){
 	bool result;
 	int posX = (bitmapRect.left + bitmapRect.right) / 2;
 	int posY = (bitmapRect.top + bitmapRect.bottom) / 2;
@@ -204,7 +206,7 @@ bool GraphicsClass::AddBitmap(HWND hwnd, char* path, RECT bitmapRect, int screen
 		return false;
 	}
 
-	result = m_Bitmap[m_bitmapCount].bitmap->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, tgaDirectory, bitmapWidth, bitmapHeight);
+	result = m_Bitmap[m_bitmapCount].bitmap->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, screenWidth, screenHeight, tgaDirectory, bitmapWidth, bitmapHeight);
 	if (!result){
 		delete m_Bitmap[m_bitmapCount].bitmap;
 		m_Bitmap[m_bitmapCount].bitmap = 0;
@@ -312,7 +314,7 @@ bool GraphicsClass::RenderBitmap(int bitmapID){
 	if (!result){
 		return false;
 	}
-	result = m_TextureShader->Render(m_D3D->GetDeviceContext(), m_Bitmap[index].bitmap->GetIndexCount(), m_worldMatrix, m_viewMatrix, m_orthoMatrix, m_Bitmap[index].bitmap->GetTexture(), m_Bitmap[index].blend, m_Bitmap[index].hueColor, m_Bitmap[index].xFlip, m_Bitmap[index].yFlip);
+	result = m_TextureShader->Render(m_hwnd, m_D3D->GetDeviceContext(), m_Bitmap[index].bitmap->GetIndexCount(), m_worldMatrix, m_viewMatrix, m_orthoMatrix, m_Bitmap[index].bitmap->GetTexture(), m_Bitmap[index].blend, m_Bitmap[index].hueColor, m_Bitmap[index].xFlip, m_Bitmap[index].yFlip);
 	if (!result){
 		return false;
 	}
@@ -380,9 +382,9 @@ int GraphicsClass::GetBitmapHeight(int bitmapID){
 }
 
 //Adds a sentence with given text, position (posX, posY), and text colour
-bool GraphicsClass::AddSentence(HWND hwnd, char* text, int posX, int posY, int screenWidth, int screenHeight, XMFLOAT4 textColor, int& id){
+bool GraphicsClass::AddSentence(char* text, int posX, int posY, int screenWidth, int screenHeight, XMFLOAT4 textColor, int& id){
 	bool result;
-	result = m_Sentence[m_sentenceCount].Initialize(text, posX, posY, textColor, m_D3D->GetDevice(), m_D3D->GetDeviceContext(), hwnd, screenWidth, screenHeight);
+	result = m_Sentence[m_sentenceCount].Initialize(text, posX, posY, textColor, m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, screenWidth, screenHeight);
 	if (!result){
 		return false;
 	}
@@ -418,7 +420,7 @@ bool GraphicsClass::RenderSentence(int sentenceID){
 		return false;
 	}
 
-	result = m_Sentence[index].Render(m_TextureShader, m_D3D->GetDeviceContext(), m_worldMatrix, m_viewMatrix, m_orthoMatrix);
+	result = m_Sentence[index].Render(m_hwnd, m_TextureShader, m_D3D->GetDeviceContext(), m_worldMatrix, m_viewMatrix, m_orthoMatrix);
 	if (!result){
 		return false;
 	}
@@ -447,7 +449,7 @@ void GraphicsClass::DeleteSentence(int& sentenceID){
 }
 
 //Initializes the fading effect
-bool GraphicsClass::InitializeFadingEffect(HWND hwnd, int screenWidth, int screenHeight){
+bool GraphicsClass::InitializeFadingEffect(int screenWidth, int screenHeight){
 	bool result;
 
 	m_FadeBitmap = new BitmapType;
@@ -465,7 +467,7 @@ bool GraphicsClass::InitializeFadingEffect(HWND hwnd, int screenWidth, int scree
 	_getcwd(tgaDirectory, maxLength);
 	strcat(tgaDirectory, "/Data/fade.tga");
 
-	result = m_FadeBitmap->bitmap->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, tgaDirectory, screenWidth, screenHeight);
+	result = m_FadeBitmap->bitmap->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, screenWidth, screenHeight, tgaDirectory, screenWidth, screenHeight);
 	if (!result){
 		return false;
 	}
