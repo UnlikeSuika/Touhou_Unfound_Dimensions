@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <string>
 
-#pragma comment(lib,"d3d11.lib")
+#include "HResultErrorMessage.h"
 
-using namespace std;
+#pragma comment(lib,"d3d11.lib")
 
 class TextureClass{
 public:

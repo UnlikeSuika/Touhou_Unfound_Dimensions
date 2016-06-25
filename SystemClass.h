@@ -168,7 +168,6 @@ private:
 
 		int reimuSpell01Bullet[3];               //array of IDs of bitmaps for orbs of "Fantasy Seal"
 		int reimuSpell01BulletBg[3];             //array of IDs of bitmaps for backgrounds of "Fantasy Seal"
-		int reimuSpell01Tail[3];                 //array of IDs of bitmaps for tails of "Fantasy Seal"
 
 		int hit01BitmapID[19];                   //array of IDs of bitmaps for physical impact 1
 

@@ -9,8 +9,7 @@
 #include <string>
 #include <sstream>
 
-using namespace std;
-
 void OutputErrorMessage(HWND hwnd, HRESULT hr, LPCWSTR prefix);
+void OutputErrorMessageWithFilename(HWND hwnd, HRESULT hr, char* filename, LPCWSTR prefix);
 
 #endif

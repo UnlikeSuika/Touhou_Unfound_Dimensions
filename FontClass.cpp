@@ -15,18 +15,13 @@ bool FontClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 		return false;
 	}
 
-	const int maxLength = 256;
-	char currentDirectory[maxLength];
-	_getcwd(currentDirectory, maxLength);
+	char currentDirectory[MAX_CHARACTER_COUNT];
+	_getcwd(currentDirectory, MAX_CHARACTER_COUNT);
 
 	for (int i = 0; i < MAX_CHARACTERS_IN_FONT; i++){
-		char tgaDirectory[maxLength];
-		strcpy(tgaDirectory, currentDirectory);
-		strcat(tgaDirectory, "\\Data\\font\\");
-		string tgaNoStr = to_string(i + 33);
-		const char *tgaNoCStr = tgaNoStr.c_str();
-		strcat(tgaDirectory, tgaNoCStr);
-		strcat(tgaDirectory, ".tga");
+		std::string tgaDirStr = currentDirectory + std::string("\\Data\\font\\") + std::to_string(i + 33) + ".tga";
+		char tgaDirectory[MAX_CHARACTER_COUNT];
+		strcpy(tgaDirectory, tgaDirStr.c_str());
 
 		m_Font[i].bitmap = new BitmapClass;
 		if (!m_Font[i].bitmap){

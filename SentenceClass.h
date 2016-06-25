@@ -6,7 +6,10 @@
 #include "FontClass.h"
 #include "TextureShaderClass.h"
 
+#ifndef _MCC_
+#define _MCC_
 const int MAX_CHARACTER_COUNT = 256;
+#endif
 
 class SentenceClass{
 public:

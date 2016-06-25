@@ -7,9 +7,15 @@
 #include <string>
 #include <direct.h>
 
-using namespace std;
+#ifndef _MCC_
+#define _MCC_
+const int MAX_CHARACTER_COUNT = 256;
+#endif
 
+#ifndef _MCIF_
+#define _MCIF_
 const int MAX_CHARACTERS_IN_FONT = 94;
+#endif
 
 class FontClass{
 public:

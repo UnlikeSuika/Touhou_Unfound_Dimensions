@@ -11,7 +11,6 @@
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"d3d11.lib")
 
-using namespace std;
 using namespace DirectX;
 
 const XMFLOAT4 NULL_COLOR = { 0.0f, 0.0f, 0.0f, 0.0f };

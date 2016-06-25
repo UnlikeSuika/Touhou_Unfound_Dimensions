@@ -1218,7 +1218,7 @@ bool SystemClass::OnVersusMode(){
 					m_Graphics->RenderBitmap(versusMatch.spellDescBitmapID);
 
 					char mpCostCStr[MAX_CHARACTER_COUNT];
-					string mpCostStr = "MP Cost: " + to_string(versusMatch.player[versusMatch.playerTurn].spellCard[hover].mpCost);
+					std::string mpCostStr = "MP Cost: " + std::to_string(versusMatch.player[versusMatch.playerTurn].spellCard[hover].mpCost);
 					strcpy(mpCostCStr, mpCostStr.c_str());
 					m_Graphics->UpdateSentence(versusMatch.spellDescSentID, mpCostCStr, 507, 442, SOLID_BLACK);
 					m_Graphics->RenderSentence(versusMatch.spellDescSentID);
@@ -1524,8 +1524,7 @@ bool SystemClass::OnVersusMode(){
 				m_Graphics->RenderBitmap(versusMatch.statsWindowBitmapID);
 				
 				//assemble string that displays current HP
-				string hpStr = "HP: ";
-				hpStr = hpStr + to_string(versusMatch.player[i].hp) + " / " + to_string(versusMatch.player[i].maxHp);
+				std::string hpStr = "HP: " + std::to_string(versusMatch.player[i].hp) + " / " + std::to_string(versusMatch.player[i].maxHp);
 				char hpDisp[MAX_CHARACTER_COUNT];
 				strcpy(hpDisp, hpStr.c_str());
 
@@ -1534,7 +1533,7 @@ bool SystemClass::OnVersusMode(){
 				m_Graphics->RenderSentence(versusMatch.hpDispSentID);
 
 				//assemble string that displays current MP
-				string mpStr = "MP: " + to_string(versusMatch.player[i].mp);
+				std::string mpStr = "MP: " + std::to_string(versusMatch.player[i].mp);
 				char mpDisp[MAX_CHARACTER_COUNT];
 				strcpy(mpDisp, mpStr.c_str());
 
@@ -1785,7 +1784,7 @@ bool SystemClass::InitializeVersusMode(){
 	for (int i = 0; i < 4; i++){
 		RECT charRect = { 0, 0, 40, 72 };
 		char path[MAX_CHARACTER_COUNT];
-		string pathStr = "/Data/in_game_reimu_stationary_0" + to_string(i + 1) + ".tga";
+		std::string pathStr = "/Data/in_game_reimu_stationary_0" + std::to_string(i + 1) + ".tga";
 		strcpy(path, pathStr.c_str());
 		result = m_Graphics->AddBitmap(path, charRect, m_screenWidth, m_screenHeight, versusMatch.reimuStationaryBitmapID[i]);
 		if (!result){
@@ -1797,7 +1796,7 @@ bool SystemClass::InitializeVersusMode(){
 	for (int i = 0; i < 4; i++){
 		RECT charRect = { 0, 0, 54, 63 };
 		char path[MAX_CHARACTER_COUNT];
-		string pathStr = "/Data/in_game_marisa_stationary_0" + to_string(i + 1) + ".tga";
+		std::string pathStr = "/Data/in_game_marisa_stationary_0" + std::to_string(i + 1) + ".tga";
 		strcpy(path, pathStr.c_str());
 		result = m_Graphics->AddBitmap(path, charRect, m_screenWidth, m_screenHeight, versusMatch.marisaStationaryBitmapID[i]);
 		if (!result){
@@ -1812,12 +1811,12 @@ bool SystemClass::InitializeVersusMode(){
 	RECT particleRect = { 0, 0, 1, 1 };
 	for (int i = 0; i < 18; i++){
 		char path[MAX_CHARACTER_COUNT];
-		string pathStr;
+		std::string pathStr;
 		if (i < 9){
-			pathStr = "/Data/bullet/laser_color_01_particle_0" + to_string(i + 1) + ".tga";
+			pathStr = "/Data/bullet/laser_color_01_particle_0" + std::to_string(i + 1) + ".tga";
 		}
 		else{
-			pathStr = "/Data/bullet/laser_color_01_particle_" + to_string(i + 1) + ".tga";
+			pathStr = "/Data/bullet/laser_color_01_particle_" + std::to_string(i + 1) + ".tga";
 		}
 		strcpy(path, pathStr.c_str());
 		result = m_Graphics->AddBitmap(path, particleRect, m_screenWidth, m_screenHeight, versusMatch.color01laserParticleID[i]);
@@ -1845,10 +1844,9 @@ bool SystemClass::InitializeVersusMode(){
 	//add bitmaps for Reimu's "Fantasy Seal"
 	for (int i = 0; i < 3; i++){
 		char path[MAX_CHARACTER_COUNT];
-		string pathStr;
 		RECT bitmapRect;
 
-		pathStr = "/Data/spell/reimu/spell_01_color_0" + to_string(i + 1) + "_bullet.tga";
+		std::string pathStr = "/Data/spell/reimu/spell_01_color_0" + std::to_string(i + 1) + "_bullet.tga";
 		strcpy(path, pathStr.c_str());
 		bitmapRect = { 0, 0, 256, 256 };
 		result = m_Graphics->AddBitmap(path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01Bullet[i]);
@@ -1856,18 +1854,10 @@ bool SystemClass::InitializeVersusMode(){
 			return false;
 		}
 
-		pathStr = "/Data/spell/reimu/spell_01_color_0" + to_string(i + 1) + "_bulletbg.tga";
+		pathStr = "/Data/spell/reimu/spell_01_color_0" + std::to_string(i + 1) + "_bulletbg.tga";
 		strcpy(path, pathStr.c_str());
 		bitmapRect = { 0, 0, 128, 128 };
 		result = m_Graphics->AddBitmap(path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01BulletBg[i]);
-		if (!result){
-			return false;
-		}
-
-		pathStr = "/Data/spell/reimu/spell_01_color_0" + to_string(i + 1) + "_tail.tga";
-		strcpy(path, pathStr.c_str());
-		bitmapRect = { 0, 0, 774, 60 };
-		result = m_Graphics->AddBitmap(path, bitmapRect, m_screenWidth, m_screenHeight, versusMatch.reimuSpell01Tail[i]);
 		if (!result){
 			return false;
 		}
@@ -1876,14 +1866,14 @@ bool SystemClass::InitializeVersusMode(){
 	//add bitmaps for physical impact 1
 	for (int i = 0; i < 19; i++){
 		char path[MAX_CHARACTER_COUNT];
-		string pathStr;
+		std::string pathStr;
 		RECT bitmapRect = { 0, 0, 288, 288 };
 
 		if (i + 1 < 10){
-			pathStr = "/Data/general/hit_01_0" + to_string(i + 1) + ".tga";
+			pathStr = "/Data/general/hit_01_0" + std::to_string(i + 1) + ".tga";
 		}
 		else{
-			pathStr = "/Data/general/hit_01_" + to_string(i + 1) + ".tga";
+			pathStr = "/Data/general/hit_01_" + std::to_string(i + 1) + ".tga";
 		}
 		strcpy(path, pathStr.c_str());
 
@@ -2061,7 +2051,6 @@ void SystemClass::ShutdownVersusMode(){
 	for (int i = 0; i < 3; i++){
 		m_Graphics->DeleteBitmap(versusMatch.reimuSpell01Bullet[i]);
 		m_Graphics->DeleteBitmap(versusMatch.reimuSpell01BulletBg[i]);
-		m_Graphics->DeleteBitmap(versusMatch.reimuSpell01Tail[i]);
 	}
 	for (int i = 0; i < 19; i++){
 		m_Graphics->DeleteBitmap(versusMatch.hit01BitmapID[i]);

@@ -39,18 +39,8 @@ bool TextureClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
 	hr = device->CreateTexture2D(&textureDesc, NULL, &m_texture);
-
 	if (FAILED(hr)){
-		size_t origSize = strlen(filename) + 1;
-		const size_t newSize = 200;
-		size_t convertedChars = 0;
-		wchar_t wcstr[newSize];
-		mbstowcs_s(&convertedChars, wcstr, origSize, filename, _TRUNCATE);
-		wstring str(wcstr);
-		wstring msg(L"Could not create 2D texture: ");
-		wstring concStr = msg + str;
-		LPCWSTR outputStr = concStr.c_str();
-		MessageBox(hwnd, outputStr, L"Error", MB_OK);
+		OutputErrorMessageWithFilename(hwnd, hr, filename, L"Could not create 2D texture: ");
 		return false;
 	}
 
@@ -64,16 +54,7 @@ bool TextureClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceC
 
 	hr = device->CreateShaderResourceView(m_texture, &srvDesc, &m_textureView);
 	if (FAILED(hr)){
-		size_t origSize = strlen(filename) + 1;
-		const size_t newSize = 200;
-		size_t convertedChars = 0;
-		wchar_t wcstr[newSize];
-		mbstowcs_s(&convertedChars, wcstr, origSize, filename, _TRUNCATE);
-		wstring str(wcstr);
-		wstring msg(L"Could not create shader resource view for the following TGA file: ");
-		wstring concStr = msg + str;
-		LPCWSTR outputStr = concStr.c_str();
-		MessageBox(hwnd, outputStr, L"Error", MB_OK);
+		OutputErrorMessageWithFilename(hwnd, hr, filename, L"Could not create shader resource view for the following TGA file: ");
 		return false;
 	}
 
@@ -118,11 +99,9 @@ bool TextureClass::LoadTarga(char* filename, int& height, int& width, HWND hwnd)
 		size_t convertedChars = 0;
 		wchar_t wcstr[newSize];
 		mbstowcs_s(&convertedChars, wcstr, origSize, filename, _TRUNCATE);
-		wstring str(wcstr);
-		wstring msg(L"Could not load TGA file: ");
-		wstring concStr = msg + str;
-		LPCWSTR outputStr = concStr.c_str();
-		MessageBox(hwnd, outputStr, L"Error", MB_OK);
+		std::wstring outputWStr = L"Could not load TGA file: " + std::wstring(wcstr);
+
+		MessageBox(hwnd, outputWStr.c_str(), L"Error", MB_OK);
 		return false;
 	}
 
@@ -141,11 +120,9 @@ bool TextureClass::LoadTarga(char* filename, int& height, int& width, HWND hwnd)
 		size_t convertedChars = 0;
 		wchar_t wcstr[newSize];
 		mbstowcs_s(&convertedChars, wcstr, origSize, filename, _TRUNCATE);
-		wstring str(wcstr);
-		wstring msg(L"The following TGA file is not 32bit: ");
-		wstring concStr = msg + str;
-		LPCWSTR outputStr = concStr.c_str();
-		MessageBox(hwnd, outputStr, L"Error", MB_OK);
+		std::wstring outputWStr = L"The following TGA file is not 32bit: " + std::wstring(wcstr);
+
+		MessageBox(hwnd, outputWStr.c_str(), L"Error", MB_OK);
 		return false;
 	}
 
@@ -163,11 +140,9 @@ bool TextureClass::LoadTarga(char* filename, int& height, int& width, HWND hwnd)
 		size_t convertedChars = 0;
 		wchar_t wcstr[newSize];
 		mbstowcs_s(&convertedChars, wcstr, origSize, filename, _TRUNCATE);
-		wstring str(wcstr);
-		wstring msg(L"The image size for the following TGA file does not match the pixels read: ");
-		wstring concStr = msg + str;
-		LPCWSTR outputStr = concStr.c_str();
-		MessageBox(hwnd, outputStr, L"Error", MB_OK);
+		std::wstring outputWStr = L"The image size for the following TGA file does not match the pixels read: " + std::wstring(wcstr);
+
+		MessageBox(hwnd, outputWStr.c_str(), L"Error", MB_OK);
 		return false;
 	}
 
@@ -178,11 +153,9 @@ bool TextureClass::LoadTarga(char* filename, int& height, int& width, HWND hwnd)
 		size_t convertedChars = 0;
 		wchar_t wcstr[newSize];
 		mbstowcs_s(&convertedChars, wcstr, origSize, filename, _TRUNCATE);
-		wstring str(wcstr);
-		wstring msg(L"Could not close the following TGA file: ");
-		wstring concStr = msg + str;
-		LPCWSTR outputStr = concStr.c_str();
-		MessageBox(hwnd, outputStr, L"Error", MB_OK);
+		std::wstring outputWStr = L"Could not close the following TGA file: " + std::wstring(wcstr);
+
+		MessageBox(hwnd, outputWStr.c_str(), L"Error", MB_OK);
 		return false;
 	}
 
@@ -193,11 +166,9 @@ bool TextureClass::LoadTarga(char* filename, int& height, int& width, HWND hwnd)
 		size_t convertedChars = 0;
 		wchar_t wcstr[newSize];
 		mbstowcs_s(&convertedChars, wcstr, origSize, filename, _TRUNCATE);
-		wstring str(wcstr);
-		wstring msg(L"Out of memory. Could not create targa data variable for the following TGA file: ");
-		wstring concStr = msg + str;
-		LPCWSTR outputStr = concStr.c_str();
-		MessageBox(hwnd, outputStr, L"Error", MB_OK);
+		std::wstring outputWStr = L"Out of memory. Could not create targa data variable for the following TGA file: " + std::wstring(wcstr);
+
+		MessageBox(hwnd, outputWStr.c_str(), L"Error", MB_OK);
 		return false;
 	}
 
