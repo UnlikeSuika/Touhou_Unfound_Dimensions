@@ -48,6 +48,12 @@ private:
 		MOVE = 0x04
 	};
 
+	//enumeration of flags for bullet's states
+	typedef enum BulletFlag{
+		BULLET_ACTIVE = 0x00,
+		BULLET_EXPLODING = 0x01
+	};
+
 	//represents a visible button
 	struct ButtonType{
 		RECT buttonRect; //rectangular portion represented by button
@@ -68,6 +74,7 @@ private:
 		float moveAngle;   //direction(angle) of bullet's current velocity
 		int damage;        //damage upon colliding on another object
 		int* pBitmapID;    //pointer to bullet's in-game sprite bitmap
+		BulletFlag state;  //flag for bullet states
 	};
 
 	//represents a single particle of an in-game laser
@@ -148,11 +155,12 @@ private:
 
 		bool movePhase;                          //whether it is currently Move Phase
 		bool actionPhase;                        //whether it is currently Act Phase
-		
 		int phaseAnnounceTimerID;                //ID of timer for the announcement of phase
 		int* pPhaseAnnounceBitmapID;             //pointer to ID of bitmap for current phase announcement
 		int movePhaseAnnounceBitmapID;           //ID of bitmap for Move Phase announcement
 		int actPhaseAnnounceBitmapID;            //ID of bitmap for Act Phase announcement
+		int playerIndicatorBitmapID;             //ID of bitmap that displays currently active player
+		int playerIndicatorClockID;              //ID of clock for displaying active player
 		PhaseChoice choice;                      //choice the player made during Move Phase or Act Phase
 		ButtonType passButton;                   //Pass choice button
 		ButtonType moveButton;                   //Move choice button
@@ -208,7 +216,7 @@ private:
 	bool InitializeCharSelect(); 
 	bool InitializeVersusMode(); 
 	void ShutdownVersusMode(); 
-	
+
 	//movement-related functions
 	bool CollisionWithWall(XMFLOAT2 pos, float radius);
 	bool CollisionWithCharacter(XMFLOAT2 pos, float radius, int& collidedChar);
@@ -277,10 +285,6 @@ private:
 	int marisaAvatarID;            //ID of bitmap of Marisa in character select screen
 	int charSelectModeBackgroundID;//ID of background bitmap in character select screen
 	int fadeTimerID;               //ID of timer for the fading effect of screen
-
-#ifdef _DEBUG
-	int testSpriteID;
-#endif
 
 public:
 

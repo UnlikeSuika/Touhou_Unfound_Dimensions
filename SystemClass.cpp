@@ -664,6 +664,10 @@ bool SystemClass::OnVersusMode(){
 		m_Graphics->RenderBitmap(*player.pInGameSpriteID);
 	}
 
+	//render player indicator bitmap
+	m_Graphics->UpdateBitmap(versusMatch.playerIndicatorBitmapID, versusMatch.player[versusMatch.playerTurn].position.x, versusMatch.player[versusMatch.playerTurn].position.y, (float)m_Clock->CurrentClockTime(versusMatch.playerIndicatorClockID)*XM_PI / 60.0f);
+	m_Graphics->RenderBitmap(versusMatch.playerIndicatorBitmapID);
+
 	//render bullet sprites
 	for (int i = 0; i < versusMatch.numBullets; i++){
 		m_Graphics->UpdateBitmap(*versusMatch.bullet[i].pBitmapID, (int)round(versusMatch.bullet[i].position.x), (int)round(versusMatch.bullet[i].position.y), versusMatch.bullet[i].moveAngle);
@@ -1260,6 +1264,9 @@ bool SystemClass::OnVersusMode(){
 
 								//orb will be set to R B G R B G colours in order
 								versusMatch.tempBullet[i].pBitmapID = &versusMatch.reimuSpell01Bullet[i % 3];
+
+								//orbs are active
+								versusMatch.tempBullet[i].state = BULLET_ACTIVE;
 							}
 						}
 
@@ -1322,7 +1329,7 @@ bool SystemClass::OnVersusMode(){
 								if (bulletIndex != -1){
 
 									//if temporary speed is zero
-									if (versusMatch.tempSpeed->x == 0.0f && versusMatch.tempSpeed->y == 0.0f){
+									if (versusMatch.tempSpeed->x == 0.0f && versusMatch.tempSpeed->y == 0.0f && bullet[bulletIndex].state == BULLET_ACTIVE){
 										Shoot(*versusMatch.tempPos, *versusMatch.tempSpeed, *versusMatch.tempAngle, 32.0f);
 									}
 
@@ -1399,12 +1406,16 @@ bool SystemClass::OnVersusMode(){
 
 											if (!m_Clock->IsTimerRunning(timer)){
 												m_Clock->AddTimer(timer, 18);
+												bullet[i].state = BULLET_EXPLODING;
 											}
 											if (m_Clock->TimeLeft(timer) == 0){
 
+												m_Clock->DeleteTimer(timer);
+
 												if (versusMatch.tempBulletNum == 1){
 													delete[] bullet;
-													bullet = 0;
+													versusMatch.tempBullet = 0;
+
 													delete[] versusMatch.tempTimerID;
 													versusMatch.tempTimerID = 0;
 
@@ -1419,6 +1430,7 @@ bool SystemClass::OnVersusMode(){
 														bullet[j].moveSpeed = bullet[j + 1].moveSpeed;
 														bullet[j].pBitmapID = bullet[j + 1].pBitmapID;
 														bullet[j].position = bullet[j + 1].position;
+														bullet[j].state = bullet[j + 1].state;
 
 														versusMatch.tempTimerID[j] = versusMatch.tempTimerID[j + 1];
 													}
@@ -1479,11 +1491,13 @@ bool SystemClass::OnVersusMode(){
 					//Dream Sign "Evil-Sealing Circle"
 					case 1:
 
+						versusMatch.isSpellSelected = false;
 						NextPhase();
 						break;
 
 					default:
 
+						versusMatch.isSpellSelected = false;
 						NextPhase();
 						break;
 					}
@@ -1491,6 +1505,7 @@ bool SystemClass::OnVersusMode(){
 
 				case MARISA:
 
+					versusMatch.isSpellSelected = false;
 					NextPhase();
 					break;
 				}
@@ -1764,6 +1779,18 @@ bool SystemClass::InitializeVersusMode(){
 		return false;
 	}
 
+	//add bitmap of player indicator
+	RECT playerIndicatorRect = { 0, 0, 63, 60 };
+	result = m_Graphics->AddBitmap("/Data/in_game_player_indicator.tga", playerIndicatorRect, m_screenWidth, m_screenHeight, versusMatch.playerIndicatorBitmapID);
+	if (!result){
+		return false;
+	}
+
+	result = m_Clock->AddClock(versusMatch.playerIndicatorClockID);
+	if (!result){
+		return false;
+	}
+
 	//add bitmaps for all types of bullets
 	RECT bulletRect = { 0, 0, 14, 12 };
 	result = m_Graphics->AddBitmap("/Data/bullet/type_01_color_01.tga", bulletRect, m_screenWidth,
@@ -2029,6 +2056,7 @@ void SystemClass::ShutdownVersusMode(){
 	m_Graphics->DeleteBitmap(versusMatch.type01color01bulletID);
 	m_Graphics->DeleteBitmap(versusMatch.movePhaseAnnounceBitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.actPhaseAnnounceBitmapID);
+	m_Graphics->DeleteBitmap(versusMatch.playerIndicatorBitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.passButton.bitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.moveButton.bitmapID);
 	m_Graphics->DeleteBitmap(versusMatch.shootButton.bitmapID);
@@ -2061,6 +2089,7 @@ void SystemClass::ShutdownVersusMode(){
 	m_Graphics->DeleteSentence(versusMatch.mpDispSentID);
 
 	m_Clock->DeleteTimer(versusMatch.phaseAnnounceTimerID);
+	m_Clock->DeleteClock(versusMatch.playerIndicatorClockID);
 
 	isVersusModeInit = false;
 }
@@ -2231,6 +2260,9 @@ void SystemClass::NextPhase(){
 		//announce Move Phase
 		m_Clock->SetTimer(versusMatch.phaseAnnounceTimerID, 240);
 
+		//set player indicator clock to zero
+		m_Clock->SetClock(versusMatch.playerIndicatorClockID, 0);
+
 		//reset the player choice to PENDING_CHOICE
 		versusMatch.choice = PENDING_CHOICE;
 	}
@@ -2257,7 +2289,7 @@ void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float r
 		versusMatch.shootFrame = m_Clock->GetFrameCount() - 1;
 	}
 	//Character's velocity will be recorded once player releases the left mouse button,
-	//or the mouse gets certain distance away from the character
+	//or when the mouse gets certain distance away from the character
 	else if (versusMatch.shootFrame != -1 && (m_Input->IsKeyJustReleased(VK_LBUTTON) || Distance(mousePt, lClickPos) > 50.0f)){
 		
 		//record x component
@@ -2274,7 +2306,7 @@ void SystemClass::Shoot(XMFLOAT2& pos, XMFLOAT2& speedVec, float& angle, float r
 	}
 
 	//if player is currently shooting/moving, update and render aim circle
-	if (m_Input->IsKeyDown(VK_LBUTTON) && Distance(lClickPos, mousePt) <= 50.0f){
+	if (m_Input->IsKeyDown(VK_LBUTTON) && Distance(lClickPos, pos) <= radius &&Distance(lClickPos, mousePt) <= 50.0f){
 		m_Graphics->UpdateBitmap(versusMatch.aimCircleBitmapID, lClickPos.x, lClickPos.y);
 		m_Graphics->RenderBitmap(versusMatch.aimCircleBitmapID);
 	}

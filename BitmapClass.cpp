@@ -175,19 +175,6 @@ bool BitmapClass::UpdateBuffers(ID3D11DeviceContext* deviceContext, int position
 		return false;
 	}
 
-	//vertices[0].position = XMFLOAT3(left, top, 0.0f);
-	//vertices[0].texture = XMFLOAT2(0.0f, 0.0f);
-	//vertices[1].position = XMFLOAT3(right, bottom, 0.0f);
-	//vertices[1].texture = XMFLOAT2(1.0f, 1.0f);
-	//vertices[2].position = XMFLOAT3(left, bottom, 0.0f);
-	//vertices[2].texture = XMFLOAT2(0.0f, 1.0f);
-	//vertices[3].position = XMFLOAT3(left, top, 0.0f);
-	//vertices[3].texture = XMFLOAT2(0.0f, 0.0f);
-	//vertices[4].position = XMFLOAT3(right, top, 0.0f);
-	//vertices[4].texture = XMFLOAT2(1.0f, 0.0f);
-	//vertices[5].position = XMFLOAT3(right, bottom, 0.0f);
-	//vertices[5].texture = XMFLOAT2(1.0f, 1.0f);
-
 	vertices[0].position = topLeft;
 	vertices[0].texture = XMFLOAT2(0.0f, 0.0f);
 	vertices[1].position = bottomRight;
