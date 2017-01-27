@@ -1,6 +1,9 @@
-*.user
-*.filters
-shader-error.txt
+*.swp
+*.vs/
+x64/*
+Debug/*
+*.opendb
+*.db
+*.sln
 *.vcxproj
-/Debug
-/Touhou_Unfound_Dimensions
+*.filters
