@@ -14,18 +14,36 @@ void InputClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int
 
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
+	m_lClickPos = { -1,-1 };
+	m_rClickPos = { -1,-1 };
 }
 
 void InputClass::Shutdown(){
 }
 
 void InputClass::Frame(HWND hwnd){
-	POINT mousePt;
-	GetCursorPos(&mousePt);
-	ScreenToClient(hwnd, &mousePt);
+	GetCursorPos(&m_mousePt);
+	ScreenToClient(hwnd, &m_mousePt);
 
-	m_mouseX = (int)mousePt.x;
-	m_mouseY = (int)mousePt.y;
+	//if left mouse button is just pressed this frame, set the click position to screen coord. of cursor
+	if (IsKeyJustPressed(VK_LBUTTON)) {
+		m_lClickPos = m_mousePt;
+	}
+
+	//if left mouse button is released, reset the click position to (-1, -1)
+	if (!IsKeyDown(VK_LBUTTON) && !IsKeyJustReleased(VK_LBUTTON)) {
+		m_lClickPos = { -1,-1 };
+	}
+
+	//if right mouse button is just pressed this frame, set the click position to screen coord. of cursor
+	if (IsKeyJustPressed(VK_RBUTTON)) {
+		m_rClickPos = m_mousePt;
+	}
+
+	//if right mouse button is released, reset the click position to (-1, -1)
+	if (!IsKeyDown(VK_RBUTTON) && !IsKeyJustReleased(VK_RBUTTON)) {
+		m_rClickPos = { -1,-1 };
+	}
 }
 
 void InputClass::KeyDown(unsigned int input){
@@ -54,9 +72,16 @@ bool InputClass::IsKeyJustReleased(unsigned int key){
 	return false;
 }
 
-void InputClass::GetMouseLocation(int& mouseX, int& mouseY){
-	mouseX = m_mouseX;
-	mouseY = m_mouseY;
+POINT InputClass::GetMouseLocation() {
+	return m_mousePt;
+}
+
+POINT InputClass::GetMouseLeftClickLocation() {
+	return m_lClickPos;
+}
+
+POINT InputClass::GetMouseRightClickLocation() {
+	return m_rClickPos;
 }
 
 void InputClass::UpdatePrevKeyboardState(){

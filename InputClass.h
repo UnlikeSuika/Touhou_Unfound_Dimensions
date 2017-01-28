@@ -20,13 +20,17 @@ public:
 	bool IsKeyDown(unsigned int key);
 	bool IsKeyJustPressed(unsigned int key);
 	bool IsKeyJustReleased(unsigned int key);
-	void GetMouseLocation(int& mouseX, int& mouseY);
+	POINT GetMouseLocation();
+	POINT GetMouseLeftClickLocation();
+	POINT GetMouseRightClickLocation();
 	void UpdatePrevKeyboardState();
 private:
 	bool m_keyboardState[256];
 	bool m_prevKeyboardState[256];
 	int m_screenWidth, m_screenHeight;
-	int m_mouseX, m_mouseY;
+	POINT m_mousePt;
+	POINT m_lClickPos;         //cursor position upon left clicking
+	POINT m_rClickPos;         //cursor position upon right clicking
 };
 
 #endif
