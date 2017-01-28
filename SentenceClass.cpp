@@ -32,7 +32,7 @@ bool SentenceClass::Initialize(char* text, int posX, int posY, XMFLOAT4 textColo
 
 void SentenceClass::UpdateSentence(char* text, int posX, int posY, XMFLOAT4 textColor){
 
-	m_Sentence.length = strlen(text);
+	m_Sentence.length = (int)strlen(text);
 	m_Sentence.textColor = textColor;
 
 	m_Sentence.posX = posX;
@@ -41,7 +41,7 @@ void SentenceClass::UpdateSentence(char* text, int posX, int posY, XMFLOAT4 text
 	int currentXPos = posX;
 	int currentYPos = posY;
 
-	for (int i = 0; i < MAX_CHARACTER_COUNT; i++){
+	for (int i = 0; i < MAX_STR_LEN; i++){
 		m_Sentence.character[i].pBitmap = 0;
 	}
 

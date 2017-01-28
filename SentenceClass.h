@@ -6,11 +6,6 @@
 #include "FontClass.h"
 #include "TextureShaderClass.h"
 
-#ifndef _MCC_
-#define _MCC_
-const int MAX_CHARACTER_COUNT = 256;
-#endif
-
 class SentenceClass{
 public:
 	static int sentenceIDCount;
@@ -34,9 +29,9 @@ private:
 		int ctrX, ctrY;
 	};
 	struct SentenceType{
-		CharacterType character[MAX_CHARACTER_COUNT];
+		CharacterType character[MAX_STR_LEN];
 		int length;
-		char text[MAX_CHARACTER_COUNT];
+		char text[MAX_STR_LEN];
 		XMFLOAT4 textColor;
 		int posX, posY;
 	};

@@ -79,9 +79,9 @@ typedef struct ButtonType {
 
 //represents the player's available spellcards
 typedef struct SpellCardType {
-	char cardName[MAX_CHARACTER_COUNT];//title of spellcard
+	char cardName[MAX_STR_LEN];//title of spellcard
 	int mpCost;                        //amount of user's MP that will be required to use the spell
-	char desc[MAX_CHARACTER_COUNT];    //spell card description
+	char desc[MAX_STR_LEN];    //spell card description
 }SpellCardType;
 
 //represents an in-game bullet

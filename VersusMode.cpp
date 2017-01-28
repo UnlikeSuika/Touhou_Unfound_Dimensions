@@ -192,7 +192,7 @@ bool VersusMode::Initialize() {
 	//add bitmaps for Reimu's in-game sprites
 	for (int i = 0; i < 4; i++) {
 		RECT charRect = { 0, 0, 40, 72 };
-		char path[MAX_CHARACTER_COUNT];
+		char path[MAX_STR_LEN];
 		std::string pathStr = "/Data/in_game_reimu_stationary_0" + std::to_string(i + 1) + ".tga";
 		strcpy(path, pathStr.c_str());
 		result = m_Graphics->AddBitmap(path, charRect, m_screenWidth, m_screenHeight, reimuStationaryBitmapID[i]);
@@ -204,7 +204,7 @@ bool VersusMode::Initialize() {
 	//add bitmap for Marisa's in-game sprite
 	for (int i = 0; i < 4; i++) {
 		RECT charRect = { 0, 0, 54, 63 };
-		char path[MAX_CHARACTER_COUNT];
+		char path[MAX_STR_LEN];
 		std::string pathStr = "/Data/in_game_marisa_stationary_0" + std::to_string(i + 1) + ".tga";
 		strcpy(path, pathStr.c_str());
 		result = m_Graphics->AddBitmap(path, charRect, m_screenWidth, m_screenHeight, marisaStationaryBitmapID[i]);
@@ -219,7 +219,7 @@ bool VersusMode::Initialize() {
 	//add bitmap for laser particles
 	RECT particleRect = { 0, 0, 1, 1 };
 	for (int i = 0; i < 18; i++) {
-		char path[MAX_CHARACTER_COUNT];
+		char path[MAX_STR_LEN];
 		std::string pathStr;
 		if (i < 9) {
 			pathStr = "/Data/bullet/laser_color_01_particle_0" + std::to_string(i + 1) + ".tga";
@@ -252,7 +252,7 @@ bool VersusMode::Initialize() {
 
 	//add bitmaps for Reimu's "Fantasy Seal"
 	for (int i = 0; i < 3; i++) {
-		char path[MAX_CHARACTER_COUNT];
+		char path[MAX_STR_LEN];
 		RECT bitmapRect;
 
 		std::string pathStr = "/Data/spell/reimu/spell_01_color_0" + std::to_string(i + 1) + "_bullet.tga";
@@ -274,7 +274,7 @@ bool VersusMode::Initialize() {
 
 	//add bitmaps for physical impact 1
 	for (int i = 0; i < 19; i++) {
-		char path[MAX_CHARACTER_COUNT];
+		char path[MAX_STR_LEN];
 		std::string pathStr;
 		RECT bitmapRect = { 0, 0, 288, 288 };
 
@@ -349,12 +349,12 @@ bool VersusMode::Initialize() {
 			player[i].hitboxRadius = 10.0f;
 			spriteRect = { 0, 0, player[i].inGameSpriteWidth, player[i].inGameSpriteHeight };
 			player[i].spellCard = new SpellCardType[player[i].numSpellCards];
-			strcpy(player[i].spellCard[0].cardName, "Spirit Sign \"Fantasy Seal\"");
+			strcpy(player[i].spellCard[0].cardName, "Spirit Sign \"Fantasy Seal\"\0");
 			player[i].spellCard[0].mpCost = 6;
-			strcpy(player[i].spellCard[0].desc, "Shoots six homing orbs at the opponent,\neach of which inflicts 3 damage.");
-			strcpy(player[i].spellCard[1].cardName, "Dream Sign \"Evil-Sealing Circle\"");
+			strcpy(player[i].spellCard[0].desc, "Shoots six homing orbs at the opponent,\neach of which inflicts 3 damage.\0");
+			strcpy(player[i].spellCard[1].cardName, "Dream Sign \"Evil-Sealing Circle\"\0");
 			player[i].spellCard[1].mpCost = 8;
-			strcpy(player[i].spellCard[1].desc, "Surrounds herself with a circular barrier\nthat inflicts 5 damage and stuns opponent\nfor one turn.");
+			strcpy(player[i].spellCard[1].desc, "Surrounds herself with a circular barrier\nthat inflicts 5 damage and stuns opponent\nfor one turn.\0");
 
 			break;
 
@@ -366,12 +366,12 @@ bool VersusMode::Initialize() {
 			player[i].hitboxRadius = 15.0f;
 			player[i].numSpellCards = 2;
 			player[i].spellCard = new SpellCardType[player[i].numSpellCards];
-			strcpy(player[i].spellCard[0].cardName, "Magic Sign \"Stardust Reverie\"");
+			strcpy(player[i].spellCard[0].cardName, "Magic Sign \"Stardust Reverie\"\0");
 			player[i].spellCard[0].mpCost = 12;
-			strcpy(player[i].spellCard[0].desc, "Rides her broom to charge at the opponent,\ninflicting 5 damage and causing the\nopponent to knock back.");
-			strcpy(player[i].spellCard[1].cardName, "Love Sign \"Master Spark\"");
+			strcpy(player[i].spellCard[0].desc, "Rides her broom to charge at the opponent,\ninflicting 5 damage and causing the\nopponent to knock back.\0");
+			strcpy(player[i].spellCard[1].cardName, "Love Sign \"Master Spark\"\0");
 			player[i].spellCard[1].mpCost = 15;
-			strcpy(player[i].spellCard[1].desc, "Shoots some lovely laser, inflicting \n8 damage.");
+			strcpy(player[i].spellCard[1].desc, "Shoots some lovely laser, inflicting \n8 damage.\0");
 
 			break;
 		}
@@ -1454,9 +1454,10 @@ bool VersusMode::Frame() {
 					m_Graphics->UpdateBitmap(spellDescBitmapID, 630, 510);
 					m_Graphics->RenderBitmap(spellDescBitmapID);
 
-					char mpCostCStr[MAX_CHARACTER_COUNT];
-					std::string mpCostStr = "MP Cost: " + std::to_string(player[playerTurn].spellCard[hover].mpCost);
+					char mpCostCStr[MAX_STR_LEN];
+					std::string mpCostStr = "MP Cost: " + std::to_string(player[playerTurn].spellCard[hover].mpCost) + "\0";
 					strcpy(mpCostCStr, mpCostStr.c_str());
+					
 					m_Graphics->UpdateSentence(spellDescSentID, mpCostCStr, 507, 442, SOLID_BLACK);
 					m_Graphics->RenderSentence(spellDescSentID);
 
@@ -1775,7 +1776,7 @@ bool VersusMode::Frame() {
 
 				//assemble string that displays current HP
 				std::string hpStr = "HP: " + std::to_string(player[i].hp) + " / " + std::to_string(player[i].maxHp);
-				char hpDisp[MAX_CHARACTER_COUNT];
+				char hpDisp[MAX_STR_LEN];
 				strcpy(hpDisp, hpStr.c_str());
 
 				//update and render current HP
@@ -1784,7 +1785,7 @@ bool VersusMode::Frame() {
 
 				//assemble string that displays current MP
 				std::string mpStr = "MP: " + std::to_string(player[i].mp);
-				char mpDisp[MAX_CHARACTER_COUNT];
+				char mpDisp[MAX_STR_LEN];
 				strcpy(mpDisp, mpStr.c_str());
 
 				//update and render current MP

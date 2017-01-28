@@ -15,12 +15,12 @@ bool FontClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 		return false;
 	}
 
-	char currentDirectory[MAX_CHARACTER_COUNT];
-	_getcwd(currentDirectory, MAX_CHARACTER_COUNT);
+	char currentDirectory[MAX_STR_LEN];
+	_getcwd(currentDirectory, MAX_STR_LEN);
 
 	for (int i = 0; i < MAX_CHARACTERS_IN_FONT; i++){
 		std::string tgaDirStr = currentDirectory + std::string("\\Data\\font\\") + std::to_string(i + 33) + ".tga";
-		char tgaDirectory[MAX_CHARACTER_COUNT];
+		char tgaDirectory[MAX_STR_LEN];
 		strcpy(tgaDirectory, tgaDirStr.c_str());
 
 		m_Font[i].bitmap = new BitmapClass;

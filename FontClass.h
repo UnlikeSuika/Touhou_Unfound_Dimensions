@@ -7,14 +7,12 @@
 #include <string>
 #include <direct.h>
 
-#ifndef _MCC_
-#define _MCC_
-const int MAX_CHARACTER_COUNT = 256;
+#ifndef MAX_STR_LEN
+#define MAX_STR_LEN 256
 #endif
 
-#ifndef _MCIF_
-#define _MCIF_
-const int MAX_CHARACTERS_IN_FONT = 94;
+#ifndef MAX_CHARACTERS_IN_FONT
+#define MAX_CHARACTERS_IN_FONT 94
 #endif
 
 class FontClass{
