@@ -3,12 +3,10 @@
 //GraphicsClass object initializer.
 //Use GraphicsClass::Initialize to initialize the system.
 GraphicsClass::GraphicsClass(){
-	m_D3D = 0;
-	m_Camera = 0;
-	m_TextureShader = 0;
-	m_Bitmap = 0;
-	m_Sentence = 0;
-	m_FadeBitmap = 0;
+	m_D3D = NULL;
+	m_Camera = NULL;
+	m_TextureShader = NULL;
+	m_FadeBitmap = NULL;
 }
 
 //GraphicsClass object initializer via GraphicsClass& argument.
@@ -68,20 +66,6 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd){
 		return false;
 	}
 
-	//create heap BitmapType array
-	m_Bitmap = new BitmapType[MAX_BITMAP_COUNT];
-	if (!m_Bitmap){
-		MessageBox(hwnd, L"Could not create bitmap array.", L"Error", MB_OK);
-		return false;
-	}
-
-	//create heap SentenceClass array
-	m_Sentence = new SentenceClass[MAX_SENTENCE_COUNT];
-	if (!m_Sentence){
-		MessageBox(hwnd, L"Could not create sentence object array.", L"Error", MB_OK);
-		return false;
-	}
-
 	//initialize fading effect
 	result = InitializeFadingEffect(screenWidth, screenHeight);
 	if (!result){
@@ -99,47 +83,45 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd){
 }
 
 //Shuts down GraphicsClass variables
-void GraphicsClass::Shutdown(){
-	if (m_FadeBitmap){
-		if (m_FadeBitmap->bitmap){
+void GraphicsClass::Shutdown() {
+	if (m_FadeBitmap) {
+		if (m_FadeBitmap->bitmap) {
 			m_FadeBitmap->bitmap->Shutdown();
 			delete m_FadeBitmap->bitmap;
-			m_FadeBitmap->bitmap = 0;
+			m_FadeBitmap->bitmap = NULL;
 		}
 		delete m_FadeBitmap;
-		m_FadeBitmap = 0;
+		m_FadeBitmap = NULL;
 	}
-	if (m_Bitmap){
-		for (int i = 0; i < m_bitmapCount; i++){
-			if (m_Bitmap[i].bitmap){
-				m_Bitmap[i].bitmap->Shutdown();
-				delete m_Bitmap[i].bitmap;
-				m_Bitmap[i].bitmap = 0;
-			}
+
+	for (int i = 0; i < m_bitmapCount; i++) {
+		if (m_Bitmap[i].bitmap) {
+			m_Bitmap[i].bitmap->Shutdown();
+			delete m_Bitmap[i].bitmap;
+			m_Bitmap[i].bitmap = NULL;
 		}
-		delete[] m_Bitmap;
-		m_Bitmap = 0;
 	}
-	if (m_Sentence){
-		for (int i = 0; i < m_sentenceCount; i++){
-			m_Sentence[i].Shutdown();
-		}
-		delete[] m_Sentence;
-		m_Sentence = 0;
+	m_bitmapCount = 0;
+
+
+	for (int i = 0; i < m_sentenceCount; i++) {
+		m_Sentence[i].Shutdown();
 	}
+	m_sentenceCount = 0;
+
 	if (m_TextureShader){
 		m_TextureShader->Shutdown();
 		delete m_TextureShader;
-		m_TextureShader = 0;
+		m_TextureShader = NULL;
 	}
 	if (m_Camera){
 		delete m_Camera;
-		m_Camera = 0;
+		m_Camera = NULL;
 	}
 	if (m_D3D){
 		m_D3D->Shutdown();
 		delete m_D3D;
-		m_D3D = 0;
+		m_D3D = NULL;
 	}
 }
 
@@ -303,6 +285,7 @@ bool GraphicsClass::RenderBitmap(int bitmapID){
 	for (int i = 0; i < m_bitmapCount; i++){
 		if (m_Bitmap[i].ID == bitmapID){
 			index = i;
+			break;
 		}
 	}
 	if (index == -1){

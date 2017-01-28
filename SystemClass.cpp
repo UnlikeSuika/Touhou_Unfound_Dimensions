@@ -631,7 +631,7 @@ bool SystemClass::InitializeCharSelect(){
 
 //initialize variables for versus mode
 bool SystemClass::InitializeVersusMode(){
-	versusMatch = new VersusMode(m_Graphics, m_Clock, m_screenWidth, m_screenHeight);
+	versusMatch = new VersusMode(m_Graphics, m_Clock, m_Input, m_screenWidth, m_screenHeight, player1, player2);
 	if (!versusMatch) {
 		isVersusModeInit = false;
 		return false;

@@ -15,11 +15,22 @@
 //const bool FULL_SCREEN = true;
 
 const bool VSYNC_ENABLED = true; 
-const float SCREEN_DEPTH = 1000.0f;  //far distance for depth buffer
-const float SCREEN_NEAR = 0.1f;      //near distance for depth buffer
 
-const int MAX_BITMAP_COUNT = 300;    //maximum number of bitmaps
-const int MAX_SENTENCE_COUNT = 30;   //maximum number of sentences
+#ifndef SCREEN_DEPTH
+#define SCREEN_DEPTH 1000.0f   //far distance for depth buffer
+#endif
+
+#ifndef SCREEN_NEAR
+#define SCREEN_NEAR 0.1f       //near distance for depth buffer
+#endif
+
+#ifndef MAX_BITMAP_COUNT
+#define MAX_BITMAP_COUNT 300   //maximum number of bitmaps
+#endif
+
+#ifndef MAX_SENTENCE_COUNT
+#define MAX_SENTENCE_COUNT 30  //maximum number of sentences
+#endif
 
 // This class manages the graphical components
 // of DirectX.
@@ -81,21 +92,21 @@ private:
 	};
 	
 	//objects and variables related to app system
-	HWND m_hwnd;                        //handle to window
-	D3DClass* m_D3D;                    //D3DClass object
-	CameraClass* m_Camera;              //CameraClass object
-	TextureShaderClass* m_TextureShader;//TextureShaderClass object
-	BitmapType* m_Bitmap;               //heap array of current bitmaps
-	SentenceClass* m_Sentence;          //heap array of current sentences
-	int m_bitmapCount;                  //number of bitmaps
-	int m_bitmapIDCount;                //bitmap ID to mark for the next new bitmap
-	int m_sentenceCount;                //number of sentences
-	BitmapType* m_FadeBitmap;           //bitmap for fading the screen to black
-	bool fading;                        //whether the screen is currently fading to or from black
-	XMMATRIX m_viewMatrix;              //view matrix
-	XMMATRIX m_projectionMatrix;        //projection matrix
-	XMMATRIX m_worldMatrix;             //world matrix
-	XMMATRIX m_orthoMatrix;             //ortho matrix
+	HWND m_hwnd;                                   //handle to window
+	D3DClass* m_D3D;                               //D3DClass object
+	CameraClass* m_Camera;                         //CameraClass object
+	TextureShaderClass* m_TextureShader;           //TextureShaderClass object
+	BitmapType m_Bitmap[MAX_BITMAP_COUNT];         //heap array of current bitmaps
+	SentenceClass m_Sentence[MAX_SENTENCE_COUNT];   //heap array of current sentences
+	int m_bitmapCount;                             //number of bitmaps
+	int m_bitmapIDCount;                           //bitmap ID to mark for the next new bitmap
+	int m_sentenceCount;                           //number of sentences
+	BitmapType* m_FadeBitmap;                      //bitmap for fading the screen to black
+	bool fading;                                   //whether the screen is currently fading to or from black
+	XMMATRIX m_viewMatrix;                         //view matrix
+	XMMATRIX m_projectionMatrix;                   //projection matrix
+	XMMATRIX m_worldMatrix;                        //world matrix
+	XMMATRIX m_orthoMatrix;                        //ortho matrix
 };
 
 #endif

@@ -48,15 +48,19 @@ bool ButtonLeftClicked(RECT rect, InputClass* input) {
 VersusMode::VersusMode() {
 	m_Graphics = NULL;
 	m_Clock = NULL;
+	m_Input = NULL;
 	m_screenWidth = 0;
 	m_screenHeight = 0;
 }
 
-VersusMode::VersusMode(GraphicsClass* graphics, TimeClass* clock, int screenWidth, int screenHeight) {
+VersusMode::VersusMode(GraphicsClass* graphics, TimeClass* clock, InputClass* input, int screenWidth, int screenHeight, PlayableCharacter player1, PlayableCharacter player2) {
 	m_Graphics = graphics;
 	m_Clock = clock;
+	m_Input = input;
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
+	player[0].character = player1;
+	player[1].character = player2;
 }
 
 VersusMode::~VersusMode() {}

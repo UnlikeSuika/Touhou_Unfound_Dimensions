@@ -1,9 +1,9 @@
 #include "BitmapClass.h"
 
 BitmapClass::BitmapClass(){
-	m_vertexBuffer = 0;
-	m_indexBuffer = 0;
-	m_Texture = 0;
+	m_vertexBuffer = NULL;
+	m_indexBuffer = NULL;
+	m_Texture = NULL;
 }
 
 BitmapClass::BitmapClass(const BitmapClass& other){}

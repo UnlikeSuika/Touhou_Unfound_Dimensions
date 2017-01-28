@@ -177,7 +177,7 @@ private:
 	int actPhaseAnnounceBitmapID;            //ID of bitmap for Act Phase announcement
 	int playerIndicatorBitmapID;             //ID of bitmap that displays currently active player
 	int playerIndicatorClockID;              //ID of clock for displaying active player
-	Action choice;                      //choice the player made during Move Phase or Act Phase
+	Action choice;                           //choice the player made during Move Phase or Act Phase
 	ButtonType passButton;                   //Pass choice button
 	ButtonType moveButton;                   //Move choice button
 	ButtonType shootButton;                  //Shoot choice button
@@ -227,7 +227,7 @@ private:
 
 public:
 	VersusMode();
-	VersusMode(GraphicsClass* graphics, TimeClass* clock, int screenWidth, int screenHeight);
+	VersusMode(GraphicsClass* graphics, TimeClass* clock, InputClass* input, int screenWidth, int screenHeight, PlayableCharacter player1, PlayableCharacter player2);
 	~VersusMode();
 
 	bool Initialize();
