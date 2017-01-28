@@ -1455,12 +1455,14 @@ bool VersusMode::Frame() {
 					m_Graphics->RenderBitmap(spellDescBitmapID);
 
 					char mpCostCStr[MAX_STR_LEN];
-					std::string mpCostStr = "MP Cost: " + std::to_string(player[playerTurn].spellCard[hover].mpCost) + "\0";
+					std::string mpCostStr = "MP Cost: " + std::to_string(player[playerTurn].spellCard[hover].mpCost) ;
 					strcpy(mpCostCStr, mpCostStr.c_str());
 					
 					m_Graphics->UpdateSentence(spellDescSentID, mpCostCStr, 507, 442, SOLID_BLACK);
 					m_Graphics->RenderSentence(spellDescSentID);
-
+					//"Surrounds herself with a circular barrier\nthat inflicts 5 damage and stuns opponent\nfor one turn.\0"
+					//m_Graphics->UpdateSentence(spellDescSentID, "a b", 507, 474, SOLID_BLACK);
+					//m_Graphics->RenderBitmap(spellDescSentID);
 					m_Graphics->UpdateSentence(spellDescSentID, player[playerTurn].spellCard[hover].desc, 507, 474, SOLID_BLACK);
 					m_Graphics->RenderSentence(spellDescSentID);
 				}

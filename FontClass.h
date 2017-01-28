@@ -26,7 +26,6 @@ public:
 	BitmapClass* GetCharacterBitmap(char c);
 	int GetCharacterWidth(char c);
 	int GetCharacterHeight(char c);
-	void operator=(FontClass other);
 private:
 	struct CharacterType{
 		BitmapClass* bitmap;

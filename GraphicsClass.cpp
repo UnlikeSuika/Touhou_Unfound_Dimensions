@@ -73,6 +73,13 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd){
 		return false;
 	}
 
+	m_Font = new FontClass;
+	result = m_Font->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, screenWidth, screenHeight);
+	if (!result) {
+		MessageBox(hwnd, L"Could not initialize the font.", L"Error", MB_OK);
+		return false;
+	}
+
 	m_hwnd = hwnd;
 
 	m_bitmapCount = 0;
@@ -108,6 +115,11 @@ void GraphicsClass::Shutdown() {
 		m_Sentence[i].Shutdown();
 	}
 	m_sentenceCount = 0;
+
+	if (m_Font) {
+		m_Font->Shutdown();
+		m_Font = NULL;
+	}
 
 	if (m_TextureShader){
 		m_TextureShader->Shutdown();
@@ -366,11 +378,9 @@ int GraphicsClass::GetBitmapHeight(int bitmapID){
 
 //Adds a sentence with given text, position (posX, posY), and text colour
 bool GraphicsClass::AddSentence(char* text, int posX, int posY, int screenWidth, int screenHeight, XMFLOAT4 textColor, int& id){
-	bool result;
-	result = m_Sentence[m_sentenceCount].Initialize(text, posX, posY, textColor, m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, screenWidth, screenHeight);
-	if (!result){
-		return false;
-	}
+
+	m_Sentence[m_sentenceCount].Initialize(m_Font, text, posX, posY, textColor, m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, screenWidth, screenHeight);
+	
 	id = m_Sentence[m_sentenceCount].GetSentenceID();
 
 	m_sentenceCount++;

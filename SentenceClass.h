@@ -12,9 +12,10 @@ public:
 
 	SentenceClass();
 	SentenceClass(const SentenceClass& other);
+	SentenceClass(FontClass* font);
 	~SentenceClass();
 
-	bool Initialize(char* text, int posX, int posY, XMFLOAT4 textColor, ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight);
+	void Initialize(FontClass* font, char* text, int posX, int posY, XMFLOAT4 textColor, ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight);
 	void Shutdown();
 	void UpdateSentence(char* text, int posX, int posY, XMFLOAT4 textColor);
 	bool Render(HWND hwnd, TextureShaderClass* textureShader, ID3D11DeviceContext* deviceContext, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& orthoMatrix);

@@ -1,7 +1,6 @@
 #include "FontClass.h"
 
-FontClass::FontClass(){
-}
+FontClass::FontClass(){}
 
 FontClass::FontClass(const FontClass& other){}
 

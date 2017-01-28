@@ -11,6 +11,7 @@
 #include "TextureShaderClass.h"
 #include "BitmapClass.h"
 #include "SentenceClass.h"
+#include "FontClass.h"
 
 //const bool FULL_SCREEN = true;
 
@@ -96,6 +97,7 @@ private:
 	D3DClass* m_D3D;                               //D3DClass object
 	CameraClass* m_Camera;                         //CameraClass object
 	TextureShaderClass* m_TextureShader;           //TextureShaderClass object
+	FontClass* m_Font;
 	BitmapType m_Bitmap[MAX_BITMAP_COUNT];         //heap array of current bitmaps
 	SentenceClass m_Sentence[MAX_SENTENCE_COUNT];   //heap array of current sentences
 	int m_bitmapCount;                             //number of bitmaps
