@@ -20,9 +20,9 @@ bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd){
 	DWORD const buffer_chars = sizeof(currentDir) / sizeof(currentDir[0]);
 	DWORD a = GetCurrentDirectory(buffer_chars, currentDir);
 
-	std::wstring dirVSWStr = std::wstring(currentDir) + L"\\Data\\texture.vs";
+	std::wstring dirVSWStr = std::wstring(currentDir) + L"\\texture_vs.vs";
 
-	std::wstring dirPSWStr = std::wstring(currentDir) + L"\\Data\\texture.ps";
+	std::wstring dirPSWStr = std::wstring(currentDir) + L"\\texture_ps.ps";
 	
 	return InitializeShader(device, hwnd, (WCHAR*)dirVSWStr.c_str(), (WCHAR*)dirPSWStr.c_str());
 }
@@ -198,7 +198,7 @@ void TextureShaderClass::OutputShaderErrorMessage(ID3DBlob* errorMessage, HWND h
 	unsigned long bufferSize;
 	std::ofstream fout;
 	compileErrors = (char*)(errorMessage->GetBufferPointer());
-	bufferSize = errorMessage->GetBufferSize();
+	bufferSize = (unsigned long)errorMessage->GetBufferSize();
 	fout.open("shader-error.txt");
 	for (unsigned long i = 0; i < bufferSize; i++){
 		fout << compileErrors[i];

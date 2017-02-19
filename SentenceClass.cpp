@@ -16,7 +16,8 @@ SentenceClass::SentenceClass(FontClass* font) {
 
 SentenceClass::~SentenceClass(){}
 
-void SentenceClass::Initialize(FontClass* font, char* text, int posX, int posY, XMFLOAT4 textColor, ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight){
+void SentenceClass::Initialize(FontClass* font, char* text, int posX, int posY, XMFLOAT4 textColor, ID3D11Device* device,
+	ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight){
 
 	m_Font = font;
 
@@ -75,19 +76,25 @@ void SentenceClass::Shutdown(){
 
 }
 
-bool SentenceClass::Render(HWND hwnd, TextureShaderClass* textureShader, ID3D11DeviceContext* deviceContext, XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& orthoMatrix){
+bool SentenceClass::Render(HWND hwnd, TextureShaderClass* textureShader, ID3D11DeviceContext* deviceContext,
+	XMMATRIX& worldMatrix, XMMATRIX& viewMatrix, XMMATRIX& orthoMatrix){
+
 	bool result;
-	for (int i = 0; i < m_Sentence.length; i++){
-		if (m_Sentence.text[i] == '\0') {
-			break;
-		}
-		else if (m_Sentence.character[i].pBitmap){
+	for (int i = 0; i < m_Sentence.length; i++) {
+		if (m_Sentence.character[i].pBitmap){
 			XMFLOAT4 processedTextColor = { m_Sentence.textColor.x, m_Sentence.textColor.y, m_Sentence.textColor.z, 1.0f };
-			result = m_Sentence.character[i].pBitmap->Render(deviceContext, m_Sentence.character[i].ctrX, m_Sentence.character[i].ctrY, m_Sentence.character[i].pBitmap->GetWidth(), m_Sentence.character[i].pBitmap->GetHeight());
+			result = m_Sentence.character[i].pBitmap->Render(deviceContext, m_Sentence.character[i].ctrX,
+				m_Sentence.character[i].ctrY, m_Sentence.character[i].pBitmap->GetWidth(),
+				m_Sentence.character[i].pBitmap->GetHeight());
+
 			if (!result){
 				return false;
 			}
-			result = textureShader->Render(hwnd, deviceContext, m_Sentence.character[i].pBitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Sentence.character[i].pBitmap->GetTexture(), m_Sentence.textColor.w, processedTextColor);
+
+			result = textureShader->Render(hwnd, deviceContext, m_Sentence.character[i].pBitmap->GetIndexCount(),
+				worldMatrix, viewMatrix, orthoMatrix, m_Sentence.character[i].pBitmap->GetTexture(),
+				m_Sentence.textColor.w, processedTextColor);
+
 			if (!result){
 				return false;
 			}

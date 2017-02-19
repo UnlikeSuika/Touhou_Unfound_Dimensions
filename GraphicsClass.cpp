@@ -159,11 +159,15 @@ void GraphicsClass::BeginRendering(){
 bool GraphicsClass::EndRendering(int screenWidth, int screenHeight){
 	bool result;
 	if (fading){
-		result = m_FadeBitmap->bitmap->Render(m_D3D->GetDeviceContext(), m_FadeBitmap->posX, m_FadeBitmap->posY, screenWidth, screenHeight);
+		result = m_FadeBitmap->bitmap->Render(m_D3D->GetDeviceContext(), m_FadeBitmap->posX, m_FadeBitmap->posY,
+			screenWidth, screenHeight);
 		if (!result){
 			return false;
 		}
-		result = m_TextureShader->Render(m_hwnd, m_D3D->GetDeviceContext(), m_FadeBitmap->bitmap->GetIndexCount(), m_worldMatrix, m_viewMatrix, m_orthoMatrix, m_FadeBitmap->bitmap->GetTexture(), m_FadeBitmap->blend, NULL_COLOR);
+
+		result = m_TextureShader->Render(m_hwnd, m_D3D->GetDeviceContext(), m_FadeBitmap->bitmap->GetIndexCount(),
+			m_worldMatrix, m_viewMatrix, m_orthoMatrix, m_FadeBitmap->bitmap->GetTexture(), m_FadeBitmap->blend,
+			NULL_COLOR);
 		if (!result){
 			return false;
 		}
@@ -176,7 +180,9 @@ bool GraphicsClass::EndRendering(int screenWidth, int screenHeight){
 }
 
 //Add a bitmap from given TGA path and with given location (bitmapRect), angle, alpha value, and a hue colour
-bool GraphicsClass::AddBitmap(char* path, RECT bitmapRect, int screenWidth, int screenHeight, int& bitmapID, float angle, float blend, XMFLOAT4 hueColor){
+bool GraphicsClass::AddBitmap(char* path, RECT bitmapRect, int screenWidth, int screenHeight, int& bitmapID,
+	float angle, float blend, XMFLOAT4 hueColor){
+
 	bool result;
 	int posX = (bitmapRect.left + bitmapRect.right) / 2;
 	int posY = (bitmapRect.top + bitmapRect.bottom) / 2;
@@ -199,7 +205,8 @@ bool GraphicsClass::AddBitmap(char* path, RECT bitmapRect, int screenWidth, int 
 		return false;
 	}
 
-	result = m_Bitmap[m_bitmapCount].bitmap->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, screenWidth, screenHeight, tgaDirectory, bitmapWidth, bitmapHeight);
+	result = m_Bitmap[m_bitmapCount].bitmap->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd,
+		screenWidth, screenHeight, tgaDirectory, bitmapWidth, bitmapHeight);
 	if (!result){
 		delete m_Bitmap[m_bitmapCount].bitmap;
 		m_Bitmap[m_bitmapCount].bitmap = 0;
@@ -304,11 +311,14 @@ bool GraphicsClass::RenderBitmap(int bitmapID){
 		return false;
 	}
 
-	result = m_Bitmap[index].bitmap->Render(m_D3D->GetDeviceContext(), m_Bitmap[index].posX, m_Bitmap[index].posY, m_Bitmap[index].bitmapWidth, m_Bitmap[index].bitmapHeight, m_Bitmap[index].rotation);
+	result = m_Bitmap[index].bitmap->Render(m_D3D->GetDeviceContext(), m_Bitmap[index].posX, m_Bitmap[index].posY,
+		m_Bitmap[index].bitmapWidth, m_Bitmap[index].bitmapHeight, m_Bitmap[index].rotation);
 	if (!result){
 		return false;
 	}
-	result = m_TextureShader->Render(m_hwnd, m_D3D->GetDeviceContext(), m_Bitmap[index].bitmap->GetIndexCount(), m_worldMatrix, m_viewMatrix, m_orthoMatrix, m_Bitmap[index].bitmap->GetTexture(), m_Bitmap[index].blend, m_Bitmap[index].hueColor, m_Bitmap[index].xFlip, m_Bitmap[index].yFlip);
+	result = m_TextureShader->Render(m_hwnd, m_D3D->GetDeviceContext(), m_Bitmap[index].bitmap->GetIndexCount(),
+		m_worldMatrix, m_viewMatrix, m_orthoMatrix, m_Bitmap[index].bitmap->GetTexture(), m_Bitmap[index].blend,
+		m_Bitmap[index].hueColor, m_Bitmap[index].xFlip, m_Bitmap[index].yFlip);
 	if (!result){
 		return false;
 	}
@@ -377,9 +387,11 @@ int GraphicsClass::GetBitmapHeight(int bitmapID){
 }
 
 //Adds a sentence with given text, position (posX, posY), and text colour
-bool GraphicsClass::AddSentence(char* text, int posX, int posY, int screenWidth, int screenHeight, XMFLOAT4 textColor, int& id){
+bool GraphicsClass::AddSentence(char* text, int posX, int posY, int screenWidth, int screenHeight, XMFLOAT4 textColor,
+	int& id){
 
-	m_Sentence[m_sentenceCount].Initialize(m_Font, text, posX, posY, textColor, m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, screenWidth, screenHeight);
+	m_Sentence[m_sentenceCount].Initialize(m_Font, text, posX, posY, textColor, m_D3D->GetDevice(),
+		m_D3D->GetDeviceContext(), m_hwnd, screenWidth, screenHeight);
 	
 	id = m_Sentence[m_sentenceCount].GetSentenceID();
 
@@ -413,7 +425,8 @@ bool GraphicsClass::RenderSentence(int sentenceID){
 		return false;
 	}
 
-	result = m_Sentence[index].Render(m_hwnd, m_TextureShader, m_D3D->GetDeviceContext(), m_worldMatrix, m_viewMatrix, m_orthoMatrix);
+	result = m_Sentence[index].Render(m_hwnd, m_TextureShader, m_D3D->GetDeviceContext(), m_worldMatrix, m_viewMatrix,
+		m_orthoMatrix);
 	if (!result){
 		return false;
 	}
@@ -460,7 +473,8 @@ bool GraphicsClass::InitializeFadingEffect(int screenWidth, int screenHeight){
 	_getcwd(tgaDirectory, maxLength);
 	strcat(tgaDirectory, "/Data/fade.tga");
 
-	result = m_FadeBitmap->bitmap->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, screenWidth, screenHeight, tgaDirectory, screenWidth, screenHeight);
+	result = m_FadeBitmap->bitmap->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, screenWidth,
+		screenHeight, tgaDirectory, screenWidth, screenHeight);
 	if (!result){
 		return false;
 	}

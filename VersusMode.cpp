@@ -1429,11 +1429,11 @@ bool VersusMode::Frame() {
 
 					if ((unsigned)i < player[playerTurn].numSpellCards) {
 
-						//update position of spell card name sentence
-						m_Graphics->UpdateSentence(spellNameSentID, player[playerTurn].spellCard[i].cardName, 30, 450 + 30 * i, SOLID_BLACK);
+						////update position of spell card name sentence
+						//m_Graphics->UpdateSentence(spellNameSentID, player[playerTurn].spellCard[i].cardName, 30, 450 + 30 * i, SOLID_BLACK);
 
-						//render spell card name sentence
-						m_Graphics->RenderSentence(spellNameSentID);
+						////render spell card name sentence
+						//m_Graphics->RenderSentence(spellNameSentID);
 
 						//if mouse is hovering over the button, set hover to current spell card index
 						if (RectContains(button.buttonRect, m_Input->GetMouseLocation())) {
@@ -1458,13 +1458,16 @@ bool VersusMode::Frame() {
 					std::string mpCostStr = "MP Cost: " + std::to_string(player[playerTurn].spellCard[hover].mpCost) ;
 					strcpy(mpCostCStr, mpCostStr.c_str());
 					
-					m_Graphics->UpdateSentence(spellDescSentID, mpCostCStr, 507, 442, SOLID_BLACK);
-					m_Graphics->RenderSentence(spellDescSentID);
-					//"Surrounds herself with a circular barrier\nthat inflicts 5 damage and stuns opponent\nfor one turn.\0"
-					//m_Graphics->UpdateSentence(spellDescSentID, "a b", 507, 474, SOLID_BLACK);
-					//m_Graphics->RenderBitmap(spellDescSentID);
-					m_Graphics->UpdateSentence(spellDescSentID, player[playerTurn].spellCard[hover].desc, 507, 474, SOLID_BLACK);
-					m_Graphics->RenderSentence(spellDescSentID);
+					//m_Graphics->UpdateSentence(spellDescSentID, mpCostCStr, 507, 442, SOLID_BLACK);
+					//m_Graphics->RenderSentence(spellDescSentID);
+					////"Surrounds herself with a circular barrier\nthat inflicts 5 damage and stuns opponent\nfor one turn.\0"
+					//m_Graphics->UpdateSentence(spellDescSentID, player[playerTurn].spellCard[hover].desc, 507, 474, SOLID_BLACK);
+					//m_Graphics->RenderSentence(spellDescSentID);
+
+					for (int i = 0;i < 500;i++) {
+						m_Graphics->UpdateBitmap(reimuSpell01Bullet[0], i, i);
+						m_Graphics->RenderBitmap(reimuSpell01Bullet[0]);
+					}
 				}
 			}
 
@@ -1781,18 +1784,18 @@ bool VersusMode::Frame() {
 				char hpDisp[MAX_STR_LEN];
 				strcpy(hpDisp, hpStr.c_str());
 
-				//update and render current HP
-				m_Graphics->UpdateSentence(hpDispSentID, hpDisp, mousePt.x, mousePt.y - 65, SOLID_BLACK);
-				m_Graphics->RenderSentence(hpDispSentID);
+				////update and render current HP
+				//m_Graphics->UpdateSentence(hpDispSentID, hpDisp, mousePt.x, mousePt.y - 65, SOLID_BLACK);
+				//m_Graphics->RenderSentence(hpDispSentID);
 
 				//assemble string that displays current MP
 				std::string mpStr = "MP: " + std::to_string(player[i].mp);
 				char mpDisp[MAX_STR_LEN];
 				strcpy(mpDisp, mpStr.c_str());
 
-				//update and render current MP
-				m_Graphics->UpdateSentence(mpDispSentID, mpDisp, mousePt.x, mousePt.y - 30, SOLID_BLACK);
-				m_Graphics->RenderSentence(mpDispSentID);
+				////update and render current MP
+				//m_Graphics->UpdateSentence(mpDispSentID, mpDisp, mousePt.x, mousePt.y - 30, SOLID_BLACK);
+				//m_Graphics->RenderSentence(mpDispSentID);
 
 				break;
 			}

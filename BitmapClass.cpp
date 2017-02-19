@@ -166,9 +166,12 @@ bool BitmapClass::UpdateBuffers(ID3D11DeviceContext* deviceContext, int position
 	float refAngle = atan2(top - bottom, right - left);
 
 	XMFLOAT3 topRight = XMFLOAT3(midPtX + radius*cos(refAngle + angle), midPtY + radius*sin(refAngle + angle), 0.0f);
-	XMFLOAT3 topLeft = XMFLOAT3(midPtX + radius*cos(XM_PI - refAngle + angle), midPtY + radius*sin(XM_PI - refAngle + angle), 0.0f);
-	XMFLOAT3 bottomLeft = XMFLOAT3(midPtX + radius*cos(XM_PI + refAngle + angle), midPtY + radius*sin(XM_PI + refAngle + angle), 0.0f);
-	XMFLOAT3 bottomRight = XMFLOAT3(midPtX + radius*cos(XM_2PI - refAngle + angle), midPtY + radius*sin(XM_2PI - refAngle + angle), 0.0f);
+	XMFLOAT3 topLeft = XMFLOAT3(midPtX + radius*cos(XM_PI - refAngle + angle),
+		midPtY + radius*sin(XM_PI - refAngle + angle), 0.0f);
+	XMFLOAT3 bottomLeft = XMFLOAT3(midPtX + radius*cos(XM_PI + refAngle + angle),
+		midPtY + radius*sin(XM_PI + refAngle + angle), 0.0f);
+	XMFLOAT3 bottomRight = XMFLOAT3(midPtX + radius*cos(XM_2PI - refAngle + angle),
+		midPtY + radius*sin(XM_2PI - refAngle + angle), 0.0f);
 
 	vertices = new VertexType[m_vertexCount];
 	if (!vertices){
